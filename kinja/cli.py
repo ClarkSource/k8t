@@ -16,13 +16,13 @@ from kinja.variants import load_variant
 
 
 @click.command()
-@click.option('-d', '--debug/--no-debug', default=False)
-@click.option('-m', '--method', type=click.Choice(MERGE_METHODS), default='ltr')
+@click.option('-d', '--debug/--no-debug', default=False, show_default=True)
+@click.option('-m', '--method', type=click.Choice(MERGE_METHODS), default='ltr', show_default=True)
 @click.option('-v', '--values', 'value_files', multiple=True)
 @click.option('--value', 'values', type=(str, str), multiple=True)
 @click.option('--variant')
 @click.option('--variant-path')
-@click.option('--environment', default='default')
+@click.option('--environment', default='default', show_default=True)
 @click.argument('directory', type=click.Path(dir_okay=True, file_okay=False))
 def root(debug, method, value_files, values, variant, variant_path, environment, directory):
     """
