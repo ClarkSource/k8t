@@ -18,7 +18,7 @@ from kinja.variants import load_variant
 @click.command()
 @click.option('-d', '--debug/--no-debug', default=False, show_default=True)
 @click.option('-m', '--method', type=click.Choice(MERGE_METHODS), default='ltr', show_default=True)
-@click.option('-v', '--values', 'value_files', multiple=True, type=click.Path(dir_okay=False))
+@click.option('--value-file', 'value_files', multiple=True, type=click.Path(dir_okay=False))
 @click.option('--value', 'values', type=(str, str), multiple=True, metavar='<KEY VALUE>')
 @click.option('--variant')
 @click.option('--variant-path', type=click.Path(file_okay=False))

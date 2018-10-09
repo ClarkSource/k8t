@@ -25,7 +25,8 @@ loaded, however an environment can be specified with **--environment**.
 Additionally kinja will attempt to load a file **defaults.yaml** in the root directory. This way a set of default
 variables can be specified and selectively overriden via variant and environment.
 
-Additional values can be given via flag **--values** in the form of a file or **--value KEY VALUE**.
+Additional values can be given via flag **--value-file** in the form of a file or **--value KEY VALUE**, both can be
+supplied multiple times.
 
 Variables will be merged via deep merging. Default merge strategy is left-to-right. For the merge order see the output of
 
