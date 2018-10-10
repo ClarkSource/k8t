@@ -21,5 +21,4 @@ def load_variant(name, path, environment):
 
     return load_value_file(values_path)
 
-
 #

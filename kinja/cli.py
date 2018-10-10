@@ -39,7 +39,8 @@ def gen(method, yes, value_files, values, variant, variant_path, environment, di
 
     template_values = deep_merge(
         load_defaults(directory),
-        load_variant(variant, variant_path or os.path.join(directory, 'variants'), environment),
+        (load_variant(variant, variant_path or os.path.join(directory, 'variants'), environment)
+            if (variant or variant_path) else dict()),
         *(load_value_file(p) for p in value_files),
         dict(values),
         method=method)
@@ -54,9 +55,11 @@ def gen(method, yes, value_files, values, variant, variant_path, environment, di
             if not confirm('continue?'):
                 exit(1)
 
+        render = render_template(template, template_values, environment)
+
         print('---')
         print('# Source: %s\n' % template)
-        print(render_template(template, template_values, environment))
+        print(render)
 
 @root.command()
 @click.argument('directory', type=click.Path())

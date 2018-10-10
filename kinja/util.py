@@ -5,6 +5,7 @@
 
 import os
 import base64
+import hashlib
 
 
 def b64encode(s):
@@ -23,6 +24,22 @@ def b64decode(s):
         return base64.b64decode(s).decode()
     else:
         raise TypeError('invalid input: %s' % s)
+
+
+def hash(s, method='sha256'):
+    try:
+        h = getattr(hashlib, method)()
+    except AttributeError:
+        raise RuntimeError('No such hash method: %s' % method)
+
+    if isinstance(s, str):
+        h.update(s.encode())
+    elif isinstance(s, bytes):
+        h.update(s)
+    else:
+        raise TypeError('invalid input: %s' % s)
+
+    return h.hexdigest()
 
 
 def touch(fname, mode=0o666, dir_fd=None, **kwargs):

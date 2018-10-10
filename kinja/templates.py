@@ -6,16 +6,30 @@
 import os
 import jinja2schema
 
-from jinja2 import Environment, FileSystemLoader, meta, nodes
+from jinja2 import Environment, FileSystemLoader, nodes, Markup, contextfunction
 
-from kinja.util import b64encode, b64decode
+from kinja.util import b64encode, b64decode, hash
 
 
-def get_environment(path):
-    env = Environment(loader=FileSystemLoader(path))
+def get_environment(path, file_path=None):
+    file_path = file_path if file_path else os.path.join(path, 'files')
+
+    env = Environment(loader=FileSystemLoader([path, file_path]))
 
     env.filters['b64decode'] = b64decode
     env.filters['b64encode'] = b64encode
+    env.filters['hash'] = hash
+
+    def include_raw(name):
+        fpath = os.path.join(file_path, name)
+
+        if not os.path.exists(fpath):
+            raise RuntimeError('No such file: %s' % fpath)
+
+        with open(fpath, 'r') as s:
+            return s.read()
+
+    env.globals['include_raw'] = include_raw
 
     return env
 
