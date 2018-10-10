@@ -15,12 +15,24 @@ run this
 usage
 -----
 
+create new folder
+~~~~~~~~~~~~~~~~~
+
+This will set up a new project folder with a variants directory and an empty defaults file
+
+::
+
+  kinja new foobar
+
+generate files
+~~~~~~~~~~~~~~
+
 The **--variant** flag will load variables from a directory. By default the file **default.yaml** in that directory will be
 loaded, however an environment can be specified with **--environment**.
 
 ::
 
-  kinja platform/ --variant cluster1.fragwilhelm.de --environment staging
+  kinja gen platform/ --variant cluster1.fragwilhelm.de --environment staging
 
 Additionally kinja will attempt to load a file **defaults.yaml** in the root directory. This way a set of default
 variables can be specified and selectively overriden via variant and environment.

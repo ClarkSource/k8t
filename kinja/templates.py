@@ -34,11 +34,11 @@ def load_template(path):
     return env.get_template(os.path.basename(path))
 
 
-def render_template(path, values):
+def render_template(path, values, environment):
     template = load_template(path)
 
     try:
-        return template.render(values=values)
+        return template.render(values=values, environment=environment)
     except TypeError as e:
         raise RuntimeError('missing value')
 
