@@ -4,6 +4,7 @@
 # Copyright © 2018 Clark Germany GmbH
 
 import os
+import copy
 import yaml
 
 from functools import reduce
@@ -14,11 +15,12 @@ MERGE_METHODS = ['ltr', 'rtl', 'ask', 'crash']
 
 def merge(a, b, path=None, method='ltr'):
     "merges b into a"
+    a = copy.deepcopy(a)
     if path is None: path = []
     for key in b:
         if key in a:
             if isinstance(a[key], dict) and isinstance(b[key], dict):
-                merge(a[key], b[key], path + [str(key)], method=method)
+                a[key] = merge(a[key], b[key], path + [str(key)], method=method)
             elif a[key] == b[key]:
                 pass # same leaf value
             else:
