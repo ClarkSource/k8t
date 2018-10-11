@@ -9,13 +9,15 @@ import yaml
 
 from functools import reduce
 
+from kinja.logger import LOGGER
+
 
 MERGE_METHODS = ['ltr', 'rtl', 'ask', 'crash']
 
 
-def merge(a, b, path=None, method='ltr'):
-    "merges b into a"
+def merge(a: dict, b: dict, path=None, method='ltr'):
     a = copy.deepcopy(a)
+
     if path is None: path = []
     for key in b:
         if key in a:
@@ -36,19 +38,24 @@ def merge(a, b, path=None, method='ltr'):
                     raise Exception('Invalid merge method: %s' % method)
         else:
             a[key] = b[key]
+
     return a
 
 
 def deep_merge(*dicts, method='ltr'):
+    LOGGER.debug('"%s" merging %s dicts', method, len(dicts))
+
     return reduce(lambda a, b: merge(a, b, method=method), dicts)
 
 
-def load_value_file(path):
+def load_value_file(path: str):
+    LOGGER.debug('loading values file: %s', path)
+
     with open(path, 'r') as s:
-        return yaml.load(s)
+        return yaml.load(s) or dict()
 
 
-def load_defaults(path):
+def load_defaults(path: str):
     defaults_path = os.path.join(path, 'defaults.yaml')
 
     if os.path.exists(defaults_path):

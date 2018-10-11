@@ -4,21 +4,43 @@
 # Copyright © 2018 Clark Germany GmbH
 
 import os
+import logging
 
-from kinja.values import deep_merge, load_value_file, MERGE_METHODS
+from kinja.values import deep_merge, load_value_file
+from kinja.logger import LOGGER
 
 
-def load_variant(name, path, environment):
-    variant_path = path if not name else os.path.join(path, name)
+def load_variant(name: str, path: str, environment: str):
+    LOGGER.info('loading variant from %s with environment %s', path, environment)
+
+    variant_path = get_variant_path(name, path)
 
     if not os.path.isdir(variant_path):
         raise RuntimeError('Invalid variant path: %s' % variant_path)
 
-    values_path = os.path.join(variant_path, '%s.yaml' % environment)
+    defaults  = dict()
+    overrides = dict()
 
-    if not os.path.exists(values_path) or os.path.isdir(values_path):
-        raise RuntimeError('No values file found: %s' % values_path)
+    defaults_path = os.path.join(variant_path, 'defaults.yaml')
 
-    return load_value_file(values_path)
+    if os.path.exists(defaults_path):
+        defaults = load_value_file(defaults_path)
+
+    if environment:
+        environment_path = os.path.join(variant_path, environment)
+
+        if not os.path.isdir(environment_path):
+            raise RuntimeError('Environment not found: %s' % environment)
+
+        overrides_path = os.path.join(environment_path, 'overrides.yaml')
+
+        if os.path.exists(overrides_path):
+            overrides = load_value_file(overrides_path)
+
+    return deep_merge(defaults, overrides)
+
+
+def get_variant_path(name: str, path: str):
+    return os.path.join(path, 'variants', name)
 
 #
