@@ -6,6 +6,12 @@
 import os
 import string
 
+from jinja2 import (Environment, FileSystemLoader, Markup, contextfunction,
+                    nodes)
+from kinja.logger import LOGGER
+from kinja.util import b64decode, b64encode, hash
+from kinja.variants import get_variant_path
+
 try:
     from secrets import choice
 except ImportError:
@@ -13,19 +19,15 @@ except ImportError:
 
     choice = SystemRandom().choice
 
-from jinja2 import Environment, FileSystemLoader, nodes, Markup, contextfunction
-
-from kinja.variants import get_variant_path
-from kinja.util import b64encode, b64decode, hash
-from kinja.logger import LOGGER
-
 
 def find_file(name, path, variant, environment):
-    LOGGER.debug('looking for file %s in %s, variant %s and environment %s', name, path, variant, environment)
+    LOGGER.debug('looking for file %s in %s, variant %s and environment %s',
+                 name, path, variant, environment)
 
     if variant and environment:
         if environment:
-            fpath = os.path.join(path, 'variants', variant, environment, 'files', name)
+            fpath = os.path.join(path, 'variants', variant,
+                                 environment, 'files', name)
             LOGGER.debug('checking path: %s', fpath)
 
             if os.path.exists(fpath):
@@ -45,8 +47,10 @@ def find_file(name, path, variant, environment):
 
     raise RuntimeError('File not found: %s' % name)
 
+
 def get_environment(path, template_path=None, variant=None, environment=None):
-    template_path = template_path if template_path else os.path.join(path, 'templates')
+    template_path = template_path if template_path else os.path.join(
+        path, 'templates')
 
     LOGGER.debug('looking for templates in %s and %s', path, template_path)
 
@@ -70,6 +74,11 @@ def get_environment(path, template_path=None, variant=None, environment=None):
 
     env.globals['random_password'] = random_password
 
+    def get_secret(key):
+        return None
+
+    env.globals['get_secret'] = get_secret
+
     return env
 
 
@@ -78,11 +87,13 @@ def find_templates(directory):
         for f in files:
             if not f.startswith('.') and f != 'defaults.yaml':
                 yield os.path.join(root, f)
+
         break
 
 
 def load_template(path, variant=None, environment=None):
-    env = get_environment(os.path.dirname(path), variant=variant, environment=environment)
+    env = get_environment(os.path.dirname(
+        path), variant=variant, environment=environment)
 
     return env.get_template(os.path.basename(path))
 
@@ -109,6 +120,7 @@ def merge_node(node):
         attr='password', ctx='load')
     """
     atoms = []
+
     while isinstance(node, nodes.Getattr):
         atoms.append(node.attr)
         node = node.node
@@ -118,7 +130,8 @@ def merge_node(node):
 
 
 def find_variables(path, variant=None, environment=None):
-    env = get_environment(os.path.dirname(path), variant=variant, environment=environment)
+    env = get_environment(os.path.dirname(
+        path), variant=variant, environment=environment)
 
     template_source = env.loader.get_source(env, os.path.basename(path))[0]
     parsed_source = env.parse(template_source)
@@ -136,7 +149,8 @@ def check_atoms(atoms, values):
 
     for atom in atoms:
         if atom not in scope:
-            raise RuntimeError('Variable "%s" missing from scope: %s' % (atom, scope))
+            raise RuntimeError(
+                'Variable "%s" missing from scope: %s' % (atom, scope))
 
         scope = scope[atom]
 

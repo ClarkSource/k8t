@@ -3,18 +3,22 @@
 #
 # Copyright © 2018 Clark Germany GmbH
 
+import logging
 import os
 import sys
-import logging
-import click
-import ujson
 
+import click
+from kinja.templates import find_templates, render_template, validate_values
+from kinja.util import touch
+from kinja.values import (MERGE_METHODS, deep_merge, load_defaults,
+                          load_value_file)
+from kinja.variants import get_variant_path, load_variant
 from simple_tools.interaction import confirm
 
-from kinja.values import deep_merge, load_value_file, load_defaults, MERGE_METHODS
-from kinja.templates import render_template, find_templates, validate_values
-from kinja.variants import load_variant, get_variant_path
-from kinja.util import touch
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 
 @click.group()
@@ -45,7 +49,8 @@ def gen(method, yes, value_files, values, variant, environment, directory):
         method=method)
 
     for template in find_templates(directory):
-        errors = validate_values(template, template_values, variant or 'default', environment)
+        errors = validate_values(
+            template, template_values, variant or 'default', environment)
 
         if errors and not yes:
             for variable, error in errors.items():
@@ -54,15 +59,18 @@ def gen(method, yes, value_files, values, variant, environment, directory):
             if not confirm('continue?'):
                 exit(1)
 
-        render = render_template(template, template_values, variant or 'default', environment)
+        render = render_template(
+            template, template_values, variant or 'default', environment)
 
         print('---')
         print('# Source: %s\n' % template)
         print(render)
 
+
 @root.group()
 def new():
     pass
+
 
 @new.command()
 @click.argument('directory', type=click.Path())
@@ -82,7 +90,7 @@ def project(directory):
 
 
 @new.command()
-@click.argument('directory', type=click.Path(exists=True, file_okay=False))
+@click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.expandpath('.'))
 @click.argument('name')
 def variant(directory, name):
     variant_path = os.path.join(directory, 'variants', name)
@@ -100,10 +108,10 @@ def variant(directory, name):
 
 
 @new.command()
-@click.argument('directory', type=click.Path(exists=True, file_okay=False))
 @click.argument('variant')
 @click.argument('name')
-def environment(directory, variant, name):
+@click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.expandpath('.'))
+def environment(variant, name, directory):
     variant_path = os.path.join(directory, 'variants', name)
 
     if not os.path.exists(variant_path):
