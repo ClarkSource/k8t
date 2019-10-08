@@ -1,7 +1,7 @@
 pipeline {
   agent {
     kubernetes {
-      defaultContainer 'jnlp'
+      defaultContainer 'python'
       yamlFile '.jenkins/python.yaml'
     }
   }
@@ -19,13 +19,13 @@ pipeline {
 
   stages {
     stage('setup') {
-      container('python') {
+      steps {
         sh 'pip install --upgrade tox'
       }
     }
 
     stage('test') {
-      container('python') {
+      steps {
         sh 'tox'
       }
     }
