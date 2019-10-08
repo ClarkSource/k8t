@@ -6,6 +6,7 @@ spec:
   containers:
     - name: python
       image: python:3-alpine
+      tty: true
       command:
         - cat
       resources:

@@ -3,7 +3,7 @@
 #
 # Copyright © 2018 Clark Germany GmbH
 
-from kinja.values import merge, deep_merge
+from kinja.values import deep_merge, merge
 
 
 def test_merge_memory_safety():
@@ -26,6 +26,7 @@ def test_ltr_merge():
 
     assert (
         merge(dict_a, dict_b) == dict(foo=1, bar=dict(a=3)))
+
 
 def test_deep_merge():
     dict_a = dict(foo=dict(a=1, b=2), bar=dict(a=3))
