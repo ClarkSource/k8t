@@ -1,14 +1,13 @@
 pipeline {
   agent {
     kubernetes {
-      defaultContainer 'jnlp'
+      defaultContainer 'python'
       yamlFile '.jenkins/python.yaml'
     }
   }
 
   options {
     timeout(time: 2, unit: 'HOURS')
-    timestamps()
     buildDiscarder(
       logRotator(
         daysToKeepStr: '14',
@@ -19,13 +18,13 @@ pipeline {
 
   stages {
     stage('setup') {
-      container('python') {
+      steps {
         sh 'pip install --upgrade tox'
       }
     }
 
     stage('test') {
-      container('python') {
+      steps {
         sh 'tox'
       }
     }
