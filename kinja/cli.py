@@ -112,7 +112,7 @@ def variant(name, directory):
 @click.argument('name')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def environment(variant, name, directory):
-    variant_path = os.path.join(directory, 'variants', name)
+    variant_path = os.path.join(directory, 'variants', variant)
 
     if not os.path.exists(variant_path):
         exit('No such variant: %s' % variant)
