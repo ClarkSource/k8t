@@ -12,12 +12,24 @@ $ pip install --user --upgrade .
 
 ## usage
 
-create new folde
+### scaffolding
 
-This will set up a new project folder with a variants directory and an empty defaults file
+Create a new project folder with a variants directory and an empty defaults file
 
 ```
-$ kinja new foobar
+$ kinja new project foobar
+```
+
+Create a new variant
+
+```
+$ kinja new variant cluster1
+```
+
+Create a new environment
+
+```
+$ kinja new environment production
 ```
 
 ### generate files

@@ -90,9 +90,9 @@ def project(directory):
 
 
 @new.command()
-@click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.expandpath('.'))
 @click.argument('name')
-def variant(directory, name):
+@click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
+def variant(name, directory):
     variant_path = os.path.join(directory, 'variants', name)
 
     try:
@@ -110,7 +110,7 @@ def variant(directory, name):
 @new.command()
 @click.argument('variant')
 @click.argument('name')
-@click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.expandpath('.'))
+@click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def environment(variant, name, directory):
     variant_path = os.path.join(directory, 'variants', name)
 
