@@ -1,6 +1,6 @@
 # kinja
 
-Simple k8s manifest templating with variants.
+Simple cluster and environment specific aware templating for kubernetes manifests.
 
 ## installation
 
@@ -14,16 +14,16 @@ $ pip install --user --upgrade .
 
 ### scaffolding
 
-Create a new project folder with a variants directory and an empty defaults file
+Create a new project folder with a cluster directory and an empty defaults file
 
 ```
 $ kinja new project foobar
 ```
 
-Create a new variant
+Create a new cluster
 
 ```
-$ kinja new variant cluster1
+$ kinja new cluster cluster1
 ```
 
 Create a new environment
@@ -34,15 +34,15 @@ $ kinja new environment production
 
 ### generate files
 
-The **--variant** flag will load variables from a directory. By default the file **default.yaml** in that directory will be
+The **--cluster** flag will load variables from a directory. By default the file **default.yaml** in that directory will be
 loaded, however an environment can be specified with **--environment**.
 
 ```
-$ kinja gen platform/ --variant cluster1.fragwilhelm.de --environment staging
+$ kinja gen platform/ --cluster cluster1 --environment staging
 ```
 
 Additionally kinja will attempt to load a file **defaults.yaml** in the root directory. This way a set of default
-variables can be specified and selectively overriden via variant and environment.
+variables can be specified and selectively overriden via cluster and environment.
 
 Additional values can be given via flag **--value-file** in the form of a file or **--value KEY VALUE**, both can be
 supplied multiple times.

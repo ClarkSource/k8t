@@ -8,11 +8,11 @@ import os
 import sys
 
 import click
+from kinja.clusters import get_cluster_path, load_cluster
 from kinja.templates import find_templates, render_template, validate_values
 from kinja.util import touch
 from kinja.values import (MERGE_METHODS, deep_merge, load_defaults,
                           load_value_file)
-from kinja.variants import get_variant_path, load_variant
 from simple_tools.interaction import confirm
 
 try:
@@ -33,24 +33,24 @@ def root(ctx, debug):
 @click.option('-y', '--yes/--no', default=False)
 @click.option('--value-file', 'value_files', multiple=True, type=click.Path(dir_okay=False, exists=True))
 @click.option('--value', 'values', type=(str, str), multiple=True, metavar='<KEY VALUE>')
-@click.option('--variant')
+@click.option('--cluster')
 @click.option('--environment')
 @click.argument('directory', type=click.Path(dir_okay=True, file_okay=False, exists=True))
-def gen(method, yes, value_files, values, variant, environment, directory):
+def gen(method, yes, value_files, values, cluster, environment, directory):
     """
-    merge order: defaults | variant | value files | values
+    merge order: defaults | cluster | value files | values
     """
 
     template_values = deep_merge(
         load_defaults(directory),
-        (load_variant(variant, directory, environment) if variant else dict()),
+        (load_cluster(cluster, directory, environment) if cluster else dict()),
         *(load_value_file(p) for p in value_files),
         dict(values),
         method=method)
 
     for template in find_templates(directory):
         errors = validate_values(
-            template, template_values, variant or 'default', environment)
+            template, template_values, cluster or 'default', environment)
 
         if errors and not yes:
             for variable, error in errors.items():
@@ -60,7 +60,7 @@ def gen(method, yes, value_files, values, variant, environment, directory):
                 exit(1)
 
         render = render_template(
-            template, template_values, variant or 'default', environment)
+            template, template_values, cluster or 'default', environment)
 
         print('---')
         print('# Source: %s\n' % template)
@@ -82,7 +82,7 @@ def project(directory):
             exit(1)
         os.makedirs(directory, exist_ok=True)
 
-    os.makedirs(os.path.join(directory, 'variants'), exist_ok=True)
+    os.makedirs(os.path.join(directory, 'clusters'), exist_ok=True)
     os.makedirs(os.path.join(directory, 'templates'), exist_ok=True)
     os.makedirs(os.path.join(directory, 'files'), exist_ok=True)
 
@@ -92,32 +92,32 @@ def project(directory):
 @new.command()
 @click.argument('name')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
-def variant(name, directory):
-    variant_path = os.path.join(directory, 'variants', name)
+def cluster(name, directory):
+    cluster_path = os.path.join(directory, 'clusters', name)
 
     try:
-        os.makedirs(variant_path)
+        os.makedirs(cluster_path)
     except OSError:
-        if not confirm('directory "%s" already exists, go ahead?' % variant_path):
+        if not confirm('directory "%s" already exists, go ahead?' % cluster_path):
             exit(1)
-        os.makedirs(variant_path, exist_ok=True)
+        os.makedirs(cluster_path, exist_ok=True)
 
-    os.makedirs(os.path.join(variant_path, 'files'), exist_ok=True)
+    os.makedirs(os.path.join(cluster_path, 'files'), exist_ok=True)
 
-    touch(os.path.join(variant_path, 'defaults.yaml'))
+    touch(os.path.join(cluster_path, 'defaults.yaml'))
 
 
 @new.command()
-@click.argument('variant')
+@click.argument('cluster')
 @click.argument('name')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
-def environment(variant, name, directory):
-    variant_path = os.path.join(directory, 'variants', variant)
+def environment(cluster, name, directory):
+    cluster_path = os.path.join(directory, 'clusters', cluster)
 
-    if not os.path.exists(variant_path):
-        exit('No such variant: %s' % variant)
+    if not os.path.exists(cluster_path):
+        exit('No such cluster: %s' % cluster)
 
-    environment_path = os.path.join(variant_path, name)
+    environment_path = os.path.join(cluster_path, name)
 
     try:
         os.makedirs(environment_path)

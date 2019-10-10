@@ -10,7 +10,7 @@ from jinja2 import (Environment, FileSystemLoader, Markup, contextfunction,
                     nodes)
 from kinja.logger import LOGGER
 from kinja.util import b64decode, b64encode, hash
-from kinja.variants import get_variant_path
+from kinja.clusters import get_cluster_path
 
 try:
     from secrets import choice
@@ -20,20 +20,20 @@ except ImportError:
     choice = SystemRandom().choice
 
 
-def find_file(name, path, variant, environment):
-    LOGGER.debug('looking for file %s in %s, variant %s and environment %s',
-                 name, path, variant, environment)
+def find_file(name, path, cluster, environment):
+    LOGGER.debug('looking for file %s in %s, cluster %s and environment %s',
+                 name, path, cluster, environment)
 
-    if variant and environment:
+    if cluster and environment:
         if environment:
-            fpath = os.path.join(path, 'variants', variant,
+            fpath = os.path.join(path, 'clusters', cluster,
                                  environment, 'files', name)
             LOGGER.debug('checking path: %s', fpath)
 
             if os.path.exists(fpath):
                 return fpath
 
-        fpath = os.path.join(path, 'variants', variant, 'files', name)
+        fpath = os.path.join(path, 'clusters', cluster, 'files', name)
         LOGGER.debug('checking path: %s', fpath)
 
         if os.path.exists(fpath):
@@ -48,7 +48,7 @@ def find_file(name, path, variant, environment):
     raise RuntimeError('File not found: %s' % name)
 
 
-def get_environment(path, template_path=None, variant=None, environment=None):
+def get_environment(path, template_path=None, cluster=None, environment=None):
     template_path = template_path if template_path else os.path.join(
         path, 'templates')
 
@@ -61,7 +61,7 @@ def get_environment(path, template_path=None, variant=None, environment=None):
     env.filters['hash'] = hash
 
     def include_file(name):
-        fpath = find_file(name, path, variant, environment)
+        fpath = find_file(name, path, cluster, environment)
 
         with open(fpath, 'rb') as s:
             return s.read()
@@ -91,18 +91,18 @@ def find_templates(directory):
         break
 
 
-def load_template(path, variant=None, environment=None):
+def load_template(path, cluster=None, environment=None):
     env = get_environment(os.path.dirname(
-        path), variant=variant, environment=environment)
+        path), cluster=cluster, environment=environment)
 
     return env.get_template(os.path.basename(path))
 
 
-def render_template(path, values, variant, environment):
-    template = load_template(path, variant, environment)
+def render_template(path, values, cluster, environment):
+    template = load_template(path, cluster, environment)
 
     try:
-        return template.render(values=values, variant=(variant or 'default'), environment=(environment or 'default'))
+        return template.render(values=values, cluster=(cluster or 'default'), environment=(environment or 'default'))
     except TypeError as e:
         raise RuntimeError('missing value')
 
@@ -129,9 +129,9 @@ def merge_node(node):
     return '.'.join(list(reversed(atoms)))
 
 
-def find_variables(path, variant=None, environment=None):
+def find_variables(path, cluster=None, environment=None):
     env = get_environment(os.path.dirname(
-        path), variant=variant, environment=environment)
+        path), cluster=cluster, environment=environment)
 
     template_source = env.loader.get_source(env, os.path.basename(path))[0]
     parsed_source = env.parse(template_source)
@@ -155,8 +155,8 @@ def check_atoms(atoms, values):
         scope = scope[atom]
 
 
-def validate_values(path, values, variant=None, environment=None):
-    variables = find_variables(path, variant=variant, environment=environment)
+def validate_values(path, values, cluster=None, environment=None):
+    variables = find_variables(path, cluster=cluster, environment=environment)
 
     errors = dict()
 
