@@ -23,13 +23,14 @@ $ kinja new project foobar
 Create a new cluster
 
 ```
-$ kinja new cluster cluster1
+$ kinja new cluster A
 ```
 
 Create a new environment
 
 ```
-$ kinja new environment production
+$ kinja new environment staging A
+$ kinja new environment production A
 ```
 
 ### generate files
@@ -38,7 +39,7 @@ The **--cluster** flag will load variables from a directory. By default the file
 loaded, however an environment can be specified with **--environment**.
 
 ```
-$ kinja gen platform/ --cluster cluster1 --environment staging
+$ kinja gen --cluster A --environment staging
 ```
 
 Additionally kinja will attempt to load a file **defaults.yaml** in the root directory. This way a set of default
