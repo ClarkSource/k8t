@@ -48,4 +48,4 @@ def validate(config: Dict[str, Any]) -> bool:
 
 def load_config_file(path: str):
     with open(path, 'rb') as stream:
-        return yaml.safe_load(stream.read().decode())
+        return yaml.safe_load(stream.read().decode()) or {}

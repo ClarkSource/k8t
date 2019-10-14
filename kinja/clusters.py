@@ -13,10 +13,10 @@ from kinja.values import load_value_file
 
 
 def list_clusters(path: str) -> List[str]:
-    result: List[str]
+    result: List[str] = []
 
     for root, dirs, _ in os.walk(os.path.join(path, 'clusters')):
-        result = [os.path.join(root, dir) for dir in dirs]
+        result = dirs
 
         break
 
@@ -24,8 +24,8 @@ def list_clusters(path: str) -> List[str]:
 
 
 def load_cluster(name: str, path: str, environment: str):
-    LOGGER.info('loading cluster from %s with environment %s',
-                path, environment)
+    LOGGER.debug('loading cluster from %s with environment %s',
+                 path, environment)
 
     cluster_path = get_cluster_path(name, path)
 
