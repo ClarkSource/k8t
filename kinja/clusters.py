@@ -13,10 +13,10 @@ from kinja.values import load_value_file
 
 
 def list_clusters(path: str) -> List[str]:
-    result: List[str]
+    result: List[str] = []
 
     for root, dirs, _ in os.walk(os.path.join(path, 'clusters')):
-        result = [os.path.join(root, dir) for dir in dirs]
+        result = dirs
 
         break
 
