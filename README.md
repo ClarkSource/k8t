@@ -32,6 +32,21 @@ Create a new environment
 $ kinja new environment staging A
 $ kinja new environment production A
 ```
+Setup secrets on SSM
+
+```
+$ kinja edit config
+secrets:
+  provider: ssm
+```
+
+Specify prefixes for SSM secrets
+
+```
+$ kinja edit config --cluster A --environment staging
+secrets:
+  prefix: "staging/application"```
+```
 
 ### generate files
 
