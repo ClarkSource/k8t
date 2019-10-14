@@ -58,6 +58,43 @@ Values can be easily added/modified in the same way
 $ kinja edit values --cluster Ano creds to it anyway or dont know where to get
 ```
 
+A typical setup should look something like this
+
+```
+.deploy/
+├── clusters
+│   ├── A
+│   │   ├── config.yaml
+│   │   ├── environments
+│   │   │   ├── production
+│   │   │   │   ├── config.yaml
+│   │   │   │   ├── files
+│   │   │   │   ├── templates
+│   │   │   │   └── values.yaml
+│   │   │   └── staging
+│   │   │       ├── config.yaml
+│   │   │       ├── files
+│   │   │       ├── templates
+│   │   │       └── values.yaml
+│   │   ├── files
+│   │   ├── templates
+│   │   └── values.yaml
+│   └── local
+│       ├── environments
+│       ├── files
+│       ├── secret.yaml.j2
+│       ├── templates
+│       │   ├── database.yaml.j2
+│       │   └── secret.yaml.j2
+│       └── values.yaml
+├── config.yaml
+├── files
+├── templates
+│   ├── deployment.yaml.j2
+│   └── secret.yaml.j2
+└── values.yaml
+```
+
 ### validate files
 
 While validation is done before generating, templates can be validated for environment files easily.
