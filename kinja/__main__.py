@@ -3,6 +3,6 @@
 #
 # Copyright © 2018 Clark Germany GmbH
 
-from kinja.cli import root
+from kinja.cli import main
 
-root()
+main()

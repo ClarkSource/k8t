@@ -4,34 +4,22 @@
 # Author: Aljosha Friemann <aljosha.friemann@clark.de>
 
 import os
-import string
-from typing import List, Set, Tuple
+from typing import Set, Tuple
 
-from jinja2 import (Environment, FileSystemLoader, Markup, contextfunction,
-                    meta, nodes)
-from kinja.clusters import get_cluster_path
-from kinja.environments import get_environment_path
+from jinja2 import meta
 from kinja.logger import LOGGER
-from kinja.util import b64decode, b64encode, hash
 
-try:
-    from secrets import choice
-except ImportError:
-    from random import SystemRandom
-
-    choice = SystemRandom().choice
-
-
-prohibited_variable_names = ['namespace']
+PROHIBITED_VARIABLE_NAMES = ['namespace']
 
 
 def analyze(template_path: str, values: dict, engine) -> Tuple[Set[str], Set[str], Set[str]]:
     required_variables = get_variables(template_path, engine)
-    defined_variables  = set(values.keys())
+    defined_variables = set(values.keys())
 
     undefined_variables = required_variables.difference(defined_variables)
     unused_variables = defined_variables.difference(required_variables)
-    invalid_variables = set([ var for var in required_variables if var in prohibited_variable_names ])
+    invalid_variables = {
+        var for var in required_variables if var in PROHIBITED_VARIABLE_NAMES}
 
     return undefined_variables, unused_variables, invalid_variables
 
@@ -49,7 +37,8 @@ def validate(template_path: str, values: dict, engine) -> bool:
 
 
 def get_variables(template_path: str, engine) -> Set[str]:
-    template_source = engine.loader.get_source(engine, os.path.basename(template_path))[0]
+    template_source = engine.loader.get_source(
+        engine, os.path.basename(template_path))[0]
     abstract_syntax_tree = engine.parse(template_source)
 
     return meta.find_undeclared_variables(abstract_syntax_tree) - set(engine.globals.keys())

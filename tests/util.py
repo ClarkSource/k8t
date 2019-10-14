@@ -5,7 +5,7 @@
 
 import random
 
-from kinja.util import (b64decode, b64encode, deep_merge, hash, merge,
+from kinja.util import (b64decode, b64encode, deep_merge, hashf, merge,
                         random_password)
 
 
@@ -62,9 +62,9 @@ def test_random_password():
     assert random_password(length) != random_password(length)
 
 
-def test_hash():
+def test_hashf():
     string = "foobar"
 
-    assert hash(string) != string
-    assert hash(string) == hash(string)
-    assert hash(string) != hash("foobaz")
+    assert hashf(string) != string
+    assert hashf(string) == hashf(string)
+    assert hashf(string) != hashf("foobaz")

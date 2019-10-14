@@ -4,7 +4,7 @@
 # Copyright © 2018 Clark Germany GmbH
 
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from kinja.environments import load_environment
 from kinja.logger import LOGGER
@@ -12,9 +12,15 @@ from kinja.util import deep_merge
 from kinja.values import load_value_file
 
 
-def list_clusters(path: str):
+def list_clusters(path: str) -> List[str]:
+    result: List[str]
+
     for root, dirs, _ in os.walk(os.path.join(path, 'clusters')):
-        return [os.path.join(root, dir) for dir in dirs]
+        result = [os.path.join(root, dir) for dir in dirs]
+
+        break
+
+    return result
 
 
 def load_cluster(name: str, path: str, environment: str):
@@ -23,8 +29,8 @@ def load_cluster(name: str, path: str, environment: str):
 
     cluster_path = get_cluster_path(name, path)
 
-    defaults : Dict[str, Any] = dict()
-    overrides : Dict[str, Any] = dict()
+    defaults: Dict[str, Any] = dict()
+    overrides: Dict[str, Any] = dict()
 
     defaults_path = os.path.join(cluster_path, 'values.yaml')
 

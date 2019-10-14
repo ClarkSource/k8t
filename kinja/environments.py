@@ -4,16 +4,23 @@
 # Author: Aljosha Friemann <aljosha.friemann@clark.de>
 
 import os
+from typing import Any, Dict, List
 
 from kinja.values import load_value_file
 
 
-def list_environments(path: str):
+def list_environments(path: str) -> List[str]:
+    result: List[str]
+
     for root, dirs, _ in os.walk(os.path.join(path, 'environments')):
-        return [os.path.join(root, dir) for dir in dirs]
+        result = [os.path.join(root, dir) for dir in dirs]
+
+        break
+
+    return result
 
 
-def load_environment(name: str, path: str):
+def load_environment(name: str, path: str) -> Dict[str, Any]:
     environment_path = get_environment_path(name, path)
 
     overrides_path = os.path.join(environment_path, 'values.yaml')
@@ -21,8 +28,10 @@ def load_environment(name: str, path: str):
     if os.path.exists(overrides_path):
         return load_value_file(overrides_path)
 
+    return dict()
 
-def get_environment_path(name: str, path: str):
+
+def get_environment_path(name: str, path: str) -> str:
     environment_path = os.path.join(path, 'environments', name)
 
     if not os.path.isdir(environment_path):
