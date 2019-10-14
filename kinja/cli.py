@@ -12,7 +12,7 @@ import coloredlogs
 from kinja.clusters import get_cluster_path, list_clusters, load_cluster
 from kinja.engine import build
 from kinja.environments import list_environments
-from kinja.templates import validate
+from kinja.templates import analyze, validate
 from kinja.util import MERGE_METHODS, deep_merge, touch
 from kinja.values import load_defaults, load_value_file
 from simple_tools.interaction import confirm  # type:ignore
@@ -29,8 +29,8 @@ def root(debug):
 
 @root.command(name='validate')
 @click.option('-m', '--method', type=click.Choice(MERGE_METHODS), default='ltr', show_default=True)
-@click.option('--cluster')
-@click.option('--environment')
+@click.option('--cluster', '-c')
+@click.option('--environment', '-e')
 @click.argument('directory', type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 def cli_validate(method, cluster, environment, directory):
     engine = build(directory, cluster, environment)
@@ -44,20 +44,33 @@ def cli_validate(method, cluster, environment, directory):
     validated = True
 
     for template_path in templates:
-        if not validate(template_path, values, engine):
-            print(f"Failed to validate template {template_path}")
+        undefined, unused, invalid = analyze(template_path, values, engine)
 
-            validated = False
+        if not (undefined or unused or invalid):
+            continue
 
-    sys.exit(0 if validated else 1)
+        print(f"{template_path}:")
+
+        for var in undefined:
+            print(f"undefined variable: {var}")
+
+        for var in invalid:
+            print(f"invalid variable: {var}")
+
+        for var in unused:
+            print(f"unused variable: {var}")
+
+        validated = False
+
+    sys.exit(1 if validated else 0)
 
 
 @root.command(name='gen')
 @click.option('-m', '--method', type=click.Choice(MERGE_METHODS), default='ltr', show_default=True)
 @click.option('--value-file', 'value_files', multiple=True, type=click.Path(dir_okay=False, exists=True))
 @click.option('--value', 'cli_values', type=(str, str), multiple=True, metavar='<KEY VALUE>')
-@click.option('--cluster')
-@click.option('--environment')
+@click.option('--cluster', '-c')
+@click.option('--environment', '-e')
 @click.argument('directory', type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 def cli_gen(method, value_files, cli_values, cluster, environment, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
     """
@@ -178,8 +191,8 @@ def get_environments(cluster, directory):  # pylint: disable=redefined-outer-nam
 
 
 @get.command(name='templates')
-@click.option('--cluster')
-@click.option('--environment')
+@click.option('--cluster', '-c')
+@click.option('--environment', '-e')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def get_templates(directory, cluster, environment):  # pylint: disable=redefined-outer-name
     for template_path in build(directory, cluster, environment).list_templates():
@@ -192,8 +205,8 @@ def edit():
 
 
 @edit.command(name='config')
-@click.option('--cluster')
-@click.option('--environment')
+@click.option('--cluster', '-c')
+@click.option('--environment', '-e')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def edit_config(directory, cluster, environment):  # pylint: disable=redefined-outer-name
     file_path: str
@@ -212,8 +225,8 @@ def edit_config(directory, cluster, environment):  # pylint: disable=redefined-o
 
 
 @edit.command(name='values')
-@click.option('--cluster')
-@click.option('--environment')
+@click.option('--cluster', '-c')
+@click.option('--environment', '-e')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def edit_values(directory, cluster, environment):  # pylint: disable=redefined-outer-name
     file_path: str

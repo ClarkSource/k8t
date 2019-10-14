@@ -48,13 +48,27 @@ secrets:
   prefix: "staging/application"```
 ```
 
+### validate files
+
+While validation is done before generating, templates can be validated for environment files easily.
+
+```
+$ kinja validate
+```
+
+To validate for clusters/environments the usual options can be used
+
+```
+$ kinja validate -c A -e production
+```
+
 ### generate files
 
 The **--cluster** flag will load variables from a directory. By default the file **default.yaml** in that directory will be
 loaded, however an environment can be specified with **--environment**.
 
 ```
-$ kinja gen --cluster A --environment staging
+$ kinja gen -c A -e staging
 ```
 
 Additionally kinja will attempt to load a file **defaults.yaml** in the root directory. This way a set of default
@@ -68,3 +82,10 @@ Variables will be merged via deep merging. Default merge strategy is left-to-rig
 ```
 $ kinja --help
 ```
+
+### Overriding templates
+
+Templates can be overriden on a cluster/environment level.
+
+If a file `application.yaml` exists in the root templates folder, simply add a file with the same name to the
+cluster/environment template folder.
