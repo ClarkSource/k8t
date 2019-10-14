@@ -48,6 +48,12 @@ secrets:
   prefix: "staging/application"```
 ```
 
+Values can be easily added/modified in the same way
+
+```
+$ kinja edit values --cluster Ano creds to it anyway or dont know where to get
+```
+
 ### validate files
 
 While validation is done before generating, templates can be validated for environment files easily.
