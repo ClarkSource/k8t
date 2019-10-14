@@ -10,12 +10,14 @@ import sys
 import click
 import coloredlogs
 from kinja.clusters import get_cluster_path, list_clusters, load_cluster
+from kinja.config import load_configuration
 from kinja.engine import build
 from kinja.environments import list_environments
 from kinja.templates import analyze, validate
 from kinja.util import MERGE_METHODS, deep_merge, touch
 from kinja.values import load_defaults, load_value_file
-from simple_tools.interaction import confirm  # type:ignore
+from simple_tools.interaction import confirm
+from termcolor import colored
 
 
 @click.group()
@@ -23,8 +25,10 @@ from simple_tools.interaction import confirm  # type:ignore
 def root(debug):
     coloredlogs.install()
     logging.basicConfig(level=logging.INFO if not debug else logging.DEBUG)
-    logging.getLogger('botocore').setLevel(logging.INFO)
-    logging.getLogger('urllib3').setLevel(logging.INFO)
+    logging.getLogger('botocore').setLevel(
+        logging.WARN if not debug else logging.INFO)
+    logging.getLogger('urllib3').setLevel(
+        logging.WARN if not debug else logging.INFO)
 
 
 @root.command(name='validate')
@@ -33,36 +37,48 @@ def root(debug):
 @click.option('--environment', '-e')
 @click.argument('directory', type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 def cli_validate(method, cluster, environment, directory):
-    engine = build(directory, cluster, environment)
-
     values = deep_merge(  # pylint: disable=redefined-outer-name
         load_defaults(directory),
         (load_cluster(cluster, directory, environment) if cluster else dict()),
         method=method)
 
+    engine = build(directory, cluster, environment)
+    config = load_configuration(directory, cluster, environment)
+
     templates = engine.list_templates()  # pylint: disable=redefined-outer-name
-    validated = True
+
+    all_validated = True
 
     for template_path in templates:
-        undefined, unused, invalid = analyze(template_path, values, engine)
+        errors = set()
 
-        if not (undefined or unused or invalid):
-            continue
+        undefined, unused, invalid, secrets = analyze(
+            template_path, values, engine)
 
-        print(f"{template_path}:")
+        if undefined or invalid:
+            for var in undefined:
+                errors.add(f"undefined variable: {var}")
 
-        for var in undefined:
-            print(f"undefined variable: {var}")
+            for var in invalid:
+                errors.add(f"invalid variable: {var}")
 
-        for var in invalid:
-            print(f"invalid variable: {var}")
+        if secrets:
+            if 'secrets' not in config or 'provider' not in config['secrets']:
+                errors.add("No secrets provider configured")
 
-        for var in unused:
-            print(f"unused variable: {var}")
+        if errors:
+            all_validated = False
 
-        validated = False
+            print(
+                colored(f"{template_path}: ✗", 'red'))
 
-    sys.exit(1 if validated else 0)
+            for error in errors:
+                print(f"- {error}")
+        else:
+            print(
+                colored(f"{template_path}: ✔", 'green'))
+
+    sys.exit(not all_validated)
 
 
 @root.command(name='gen')
@@ -85,18 +101,19 @@ def cli_gen(method, value_files, cli_values, cluster, environment, directory):  
         method=method)
 
     engine = build(directory, cluster, environment)
+    config = load_configuration(directory, cluster, environment)
 
     templates = engine.list_templates()  # pylint: disable=redefined-outer-name
     validated = True
 
     for template_path in templates:
-        if not validate(template_path, values, engine):
+        if not validate(template_path, values, engine, config):
             print(f"Failed to validate template {template_path}")
 
             validated = False
 
     if not validated:
-        sys.exit("Failed to validate all templates")
+        sys.exit(1)
 
     for template_path in templates:
         print('---')
@@ -248,4 +265,4 @@ def main():
     try:
         root()  # pylint: disable=no-value-for-parameter
     except RuntimeError as exc:
-        print(exc)
+        sys.exit(exc)

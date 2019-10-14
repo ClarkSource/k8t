@@ -24,8 +24,8 @@ def list_clusters(path: str) -> List[str]:
 
 
 def load_cluster(name: str, path: str, environment: str):
-    LOGGER.info('loading cluster from %s with environment %s',
-                path, environment)
+    LOGGER.debug('loading cluster from %s with environment %s',
+                 path, environment)
 
     cluster_path = get_cluster_path(name, path)
 
