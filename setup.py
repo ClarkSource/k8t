@@ -3,5 +3,5 @@
 from setuptools import setup
 
 setup(
-    entry_points={'console_scripts': ['kinja=kinja.cli:root']}
+    entry_points={'console_scripts': ['kinja=kinja.cli:main']}
 )
