@@ -10,6 +10,10 @@ run this
 $ pip install --user --upgrade .
 ```
 
+## example
+
+check out https://github.com/ClarkSource/k8s-cd-poc
+
 ## usage
 
 ### scaffolding
