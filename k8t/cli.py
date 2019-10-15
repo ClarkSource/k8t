@@ -26,7 +26,8 @@ def check_directory(path: str) -> bool:
 
 
 @click.group()
-@click.option('-d', '--debug/--no-debug', default=False, show_default=True)
+@click.version_option(version=__version__)
+@click.option('-d', '--debug/--no-debug', default=False, show_default=True, help='Enable debug logging.')
 def root(debug):
     coloredlogs.install()
     logging.basicConfig(level=logging.INFO if not debug else logging.DEBUG)
@@ -36,20 +37,15 @@ def root(debug):
         logging.WARN if not debug else logging.INFO)
 
 
-@root.command(name='version')
-def print_version():
-    print(f"k8t {__version__}")
-
-
-@root.command(name='license')
+@root.command(name='license', help='Print software license.')
 def print_license():
     print(__license__)
 
 
-@root.command(name='validate')
-@click.option('-m', '--method', type=click.Choice(MERGE_METHODS), default='ltr', show_default=True)
-@click.option('--cluster', '-c')
-@click.option('--environment', '-e')
+@root.command(name='validate', help='Validate template files for given context.')
+@click.option('-m', '--method', type=click.Choice(MERGE_METHODS), default='ltr', show_default=True, help='Value file merge method.')
+@click.option('--cluster', '-c', help='Cluster context to use.')
+@click.option('--environment', '-e', help='Deployment environment to use.')
 @click.argument('directory', type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 def cli_validate(method, cluster, environment, directory):
     if not check_directory(directory):
@@ -99,16 +95,16 @@ def cli_validate(method, cluster, environment, directory):
     sys.exit(not all_validated)
 
 
-@root.command(name='gen')
-@click.option('-m', '--method', type=click.Choice(MERGE_METHODS), default='ltr', show_default=True)
-@click.option('--value-file', 'value_files', multiple=True, type=click.Path(dir_okay=False, exists=True))
-@click.option('--value', 'cli_values', type=(str, str), multiple=True, metavar='<KEY VALUE>')
-@click.option('--cluster', '-c')
-@click.option('--environment', '-e')
+@root.command(name='gen', help='Create manifest files using stored templates.')
+@click.option('-m', '--method', type=click.Choice(MERGE_METHODS), default='ltr', show_default=True, help='Value file merge method.')
+@click.option('--value-file', 'value_files', multiple=True, type=click.Path(dir_okay=False, exists=True), help='Additional value file to include.')
+@click.option('--value', 'cli_values', type=(str, str), multiple=True, metavar='<KEY VALUE>', help='Additional value(s) to include.')
+@click.option('--cluster', '-c', help='Cluster context to use.')
+@click.option('--environment', '-e', help='Deployment environment to use.')
 @click.argument('directory', type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 def cli_gen(method, value_files, cli_values, cluster, environment, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
     """
-    merge order: defaults | cluster | value files | values
+    Merge order: defaults | cluster | value files | values
     """
 
     if not check_directory(directory):
@@ -142,12 +138,12 @@ def cli_gen(method, value_files, cli_values, cluster, environment, directory):  
         print(engine.get_template(template_path).render(values))
 
 
-@root.group()
+@root.group(help='Code scaffolding commands.')
 def new():
     pass
 
 
-@new.command(name='project')
+@new.command(name='project', help='Create a new project.')
 @click.argument('directory', type=click.Path())
 def new_project(directory):
     try:
@@ -167,7 +163,7 @@ def new_project(directory):
     touch(os.path.join(directory, 'values.yaml'))
 
 
-@new.command(name='cluster')
+@new.command(name='cluster', help='Create a new cluster context.')
 @click.argument('name')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def new_cluster(name, directory):
@@ -190,11 +186,11 @@ def new_cluster(name, directory):
     touch(os.path.join(cluster_path, 'values.yaml'))
 
 
-@new.command(name='environment')
-@click.argument('name')
+@new.command(name='environment', help='Create a new environment context.')
 @click.argument('cluster')
+@click.argument('name')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
-def new_environment(name, cluster, directory):  # pylint: disable=redefined-outer-name
+def new_environment(cluster, name, directory):  # pylint: disable=redefined-outer-name
     if not check_directory(directory):
         sys.exit(f"not a valid project: {directory}")
 
@@ -214,12 +210,12 @@ def new_environment(name, cluster, directory):  # pylint: disable=redefined-oute
     touch(os.path.join(environment_path, 'values.yaml'))
 
 
-@root.group()
+@root.group(help='Project inspection commands.')
 def get():
     pass
 
 
-@get.command(name='clusters')
+@get.command(name='clusters', help='Get configured clusters.')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def get_clusters(directory):
     if not check_directory(directory):
@@ -229,7 +225,7 @@ def get_clusters(directory):
         print(cluster_path)
 
 
-@get.command(name='environments')
+@get.command(name='environments', help='Get configured environments.')
 @click.argument('cluster')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def get_environments(cluster, directory):  # pylint: disable=redefined-outer-name
@@ -242,9 +238,9 @@ def get_environments(cluster, directory):  # pylint: disable=redefined-outer-nam
         print(environment_path)
 
 
-@get.command(name='templates')
-@click.option('--cluster', '-c')
-@click.option('--environment', '-e')
+@get.command(name='templates', help='Get stored templates.')
+@click.option('--cluster', '-c', help='Cluster context to use.')
+@click.option('--environment', '-e', help='Deployment environment to use.')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def get_templates(directory, cluster, environment):  # pylint: disable=redefined-outer-name
     if not check_directory(directory):
@@ -254,14 +250,14 @@ def get_templates(directory, cluster, environment):  # pylint: disable=redefined
         print(template_path)
 
 
-@root.group()
+@root.group(help='Edit local project files.')
 def edit():
     pass
 
 
-@edit.command(name='config')
-@click.option('--cluster', '-c')
-@click.option('--environment', '-e')
+@edit.command(name='config', help='Edit config files in chosen context.')
+@click.option('--cluster', '-c', help='Cluster context to use.')
+@click.option('--environment', '-e', help='Deployment environment to use.')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def edit_config(directory, cluster, environment):  # pylint: disable=redefined-outer-name
     if not check_directory(directory):
@@ -282,9 +278,9 @@ def edit_config(directory, cluster, environment):  # pylint: disable=redefined-o
     os.system('%s %s' % (os.getenv('EDITOR', 'vim'), file_path))
 
 
-@edit.command(name='values')
-@click.option('--cluster', '-c')
-@click.option('--environment', '-e')
+@edit.command(name='values', help='Edit value files in chosen context.')
+@click.option('--cluster', '-c', help='Cluster context to use.')
+@click.option('--environment', '-e', help='Deployment environment to use.')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def edit_values(directory, cluster, environment):  # pylint: disable=redefined-outer-name
     if not check_directory(directory):
