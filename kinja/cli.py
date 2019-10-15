@@ -20,6 +20,10 @@ from simple_tools.interaction import confirm
 from termcolor import colored
 
 
+def check_directory(path: str) -> bool:
+    return os.path.exists(os.path.join(path, '.ktpl'))
+
+
 @click.group()
 @click.option('-d', '--debug/--no-debug', default=False, show_default=True)
 def root(debug):
@@ -37,6 +41,9 @@ def root(debug):
 @click.option('--environment', '-e')
 @click.argument('directory', type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 def cli_validate(method, cluster, environment, directory):
+    if not check_directory(directory):
+        sys.exit(f"not a valid project: {directory}")
+
     values = deep_merge(  # pylint: disable=redefined-outer-name
         load_defaults(directory),
         (load_cluster(cluster, directory, environment) if cluster else dict()),
@@ -93,6 +100,9 @@ def cli_gen(method, value_files, cli_values, cluster, environment, directory):  
     merge order: defaults | cluster | value files | values
     """
 
+    if not check_directory(directory):
+        sys.exit(f"not a valid project: {directory}")
+
     values = deep_merge(  # pylint: disable=redefined-outer-name
         load_defaults(directory),
         (load_cluster(cluster, directory, environment) if cluster else dict()),
@@ -137,6 +147,8 @@ def new_project(directory):
             sys.exit(1)
         os.makedirs(directory, exist_ok=True)
 
+    touch(os.path.join(directory, '.ktpl'))
+
     os.makedirs(os.path.join(directory, 'clusters'), exist_ok=True)
     os.makedirs(os.path.join(directory, 'templates'), exist_ok=True)
     os.makedirs(os.path.join(directory, 'files'), exist_ok=True)
@@ -148,6 +160,9 @@ def new_project(directory):
 @click.argument('name')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def new_cluster(name, directory):
+    if not check_directory(directory):
+        sys.exit(f"not a valid project: {directory}")
+
     cluster_path = os.path.join(directory, 'clusters', name)
 
     try:
@@ -169,6 +184,9 @@ def new_cluster(name, directory):
 @click.argument('cluster')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def new_environment(name, cluster, directory):  # pylint: disable=redefined-outer-name
+    if not check_directory(directory):
+        sys.exit(f"not a valid project: {directory}")
+
     cluster_path = get_cluster_path(cluster, directory)
     environment_path = os.path.join(cluster_path, 'environments', name)
 
@@ -193,6 +211,9 @@ def get():
 @get.command(name='clusters')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def get_clusters(directory):
+    if not check_directory(directory):
+        sys.exit(f"not a valid project: {directory}")
+
     for cluster_path in list_clusters(directory):
         print(cluster_path)
 
@@ -201,6 +222,9 @@ def get_clusters(directory):
 @click.argument('cluster')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def get_environments(cluster, directory):  # pylint: disable=redefined-outer-name
+    if not check_directory(directory):
+        sys.exit(f"not a valid project: {directory}")
+
     cluster_path = get_cluster_path(cluster, directory)
 
     for environment_path in list_environments(cluster_path):
@@ -212,6 +236,9 @@ def get_environments(cluster, directory):  # pylint: disable=redefined-outer-nam
 @click.option('--environment', '-e')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def get_templates(directory, cluster, environment):  # pylint: disable=redefined-outer-name
+    if not check_directory(directory):
+        sys.exit(f"not a valid project: {directory}")
+
     for template_path in build(directory, cluster, environment).list_templates():
         print(template_path)
 
@@ -226,6 +253,9 @@ def edit():
 @click.option('--environment', '-e')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def edit_config(directory, cluster, environment):  # pylint: disable=redefined-outer-name
+    if not check_directory(directory):
+        sys.exit(f"not a valid project: {directory}")
+
     file_path: str
 
     if cluster is not None:
@@ -246,6 +276,9 @@ def edit_config(directory, cluster, environment):  # pylint: disable=redefined-o
 @click.option('--environment', '-e')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def edit_values(directory, cluster, environment):  # pylint: disable=redefined-outer-name
+    if not check_directory(directory):
+        sys.exit(f"not a valid project: {directory}")
+
     file_path: str
 
     if cluster is not None:
