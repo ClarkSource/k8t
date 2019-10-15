@@ -35,8 +35,8 @@ $ k8t new cluster A
 Create a new environment
 
 ```
-$ k8t new environment staging A
-$ k8t new environment production A
+$ k8t new environment A staging
+$ k8t new environment A production
 ```
 Setup secrets on SSM
 
