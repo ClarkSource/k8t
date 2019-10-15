@@ -6,11 +6,12 @@
 import os
 
 from jinja2 import Environment, FileSystemLoader
-from kinja.clusters import get_cluster_path
-from kinja.environments import get_environment_path
-from kinja.logger import LOGGER
-from kinja.secrets import get_secret
-from kinja.util import b64decode, b64encode, hashf, random_password
+
+from k8t.clusters import get_cluster_path
+from k8t.environments import get_environment_path
+from k8t.logger import LOGGER
+from k8t.secrets import get_secret
+from k8t.util import b64decode, b64encode, hashf, random_password
 
 
 def build(path: str, cluster: str, environment: str):

@@ -1,4 +1,6 @@
-# kinja
+# k8t
+
+*Pronounced Katie [ˈkeɪti]*
 
 Simple cluster and environment specific aware templating for kubernetes manifests.
 
@@ -21,25 +23,25 @@ check out https://github.com/ClarkSource/k8s-cd-poc
 Create a new project folder with a cluster directory and an empty defaults file
 
 ```
-$ kinja new project foobar
+$ k8t new project foobar
 ```
 
 Create a new cluster
 
 ```
-$ kinja new cluster A
+$ k8t new cluster A
 ```
 
 Create a new environment
 
 ```
-$ kinja new environment staging A
-$ kinja new environment production A
+$ k8t new environment staging A
+$ k8t new environment production A
 ```
 Setup secrets on SSM
 
 ```
-$ kinja edit config
+$ k8t edit config
 secrets:
   provider: ssm
 ```
@@ -47,7 +49,7 @@ secrets:
 Specify prefixes for SSM secrets
 
 ```
-$ kinja edit config --cluster A --environment staging
+$ k8t edit config --cluster A --environment staging
 secrets:
   prefix: "staging/application"```
 ```
@@ -55,7 +57,7 @@ secrets:
 Values can be easily added/modified in the same way
 
 ```
-$ kinja edit values --cluster Ano creds to it anyway or dont know where to get
+$ k8t edit values --cluster Ano creds to it anyway or dont know where to get
 ```
 
 A typical setup should look something like this
@@ -100,13 +102,13 @@ A typical setup should look something like this
 While validation is done before generating, templates can be validated for environment files easily.
 
 ```
-$ kinja validate
+$ k8t validate
 ```
 
 To validate for clusters/environments the usual options can be used
 
 ```
-$ kinja validate -c A -e production
+$ k8t validate -c A -e production
 ```
 
 ### generate files
@@ -115,10 +117,10 @@ The **--cluster** flag will load variables from a directory. By default the file
 loaded, however an environment can be specified with **--environment**.
 
 ```
-$ kinja gen -c A -e staging
+$ k8t gen -c A -e staging
 ```
 
-Additionally kinja will attempt to load a file **defaults.yaml** in the root directory. This way a set of default
+Additionally k8t will attempt to load a file **defaults.yaml** in the root directory. This way a set of default
 variables can be specified and selectively overriden via cluster and environment.
 
 Additional values can be given via flag **--value-file** in the form of a file or **--value KEY VALUE**, both can be
@@ -127,7 +129,7 @@ supplied multiple times.
 Variables will be merged via deep merging. Default merge strategy is left-to-right. For the merge order see the output of
 
 ```
-$ kinja --help
+$ k8t --help
 ```
 
 ### Overriding templates

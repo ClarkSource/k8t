@@ -3,7 +3,7 @@
 # Copyright © 2019 Clark Germany GmbH
 # Author: Aljosha Friemann <aljosha.friemann@clark.de>
 
-from kinja.config import validate
+from k8t.config import validate
 
 
 def test_validate():

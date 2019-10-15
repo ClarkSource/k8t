@@ -9,19 +9,20 @@ import sys
 
 import click
 import coloredlogs
-from kinja.clusters import get_cluster_path, list_clusters, load_cluster
-from kinja.config import load_configuration
-from kinja.engine import build
-from kinja.environments import list_environments
-from kinja.templates import analyze, validate
-from kinja.util import MERGE_METHODS, deep_merge, touch
-from kinja.values import load_defaults, load_value_file
+from k8t import __license__, __version__
+from k8t.clusters import get_cluster_path, list_clusters, load_cluster
+from k8t.config import load_configuration
+from k8t.engine import build
+from k8t.environments import list_environments
+from k8t.templates import analyze, validate
+from k8t.util import MERGE_METHODS, deep_merge, touch
+from k8t.values import load_defaults, load_value_file
 from simple_tools.interaction import confirm
 from termcolor import colored
 
 
 def check_directory(path: str) -> bool:
-    return os.path.exists(os.path.join(path, '.ktpl'))
+    return os.path.exists(os.path.join(path, '.k8t'))
 
 
 @click.group()
@@ -33,6 +34,16 @@ def root(debug):
         logging.WARN if not debug else logging.INFO)
     logging.getLogger('urllib3').setLevel(
         logging.WARN if not debug else logging.INFO)
+
+
+@root.command(name='version')
+def print_version():
+    print(f"k8t {__version__}")
+
+
+@root.command(name='license')
+def print_license():
+    print(__license__)
 
 
 @root.command(name='validate')
@@ -147,7 +158,7 @@ def new_project(directory):
             sys.exit(1)
         os.makedirs(directory, exist_ok=True)
 
-    touch(os.path.join(directory, '.ktpl'))
+    touch(os.path.join(directory, '.k8t'))
 
     os.makedirs(os.path.join(directory, 'clusters'), exist_ok=True)
     os.makedirs(os.path.join(directory, 'templates'), exist_ok=True)

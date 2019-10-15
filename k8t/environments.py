@@ -6,7 +6,7 @@
 import os
 from typing import Any, Dict, List
 
-from kinja.values import load_value_file
+from k8t.values import load_value_file
 
 
 def list_environments(path: str) -> List[str]:
