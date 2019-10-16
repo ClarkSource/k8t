@@ -7,7 +7,8 @@ import os
 from typing import Set, Tuple
 
 from jinja2 import meta, nodes
-from kinja.logger import LOGGER
+
+from k8t.logger import LOGGER
 
 PROHIBITED_VARIABLE_NAMES = ['namespace']
 

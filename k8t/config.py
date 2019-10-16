@@ -7,7 +7,8 @@ import os
 from typing import Any, Dict
 
 import yaml
-from kinja.util import merge
+
+from k8t.util import merge
 
 
 def load_configuration(path: str, cluster: str, environment: str) -> dict:

@@ -6,7 +6,8 @@
 import os
 
 import yaml
-from kinja.logger import LOGGER
+
+from k8t.logger import LOGGER
 
 
 def load_value_file(path: str):

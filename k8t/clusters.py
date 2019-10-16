@@ -6,10 +6,10 @@
 import os
 from typing import Any, Dict, List
 
-from kinja.environments import load_environment
-from kinja.logger import LOGGER
-from kinja.util import deep_merge
-from kinja.values import load_value_file
+from k8t.environments import load_environment
+from k8t.logger import LOGGER
+from k8t.util import deep_merge
+from k8t.values import load_value_file
 
 
 def list_clusters(path: str) -> List[str]:

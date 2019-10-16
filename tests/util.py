@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-# vim:fenc=utf-8
 #
 # Copyright © 2018 Clark Germany GmbH
+# Author: Aljosha Friemann <aljosha.friemann@clark.de>
 
 import random
 
-from kinja.util import (b64decode, b64encode, deep_merge, hashf, merge,
-                        random_password)
+from k8t.util import (b64decode, b64encode, deep_merge, hashf, merge,
+                      random_password)
 
 
 def test_merge_memory_safety():

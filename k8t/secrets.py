@@ -3,8 +3,8 @@
 # Copyright © 2019 Clark Germany GmbH
 # Author: Aljosha Friemann <aljosha.friemann@clark.de>
 
-from kinja import secret_providers
-from kinja.config import load_configuration
+from k8t import secret_providers
+from k8t.config import load_configuration
 
 
 def get_secret(key: str, path: str, cluster: str, environment: str) -> str:

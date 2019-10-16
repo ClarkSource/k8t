@@ -11,7 +11,7 @@ import string
 from functools import reduce
 from typing import Any
 
-from kinja.logger import LOGGER
+from k8t.logger import LOGGER
 
 try:
     from secrets import choice

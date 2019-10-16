@@ -3,4 +3,6 @@
 #
 # Copyright © 2018 Clark Germany GmbH
 
-__version__ = '0.0.1'
+from k8t.cli import main
+
+main()

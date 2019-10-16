@@ -4,7 +4,8 @@
 # Author: Aljosha Friemann <aljosha.friemann@clark.de>
 
 import boto3
-from kinja.logger import LOGGER
+
+from k8t.logger import LOGGER
 
 
 def ssm(key: str) -> str:
