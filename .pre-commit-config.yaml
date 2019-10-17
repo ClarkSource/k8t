@@ -7,11 +7,6 @@ repos:
     rev: v2.2.3
     hooks:
       - id: check-merge-conflict
-  - repo: git@github.com:Yelp/detect-secrets
-    rev: v0.12.5
-    hooks:
-      - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
   - repo: git://github.com/Lucas-C/pre-commit-hooks.git
     rev: v1.1.7
     hooks:
