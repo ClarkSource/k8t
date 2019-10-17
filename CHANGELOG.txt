@@ -1,0 +1,5 @@
+CHANGELOG.txt
+
+:Author: Aljosha Friemann
+:Email: aljosha.friemann@clark.de
+:Date: 2019-10-16 10:48
