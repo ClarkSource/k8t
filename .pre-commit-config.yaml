@@ -12,3 +12,7 @@ repos:
     hooks:
       - id: insert-license
         files: \.py$
+  - repo: git@github.com:thlorenz/doctoc
+    rev: v1.4.0
+    hooks:
+      - id: doctoc
