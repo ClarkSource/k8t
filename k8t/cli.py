@@ -9,15 +9,16 @@
 
 import logging
 import os
+import shutil
 import sys
 
 import click
 import coloredlogs
-from k8t import __license__, __version__
+import k8t
 from k8t.clusters import get_cluster_path, list_clusters, load_cluster
 from k8t.config import load_configuration
 from k8t.engine import build
-from k8t.environments import list_environments
+from k8t.environments import get_environment_path, list_environments
 from k8t.templates import analyze, validate
 from k8t.util import MERGE_METHODS, deep_merge, touch
 from k8t.values import load_defaults, load_value_file
@@ -30,7 +31,7 @@ def check_directory(path: str) -> bool:
 
 
 @click.group()
-@click.version_option(version=__version__)
+@click.version_option(version=k8t.__version__)
 @click.option('-d', '--debug/--no-debug', default=False, show_default=True, help='Enable debug logging.')
 def root(debug):
     coloredlogs.install()
@@ -43,7 +44,7 @@ def root(debug):
 
 @root.command(name='license', help='Print software license.')
 def print_license():
-    print(__license__)
+    print(k8t.__license__)
 
 
 @root.command(name='validate', help='Validate template files for given context.')
@@ -162,7 +163,6 @@ def new_project(directory):
 
     os.makedirs(os.path.join(directory, 'clusters'), exist_ok=True)
     os.makedirs(os.path.join(directory, 'templates'), exist_ok=True)
-    os.makedirs(os.path.join(directory, 'files'), exist_ok=True)
 
     touch(os.path.join(directory, 'values.yaml'))
 
@@ -185,7 +185,6 @@ def new_cluster(name, directory):
 
     os.makedirs(os.path.join(cluster_path, 'environments'), exist_ok=True)
     os.makedirs(os.path.join(cluster_path, 'templates'), exist_ok=True)
-    os.makedirs(os.path.join(cluster_path, 'files'), exist_ok=True)
 
     touch(os.path.join(cluster_path, 'values.yaml'))
 
@@ -194,7 +193,7 @@ def new_cluster(name, directory):
 @click.argument('cluster')
 @click.argument('name')
 @click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
-def new_environment(cluster, name, directory):  # pylint: disable=redefined-outer-name
+def new_environment(cluster, name, directory):
     if not check_directory(directory):
         sys.exit(f"not a valid project: {directory}")
 
@@ -209,9 +208,42 @@ def new_environment(cluster, name, directory):  # pylint: disable=redefined-oute
         os.makedirs(environment_path, exist_ok=True)
 
     os.makedirs(os.path.join(environment_path, 'templates'), exist_ok=True)
-    os.makedirs(os.path.join(environment_path, 'files'), exist_ok=True)
 
     touch(os.path.join(environment_path, 'values.yaml'))
+
+
+@new.command(name='deployment', help='Create a new deployment template.')
+@click.option('--cluster', '-c', help='Cluster context to use.')
+@click.option('--environment', '-e', help='Deployment environment to use.')
+@click.option('--name', '-n', help='Template filename.', default='deployment')
+@click.argument('directory', type=click.Path(exists=True, file_okay=False), default=os.getcwd())
+def new_deployment(cluster, environment, name, directory):
+    if not check_directory(directory):
+        sys.exit(f"not a valid project: {directory}")
+
+    asset_dir = os.path.join(os.path.dirname(k8t.__file__), 'assets')
+
+    context_path = None
+
+    if cluster:
+        cluster_path = get_cluster_path(cluster, directory)
+
+        if environment:
+            context_path = get_environment_path(environment, cluster_path)
+        else:
+            context_path = cluster_path
+    else:
+        context_path = directory
+
+    template_dir = os.path.join(context_path, 'templates')
+
+    os.makedirs(template_dir, exist_ok=True)
+
+    output_path = os.path.join(template_dir, f"{name}.yaml.j2")
+
+    if not os.path.exists(output_path) or confirm(f"file {output_path} already exists, overwrite?"):
+        shutil.copyfile(os.path.join(
+            asset_dir, 'deployment.yaml.j2'), output_path)
 
 
 @root.group(help='Project inspection commands.')

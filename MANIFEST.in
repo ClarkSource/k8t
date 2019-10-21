@@ -1,2 +1,2 @@
 include *.rst *.txt *.md
-recursive-include assets
+include k8t/assets/*
