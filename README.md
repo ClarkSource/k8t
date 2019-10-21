@@ -1,6 +1,6 @@
 # k8t
 
-*Pronounced Katie [ˈkeɪti]*
+*Pronounced katie [ˈkeɪti]*
 
 Simple cluster and environment specific aware templating for kubernetes manifests.
 
@@ -8,17 +8,16 @@ Simple cluster and environment specific aware templating for kubernetes manifest
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [k8t](#k8t)
-  - [installation](#installation)
-  - [example](#example)
-  - [usage](#usage)
-    - [scaffolding](#scaffolding)
-    - [validate files](#validate-files)
-    - [generate files](#generate-files)
-    - [Overriding templates](#overriding-templates)
-    - [Managing secrets](#managing-secrets)
-      - [SSM](#ssm)
-  - [TODO](#todo)
+- [installation](#installation)
+- [example](#example)
+- [usage](#usage)
+  - [scaffolding](#scaffolding)
+  - [validate files](#validate-files)
+  - [generate files](#generate-files)
+  - [Overriding templates](#overriding-templates)
+  - [Managing secrets](#managing-secrets)
+    - [SSM](#ssm)
+- [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
