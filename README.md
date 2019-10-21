@@ -25,7 +25,7 @@ Simple cluster and environment specific aware templating for kubernetes manifest
 run this
 
 ```
-$ pip install --user --upgrade .
+$ pip install --user --upgrade k8t
 ```
 
 ## usage
