@@ -2,6 +2,7 @@
 
 *.egg-info
 .tox
+.eggs
 .mypy_cache
 __pycache__
 build
