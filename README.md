@@ -9,7 +9,6 @@ Simple cluster and environment specific aware templating for kubernetes manifest
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [installation](#installation)
-- [example](#example)
 - [usage](#usage)
   - [scaffolding](#scaffolding)
   - [validate files](#validate-files)
@@ -28,10 +27,6 @@ run this
 ```
 $ pip install --user --upgrade .
 ```
-
-## example
-
-check out https://github.com/ClarkSource/k8s-cd-poc
 
 ## usage
 
