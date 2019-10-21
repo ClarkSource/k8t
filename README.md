@@ -20,7 +20,7 @@ Simple cluster and environment specific aware templating for kubernetes manifest
       - [SSM](#ssm)
   - [TODO](#todo)
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->Rewrite
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## installation
 
