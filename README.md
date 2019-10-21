@@ -1,3 +1,21 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [k8t](#k8t)
+  - [installation](#installation)
+  - [example](#example)
+  - [usage](#usage)
+    - [scaffolding](#scaffolding)
+    - [validate files](#validate-files)
+    - [generate files](#generate-files)
+    - [Overriding templates](#overriding-templates)
+    - [Managing secrets](#managing-secrets)
+      - [SSM](#ssm)
+  - [TODO](#todo)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # k8t
 
 *Pronounced Katie [ˈkeɪti]*
@@ -38,15 +56,7 @@ Create a new environment
 $ k8t new environment A staging
 $ k8t new environment A production
 ```
-Setup secrets on SSM
-
-```
-$ k8t edit config
-secrets:
-  provider: ssm
-```
-
-Specify prefixes for SSM secrets
+Specify prefixes for secrets
 
 ```
 $ k8t edit config --cluster A --environment staging
@@ -138,3 +148,22 @@ Templates can be overriden on a cluster/environment level.
 
 If a file `application.yaml` exists in the root templates folder, simply add a file with the same name to the
 cluster/environment template folder.
+
+### Managing secrets
+
+#### SSM
+
+Setup secrets on SSM
+```
+$ k8t edit config
+secrets:
+  provider: ssm
+  prefix: "foobar"
+  ```
+
+## TODO
+
+* testing needs to be expanded
+* add templates for basic manifest scaffolding (deployments, services, etc)
+* `cluster` should be optional for `new environment`
+* the ability to add additional template directories via the CLI
