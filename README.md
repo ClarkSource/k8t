@@ -165,5 +165,5 @@ secrets:
 
 * testing needs to be expanded
 * add templates for basic manifest scaffolding (deployments, services, etc)
-* cluster should be optional for `new environment`
+* `cluster` should be optional for `new environment`
 * the ability to add additional template directories via the CLI
