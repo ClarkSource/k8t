@@ -47,9 +47,9 @@ pipeline {
 
       steps {
         sh 'pip install --upgrade twine'
-        /* missing credentials
-        sh 'twine upload dist/*'
-        */
+        withCredentials([usernamePassword(credentialsId: 'pypi', usernameVariable: 'TWINE_USERNAME', passwordVariable: 'TWINE_PASSWORD')]) {
+          sh 'twine upload dist/*'
+        }
       }
     }
   }
