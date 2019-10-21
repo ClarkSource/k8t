@@ -1,3 +1,9 @@
+# k8t
+
+*Pronounced Katie [ˈkeɪti]*
+
+Simple cluster and environment specific aware templating for kubernetes manifests.
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
@@ -14,13 +20,7 @@
       - [SSM](#ssm)
   - [TODO](#todo)
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-# k8t
-
-*Pronounced Katie [ˈkeɪti]*
-
-Simple cluster and environment specific aware templating for kubernetes manifests.
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->Rewrite
 
 ## installation
 
