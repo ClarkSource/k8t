@@ -50,6 +50,12 @@ Create a new environment
 $ k8t new environment A staging
 $ k8t new environment A production
 ```
+Generate a new deployment template for cluster A
+
+```
+$ k8t new deployment -c A
+```
+
 Specify prefixes for secrets
 
 ```
