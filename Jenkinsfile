@@ -32,7 +32,10 @@ pipeline {
 
     stage('build') {
       when {
-        branch 'master'
+        anyOf {
+          branch 'master'
+          buildingTag()
+        }
       }
 
       steps {
