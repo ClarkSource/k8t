@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ name }}
+  namespace: {{ ns }}
+  labels:
+    app.kubernetes.io/name: {{ name }}
+spec:
+  replicas: {{ replicas }}
+  revisionHistoryLimit: {{ revision_history_limit | default(3) }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ name }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      name: {{ name }}
+      labels:
+        app.kubernetes.io/name: {{ name }}
+    spec:
+      restartPolicy: {{ restart_policy | default("Always") }}
+      securityContext:
+        runAsUser: {{ user_id | default(1000) }}
+      containers:
+        - name: {{ name }}
+          image: {{ image_repository }}:{{ image_tag }}
+          imagePullPolicy: {{ image_pull_policy | default("Always") }}
+          livenessProbe:
+            initialDelaySeconds: 45
+            failureThreshold: 3
+            successThreshold: 1
+            periodSeconds: 10
+            timeoutSeconds: 10
+            tcpSocket:
+              port: http
+          readinessProbe:
+            initialDelaySeconds: 45
+            failureThreshold: 3
+            successThreshold: 1
+            periodSeconds: 10
+            timeoutSeconds: 10
+            tcpSocket:
+              port: http
+          resources:
+            limits:
+              cpu: {{ limit_cpu }}
+              memory: {{ limit_memory }}
+            requests:
+              cpu: {{ request_cpu }}
+              memory: {{ request_memory }}
