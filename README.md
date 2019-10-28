@@ -165,7 +165,6 @@ secrets:
 ## TODO
 
 * testing needs to be expanded
-* add templates for basic manifest scaffolding (deployments, services, etc)
-* `cluster` should be optional for `new environment`
+* add more templates for manifest scaffolding
 * the ability to add additional template directories via the CLI
 * validation functions for template values (e.g. memory/cpu values)
