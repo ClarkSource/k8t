@@ -8,40 +8,33 @@
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import os
-from typing import Any, Dict, List
+import shutil
 
-from k8t.values import load_value_file
+from simple_tools.interaction import confirm
+
+import k8t
+
+ASSET_DIR = os.path.join(os.path.dirname(k8t.__file__), "assets")
 
 
-def list_environments(path: str) -> List[str]:
-    result: List[str] = []
-
-    for root, dirs, _ in os.walk(os.path.join(path, 'environments')):
-        result = dirs
+def list_available_templates():
+    for _, _, files in os.walk(ASSET_DIR):
+        yield from [f.rsplit(".")[0] for f in files]
 
         break
 
-    return result
 
+def new_template(kind, dest):
+    source = os.path.join(ASSET_DIR, f"{kind}.yaml.j2")
 
-def load_environment(name: str, path: str) -> Dict[str, Any]:
-    environment_path = get_environment_path(name, path)
+    if not os.path.isfile(source):
+        raise RuntimeError(f"Invalid resource {kind}, file does not exist: {source}")
 
-    overrides_path = os.path.join(environment_path, 'values.yaml')
+    if os.path.exists(dest):
+        if not confirm(f"file {dest} already exists, overwrite?"):
+            raise RuntimeError("aborting")
 
-    if os.path.exists(overrides_path):
-        return load_value_file(overrides_path)
-
-    return dict()
-
-
-def get_environment_path(name: str, path: str) -> str:
-    environment_path = os.path.join(path, 'environments', name)
-
-    if not os.path.isdir(environment_path):
-        raise RuntimeError('Invalid environment path: %s' % environment_path)
-
-    return environment_path
+    shutil.copyfile(source, dest)
 
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab

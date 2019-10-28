@@ -7,24 +7,29 @@
 #
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-from typing import Any, Dict, List
+import os
+from typing import List
 
-from k8t.logger import LOGGER
-from k8t.project import find_files
-from k8t.util import deep_merge, load_yaml
-
-
-def validate(config: Dict[str, Any]) -> bool:
-    if "secrets" in config:
-        assert "provider" in config["secrets"]
-
-    return True
+from k8t.util import makedirs, touch
 
 
-def load_all(root: str, cluster: str, environment: str, method: str) -> Dict[str, Any]:
-    configs: List[str] = find_files(
-        root, cluster, environment, "config.yaml", dir_ok=False)
+def list_all(path: str) -> List[str]:
+    result: List[str] = []
 
-    LOGGER.debug("using config files: %s", configs)
+    for _, dirs, _ in os.walk(os.path.join(path, "clusters")):
+        result = dirs
 
-    return deep_merge(*[load_yaml(f) for f in configs], method=method)
+        break
+
+    return result
+
+
+def new(root: str, name: str):
+    directory = os.path.join(root, "clusters", name)
+
+    makedirs(directory)
+    makedirs(os.path.join(directory, "templates"))
+    makedirs(os.path.join(directory, "environments"))
+
+    touch(os.path.join(directory, "values.yaml"))
+    touch(os.path.join(directory, "config.yaml"))

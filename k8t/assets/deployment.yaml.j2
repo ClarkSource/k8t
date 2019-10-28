@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ name }}
@@ -11,11 +11,6 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ name }}
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
   template:
     metadata:
       name: {{ name }}
@@ -29,22 +24,6 @@ spec:
         - name: {{ name }}
           image: {{ image_repository }}:{{ image_tag }}
           imagePullPolicy: {{ image_pull_policy | default("Always") }}
-          livenessProbe:
-            initialDelaySeconds: 45
-            failureThreshold: 3
-            successThreshold: 1
-            periodSeconds: 10
-            timeoutSeconds: 10
-            tcpSocket:
-              port: http
-          readinessProbe:
-            initialDelaySeconds: 45
-            failureThreshold: 3
-            successThreshold: 1
-            periodSeconds: 10
-            timeoutSeconds: 10
-            tcpSocket:
-              port: http
           resources:
             limits:
               cpu: {{ limit_cpu }}

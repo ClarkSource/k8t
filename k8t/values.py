@@ -7,25 +7,17 @@
 #
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import os
+from typing import Any, Dict, List
 
-import yaml
 from k8t.logger import LOGGER
+from k8t.project import find_files
+from k8t.util import deep_merge, load_yaml
 
 
-def load_value_file(path: str):
-    LOGGER.debug('loading values file: %s', path)
+def load_all(root: str, cluster: str, environment: str, method: str) -> Dict[str, Any]:
+    values: List[str] = find_files(
+        root, cluster, environment, "values.yaml", dir_ok=False)
 
-    with open(path, 'r') as stream:
-        return yaml.safe_load(stream) or dict()
+    LOGGER.debug("using value files: %s", values)
 
-
-def load_defaults(path: str):
-    defaults_path = os.path.join(path, 'values.yaml')
-
-    if os.path.exists(defaults_path):
-        return load_value_file(defaults_path)
-
-    return dict()
-
-#
+    return deep_merge(*[load_yaml(f) for f in values], method=method)

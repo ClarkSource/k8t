@@ -15,6 +15,9 @@ import string
 from functools import reduce
 from typing import Any
 
+import yaml
+from simple_tools.interaction import confirm
+
 from k8t.logger import LOGGER
 
 try:
@@ -26,7 +29,9 @@ except ImportError:
 
 
 def random_password(length: int) -> str:
-    return ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(length))
+    return "".join(
+        choice(string.ascii_lowercase + string.digits) for _ in range(length)
+    )
 
 
 # def include_file(name: str):
@@ -64,7 +69,7 @@ def b64decode(value: Any) -> str:
     return result
 
 
-def hashf(value, method='sha256'):
+def hashf(value, method="sha256"):
     try:
         hash_method = getattr(hashlib, method)()
     except AttributeError:
@@ -81,16 +86,28 @@ def hashf(value, method='sha256'):
 
 
 def touch(fname: str, mode=0o666, dir_fd=None, **kwargs) -> None:
-    flags = os.O_CREAT | os.O_APPEND
-    with os.fdopen(os.open(fname, flags=flags, mode=mode, dir_fd=dir_fd)) as filep:
-        os.utime(filep.fileno() if os.utime in os.supports_fd else fname,
-                 dir_fd=None if os.supports_fd else dir_fd, **kwargs)
+    if not os.path.exists(fname):
+        flags = os.O_CREAT | os.O_APPEND
+        with os.fdopen(os.open(fname, flags=flags, mode=mode, dir_fd=dir_fd)) as filep:
+            os.utime(
+                filep.fileno() if os.utime in os.supports_fd else fname,
+                dir_fd=None if os.supports_fd else dir_fd,
+                **kwargs,
+            )
 
 
-MERGE_METHODS = ['ltr', 'rtl', 'ask', 'crash']
+def makedirs(path, warn_exists=True):
+    if os.path.exists(path) and warn_exists:
+        if not confirm(f"directory {path} already exists, go ahead?"):
+            raise RuntimeError("aborting")
+
+    os.makedirs(path, exist_ok=True)
 
 
-def merge(d_1: dict, d_2: dict, path=None, method='ltr'):
+MERGE_METHODS = ["ltr", "rtl", "ask", "crash"]
+
+
+def merge(d_1: dict, d_2: dict, path=None, method="ltr"):
     d_1 = copy.deepcopy(d_1)
 
     if path is None:
@@ -99,29 +116,42 @@ def merge(d_1: dict, d_2: dict, path=None, method='ltr'):
     for key in d_2:
         if key in d_1:
             if isinstance(d_1[key], dict) and isinstance(d_2[key], dict):
-                d_1[key] = merge(d_1[key], d_2[key], path +
-                                 [str(key)], method=method)
+                d_1[key] = merge(d_1[key], d_2[key],
+                                 path + [str(key)],
+                                 method=method)
             elif d_1[key] == d_2[key]:
                 pass  # same leaf value
             else:
-                if method == 'ltr':
+                if method == "ltr":
                     d_1[key] = d_2[key]
-                elif method == 'rtl':
+                elif method == "rtl":
                     pass
-                elif method == 'ask':
+                elif method == "ask":
                     raise NotImplementedError('Merge method "ask"')
-                elif method == 'crash':
-                    raise Exception('Conflict at %s' %
-                                    '.'.join(path + [str(key)]))
+                elif method == "crash":
+                    raise Exception("Conflict at %s" %
+                                    ".".join(path + [str(key)]))
                 else:
-                    raise Exception('Invalid merge method: %s' % method)
+                    raise Exception("Invalid merge method: %s" % method)
         else:
             d_1[key] = d_2[key]
 
     return d_1
 
 
-def deep_merge(*dicts, method='ltr'):
+def deep_merge(*dicts, method="ltr"):
     LOGGER.debug('"%s" merging %s dicts', method, len(dicts))
 
-    return reduce(lambda a, b: merge(a, b, method=method) if b is not None else a, dicts)
+    if not dicts:
+        return {}
+
+    return reduce(
+        lambda a, b: merge(a, b, method=method) if b is not None else a, dicts
+    )
+
+
+def load_yaml(path: str) -> dict:
+    LOGGER.debug("loading values file: %s", path)
+
+    with open(path, "r") as stream:
+        return yaml.safe_load(stream) or dict()

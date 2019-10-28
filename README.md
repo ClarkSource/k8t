@@ -47,13 +47,14 @@ $ k8t new cluster A
 Create a new environment
 
 ```
-$ k8t new environment A staging
-$ k8t new environment A production
-```
-Generate a new deployment template for cluster A
+$ k8t new environment staging
+$ k8t new environment production
 
 ```
-$ k8t new deployment -c A
+Generate a new deployment template for cluster A (currently only `deployment` and `service` are supported)
+
+```
+$ k8t new template deployment -c A
 ```
 
 Specify prefixes for secrets
@@ -167,3 +168,4 @@ secrets:
 * add templates for basic manifest scaffolding (deployments, services, etc)
 * `cluster` should be optional for `new environment`
 * the ability to add additional template directories via the CLI
+* validation functions for template values (e.g. memory/cpu values)

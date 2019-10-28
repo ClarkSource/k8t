@@ -12,11 +12,13 @@ from k8t.logger import LOGGER
 
 
 def ssm(key: str) -> str:
-    LOGGER.debug('Requesting secret from %s', key)
+    LOGGER.debug("Requesting secret from %s", key)
 
-    client = boto3.client('ssm')
+    client = boto3.client("ssm")
 
     try:
-        return client.get_parameter(Name=f"/{key}", WithDecryption=True)['Parameter']['Value']
+        return client.get_parameter(Name=f"/{key}", WithDecryption=True)["Parameter"][
+            "Value"
+        ]
     except client.exceptions.ParameterNotFound:
         raise RuntimeError(f"Could not find secret: {key}")
