@@ -47,7 +47,7 @@ $ k8t new cluster A
 Create a new environment
 
 ```
-$ k8t new environment staging
+$ k8t new environment staging -c A
 $ k8t new environment production
 
 ```
