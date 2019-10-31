@@ -10,6 +10,7 @@
 import base64
 import copy
 import hashlib
+import logging
 import os
 import string
 from functools import reduce
@@ -18,7 +19,7 @@ from typing import Any
 import yaml
 from simple_tools.interaction import confirm
 
-from k8t.logger import LOGGER
+LOGGER = logging.getLogger(__name__)
 
 try:
     from secrets import choice
@@ -140,7 +141,8 @@ def merge(d_1: dict, d_2: dict, path=None, method="ltr"):
 
 
 def deep_merge(*dicts, method="ltr"):
-    LOGGER.debug('"%s" merging %s dicts', method, len(dicts))
+    LOGGER.debug(
+        '"%s" merging %s dicts', method, len(dicts))
 
     if not dicts:
         return {}
