@@ -2,6 +2,8 @@
 
 *Pronounced katie [ˈkeɪti]*
 
+[![Build Status](https://jenkins.ci.flfinteche.de/buildStatus/icon?job=DevOps%2Fk8t%2Fmaster)](https://jenkins.ci.flfinteche.de/job/DevOps/job/k8t/job/master/)
+
 Simple cluster and environment specific aware templating for kubernetes manifests.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
