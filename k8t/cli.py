@@ -24,14 +24,16 @@ from k8t.util import MERGE_METHODS, deep_merge, load_yaml, makedirs
 
 @click.group()
 @click.version_option(version=k8t.__version__)
-@click.option("-d", "--debug/--no-debug", default=False, show_default=True, help="Enable debug logging.")
-def root(debug):
-    coloredlogs.install()
-    logging.basicConfig(level=logging.INFO if not debug else logging.DEBUG)
-    logging.getLogger("botocore").setLevel(
-        logging.WARN if not debug else logging.INFO)
-    logging.getLogger("urllib3").setLevel(
-        logging.WARN if not debug else logging.INFO)
+@click.option("-d", "--debug", is_flag=True, default=False, show_default=True, help="Enable debug logging.")
+@click.option("-t", "--trace", is_flag=True, default=False, show_default=True, help="Enable spammy logging.")
+def root(debug, trace):
+    coloredlogs.install(level=logging.DEBUG if debug else logging.INFO)
+
+    if not trace:
+        logging.getLogger("botocore").setLevel(
+            logging.WARN if not debug else logging.INFO)
+        logging.getLogger("urllib3").setLevel(
+            logging.WARN if not debug else logging.INFO)
 
 
 @root.command(name="license", help="Print software license.")

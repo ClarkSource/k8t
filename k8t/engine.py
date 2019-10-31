@@ -7,18 +7,22 @@
 #
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+import logging
+
 from jinja2 import Environment, FileSystemLoader
 
-from k8t.logger import LOGGER
 from k8t.project import find_files
 from k8t.secrets import get_secret
 from k8t.util import b64decode, b64encode, hashf, random_password
+
+LOGGER = logging.getLogger(__name__)
 
 
 def build(path: str, cluster: str, environment: str):
     template_paths = find_template_paths(path, cluster, environment)
 
-    LOGGER.debug("building template envionment for %s", template_paths)
+    LOGGER.debug(
+        "building template environment")
 
     env = Environment(loader=FileSystemLoader(template_paths))
 
@@ -37,12 +41,13 @@ def build(path: str, cluster: str, environment: str):
 
 def find_template_paths(path: str, cluster: str, environment: str):
     LOGGER.debug(
-        "finding template paths in %s for %s on %s", path, cluster, environment
+        "finding template paths in %s for cluster=%s on environment=%s", path, cluster, environment
     )
 
     template_paths = find_files(
         path, cluster, environment, 'templates', file_ok=False)
 
-    LOGGER.debug("found template paths: %s", template_paths)
+    LOGGER.debug(
+        "found template paths: %s", template_paths)
 
     return reversed(template_paths)
