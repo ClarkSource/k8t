@@ -48,7 +48,7 @@ def print_license():
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 def cli_validate(method, cname, ename, directory):   # pylint: disable=too-many-locals
     if not project.check_directory(directory):
-        sys.exit(f"not a valid project: {directory}")
+        sys.exit("not a valid project: {}".format(directory))
 
     vals = values.load_all(directory, cname, ename, method)
     conf = config.load_all(directory, cname, ename, method)
@@ -66,10 +66,10 @@ def cli_validate(method, cname, ename, directory):   # pylint: disable=too-many-
 
         if undefined or invalid:
             for var in undefined:
-                errors.add(f"undefined variable: {var}")
+                errors.add("undefined variable: {}".format(var))
 
             for var in invalid:
-                errors.add(f"invalid variable: {var}")
+                errors.add("invalid variable: {}".format(var))
 
         if secrets:
             if "secrets" not in conf or "provider" not in conf["secrets"]:
@@ -78,12 +78,12 @@ def cli_validate(method, cname, ename, directory):   # pylint: disable=too-many-
         if errors:
             all_validated = False
 
-            print(colored(f"{template_path}: ✗", "red"))
+            print(colored("{}: ✗".format(template_path), "red"))
 
             for error in errors:
-                print(f"- {error}")
+                print("- {}".format(error))
         else:
-            print(colored(f"{template_path}: ✔", "green"))
+            print(colored("{}: ✔".format(template_path), "green"))
 
     sys.exit(not all_validated)
 
@@ -97,7 +97,7 @@ def cli_validate(method, cname, ename, directory):   # pylint: disable=too-many-
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
     if not project.check_directory(directory):
-        sys.exit(f"not a valid project: {directory}")
+        sys.exit("not a valid project: {}".format(directory))
 
     conf = config.load_all(directory, cname, ename, method)
     vals = deep_merge(  # pylint: disable=redefined-outer-name
@@ -114,7 +114,7 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
 
     for template_path in templates:
         if not validate(template_path, vals, eng, conf):
-            print(f"Failed to validate template {template_path}")
+            print("Failed to validate template {}".format(template_path))
 
             validated = False
 
@@ -123,7 +123,7 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
 
     for template_path in templates:
         print("---")
-        print(f"# Source: {template_path}")
+        print("# Source: {}".format(template_path))
         print(eng.get_template(template_path).render(vals))
 
 
@@ -143,7 +143,7 @@ def new_project(directory):
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def new_cluster(name, directory):
     if not project.check_directory(directory):
-        sys.exit(f"not a valid project: {directory}")
+        sys.exit("not a valid project: {}".format(directory))
 
     cluster.new(directory, name)
 
@@ -154,7 +154,7 @@ def new_cluster(name, directory):
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def new_environment(cname, name, directory):
     if not project.check_directory(directory):
-        sys.exit(f"not a valid project: {directory}")
+        sys.exit("not a valid project: {}".format(directory))
 
     base_path = project.get_base_dir(directory, cname, environment=None)
 
@@ -169,7 +169,7 @@ def new_environment(cname, name, directory):
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def new_template(cname, ename, name, kind, directory):
     if not project.check_directory(directory):
-        sys.exit(f"not a valid project: {directory}")
+        sys.exit("not a valid project: {}".format(directory))
 
     base_path = project.get_base_dir(directory, cname, ename)
 
@@ -178,7 +178,7 @@ def new_template(cname, ename, name, kind, directory):
     makedirs(template_dir, warn_exists=False)
 
     scaffolding.new_template(
-        kind, os.path.join(template_dir, f"{name or kind}.yaml.j2")
+        kind, os.path.join(template_dir, "{}.yaml.j2".format(name or kind))
     )
 
 
@@ -191,7 +191,7 @@ def get():
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def get_clusters(directory):
     if not project.check_directory(directory):
-        sys.exit(f"not a valid project: {directory}")
+        sys.exit("not a valid project: {}".format(directory))
 
     for cluster_path in cluster.list_all(directory):
         print(cluster_path)
@@ -202,7 +202,7 @@ def get_clusters(directory):
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def get_environments(cname, directory):  # pylint: disable=redefined-outer-name
     if not project.check_directory(directory):
-        sys.exit(f"not a valid project: {directory}")
+        sys.exit("not a valid project: {}".format(directory))
 
     path = project.get_base_dir(directory, cname, environment=None)
 
@@ -216,7 +216,7 @@ def get_environments(cname, directory):  # pylint: disable=redefined-outer-name
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def get_templates(directory, cname, ename):  # pylint: disable=redefined-outer-name
     if not project.check_directory(directory):
-        sys.exit(f"not a valid project: {directory}")
+        sys.exit("not a valid project: {}".format(directory))
 
     for template_path in build(directory, cname, ename).list_templates():
         print(template_path)
@@ -233,7 +233,7 @@ def edit():
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def edit_config(directory, cname, ename):  # pylint: disable=redefined-outer-name
     if not project.check_directory(directory):
-        sys.exit(f"not a valid project: {directory}")
+        sys.exit("not a valid project: {}".format(directory))
 
     file_path: str
 
@@ -257,7 +257,7 @@ def edit_config(directory, cname, ename):  # pylint: disable=redefined-outer-nam
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def edit_values(directory, cname, ename):  # pylint: disable=redefined-outer-name
     if not project.check_directory(directory):
-        sys.exit(f"not a valid project: {directory}")
+        sys.exit("not a valid project: {}".format(directory))
 
     base_dir = project.get_base_dir(directory, cname, ename)
 

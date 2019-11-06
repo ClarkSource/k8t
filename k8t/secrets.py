@@ -15,10 +15,12 @@ def get_secret(key: str, path: str, cluster: str, environment: str) -> str:
     config = load_all(path, cluster, environment, 'ltr')
 
     if "secrets" not in config:
-        raise RuntimeError(f"No configuration for secrets found: {config}")
+        raise RuntimeError(
+            "No configuration for secrets found: {}".format(config))
 
     provider = getattr(secret_providers, config["secrets"]["provider"].lower())
 
     return provider(
-        f"{config['secrets']['prefix']}/{key}" if "prefix" in config["secrets"] else key
+        "{0}/{1}".format(config['secrets']['prefix'],
+                         key) if "prefix" in config["secrets"] else key
     )

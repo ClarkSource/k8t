@@ -26,13 +26,13 @@ def get_base_dir(root: str, cluster: str, environment: str) -> str:
         base_path = os.path.join(base_path, "clusters", cluster)
 
         if not os.path.isdir(base_path):
-            raise RuntimeError(f"No such cluster: {cluster}")
+            raise RuntimeError("No such cluster: {}".format(cluster))
 
     if environment is not None:
         base_path = os.path.join(base_path, "environments", environment)
 
         if not os.path.isdir(base_path):
-            raise RuntimeError(f"No such environment: {environment}")
+            raise RuntimeError("No such environment: {}".format(environment))
 
     return base_path
 
@@ -73,7 +73,7 @@ def find_files(root: str, cluster: str, environment: str, name: str, file_ok=Tru
         cluster_path = os.path.join(root, "clusters", cluster)
 
         if not os.path.isdir(cluster_path):
-            raise RuntimeError(f"no such cluster: {cluster}")
+            raise RuntimeError("no such cluster: {}".format(cluster))
 
         file_path = os.path.join(cluster_path, name)
 
@@ -89,6 +89,6 @@ def find_files(root: str, cluster: str, environment: str, name: str, file_ok=Tru
                 env_found = True
 
     if not env_found:
-        raise RuntimeError(f"no such environment: {environment}")
+        raise RuntimeError("no such environment: {}".format(environment))
 
     return files

@@ -52,7 +52,7 @@ def b64encode(value: Any) -> str:
     elif isinstance(value, bytes):
         result = base64.b64encode(value).decode()
     else:
-        raise TypeError(f"invalid input: {value}")
+        raise TypeError("invalid input: {}".format(value))
 
     return result
 
@@ -65,7 +65,7 @@ def b64decode(value: Any) -> str:
     elif isinstance(value, bytes):
         result = base64.b64decode(value).decode()
     else:
-        raise TypeError(f"invalid input: {value}")
+        raise TypeError("invalid input: {}".format(value))
 
     return result
 
@@ -74,14 +74,14 @@ def hashf(value, method="sha256"):
     try:
         hash_method = getattr(hashlib, method)()
     except AttributeError:
-        raise RuntimeError(f"No such hash method: {method}")
+        raise RuntimeError("No such hash method: {}".format(method))
 
     if isinstance(value, str):
         hash_method.update(value.encode())
     elif isinstance(value, bytes):
         hash_method.update(value)
     else:
-        raise TypeError(f"invalid input: {value}")
+        raise TypeError("invalid input: {}".format(value))
 
     return hash_method.hexdigest()
 
@@ -99,7 +99,7 @@ def touch(fname: str, mode=0o666, dir_fd=None, **kwargs) -> None:
 
 def makedirs(path, warn_exists=True):
     if os.path.exists(path) and warn_exists:
-        if not confirm(f"directory {path} already exists, go ahead?"):
+        if not confirm("directory {} already exists, go ahead?".format(path)):
             raise RuntimeError("aborting")
 
     os.makedirs(path, exist_ok=True)

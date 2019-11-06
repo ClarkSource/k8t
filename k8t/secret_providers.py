@@ -20,8 +20,8 @@ def ssm(key: str) -> str:
     client = boto3.client("ssm")
 
     try:
-        return client.get_parameter(Name=f"/{key}", WithDecryption=True)["Parameter"][
+        return client.get_parameter(Name="/{}".format(key), WithDecryption=True)["Parameter"][
             "Value"
         ]
     except client.exceptions.ParameterNotFound:
-        raise RuntimeError(f"Could not find secret: {key}")
+        raise RuntimeError("Could not find secret: {}".format(key))

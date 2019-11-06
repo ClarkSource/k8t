@@ -25,13 +25,14 @@ def list_available_templates():
 
 
 def new_template(kind, dest):
-    source = os.path.join(ASSET_DIR, f"{kind}.yaml.j2")
+    source = os.path.join(ASSET_DIR, "{}.yaml.j2".format(kind))
 
     if not os.path.isfile(source):
-        raise RuntimeError(f"Invalid resource {kind}, file does not exist: {source}")
+        raise RuntimeError(
+            "Invalid resource {0}, file does not exist: {1}".format(kind, source))
 
     if os.path.exists(dest):
-        if not confirm(f"file {dest} already exists, overwrite?"):
+        if not confirm("file {} already exists, overwrite?".format(dest)):
             raise RuntimeError("aborting")
 
     shutil.copyfile(source, dest)
