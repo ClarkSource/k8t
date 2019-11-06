@@ -19,7 +19,7 @@ import k8t
 from k8t import cluster, config, environment, project, scaffolding, values
 from k8t.engine import build
 from k8t.templates import analyze, validate
-from k8t.util import MERGE_METHODS, deep_merge, load_yaml, makedirs
+from k8t.util import MERGE_METHODS, deep_merge, envvalues, load_yaml, makedirs
 
 
 @click.group()
@@ -104,6 +104,7 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
         dict(cli_values),
+        envvalues(),
         method=method,
     )
 
