@@ -14,7 +14,7 @@ import logging
 import os
 import string
 from functools import reduce
-from typing import Any
+from typing import Any, Dict
 
 import yaml
 from simple_tools.interaction import confirm
@@ -161,3 +161,14 @@ def load_yaml(path: str) -> dict:
 
 def envvar(key: str, default=None) -> str:
     return os.environ.get(key, default)
+
+
+def envvalues() -> Dict:
+    prefix: str = 'K8T_VALUE_'
+    values: dict = dict()
+
+    for key, value in os.environ.items():
+        if key.startswith(prefix):
+            values[key.lstrip(prefix).lower()] = value
+
+    return values
