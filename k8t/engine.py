@@ -13,7 +13,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from k8t.project import find_files
 from k8t.secrets import get_secret
-from k8t.util import b64decode, b64encode, hashf, random_password
+from k8t.util import b64decode, b64encode, envvar, hashf, random_password
 
 LOGGER = logging.getLogger(__name__)
 
@@ -35,6 +35,8 @@ def build(path: str, cluster: str, environment: str):
     env.globals["random_password"] = random_password
     env.globals["get_secret"] = lambda key: get_secret(
         key, path, cluster, environment)
+
+    env.globals["env"] = envvar
 
     return env
 
