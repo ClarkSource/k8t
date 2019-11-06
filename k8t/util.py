@@ -157,3 +157,7 @@ def load_yaml(path: str) -> dict:
 
     with open(path, "r") as stream:
         return yaml.safe_load(stream) or dict()
+
+
+def envvar(key: str, default=None) -> str:
+    return os.environ.get(key, default)
