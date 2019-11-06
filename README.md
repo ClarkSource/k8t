@@ -3,6 +3,8 @@
 *Pronounced katie [ˈkeɪti]*
 
 [![Build Status](https://jenkins.ci.flfinteche.de/buildStatus/icon?job=DevOps%2Fk8t%2Fmaster)](https://jenkins.ci.flfinteche.de/job/DevOps/job/k8t/job/master/)
+[![PyPi version](https://pypip.in/v/k8t/badge.png)]()
+[![PyPi downloads](https://pypip.in/d/k8t/badge.png)]()
 
 Simple cluster and environment specific aware templating for kubernetes manifests.
 
