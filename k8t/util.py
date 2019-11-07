@@ -14,7 +14,7 @@ import logging
 import os
 import string
 from functools import reduce
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import yaml
 from simple_tools.interaction import confirm
@@ -172,3 +172,18 @@ def envvalues() -> Dict:
             values[key.replace(prefix, '', 1).lower()] = value
 
     return values
+
+
+def list_files(directory: str, files=False, directories=False) -> List[str]:
+    result = []
+
+    for _, dirs, files in os.walk(directory):
+        if files:
+            result.extend(files)
+
+        if directories:
+            result.extend(dirs)
+
+        break
+
+    return result

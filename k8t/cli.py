@@ -166,9 +166,10 @@ def new_environment(cname, name, directory):
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
 @click.option("--name", "-n", help="Template filename.")
+@click.option("--prefix", "-p", help="Prefix for filename.")
 @click.argument("kind", type=click.Choice(list(scaffolding.list_available_templates())))
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
-def new_template(cname, ename, name, kind, directory):
+def new_template(cname, ename, name, prefix, kind, directory):
     if not project.check_directory(directory):
         sys.exit("not a valid project: {}".format(directory))
 
@@ -179,7 +180,8 @@ def new_template(cname, ename, name, kind, directory):
     makedirs(template_dir, warn_exists=False)
 
     scaffolding.new_template(
-        kind, os.path.join(template_dir, "{}.yaml.j2".format(name or kind))
+        kind, os.path.join(
+            template_dir, "{0}{1}.yaml.j2".format(prefix, name or kind))
     )
 
 
@@ -199,7 +201,7 @@ def get_clusters(directory):
 
 
 @get.command(name="environments", help="Get configured environments.")
-@click.argument("cname", metavar="CLUSTER")
+@click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def get_environments(cname, directory):  # pylint: disable=redefined-outer-name
     if not project.check_directory(directory):

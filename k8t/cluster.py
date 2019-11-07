@@ -10,16 +10,18 @@
 import os
 from typing import List
 
+from k8t.project import find_files
 from k8t.util import makedirs, touch
 
 
 def list_all(path: str) -> List[str]:
     result: List[str] = []
 
-    for _, dirs, _ in os.walk(os.path.join(path, "clusters")):
-        result = dirs
+    for directory in find_files(path, None, None, 'environments', file_ok=False, dir_ok=True):
+        for _, dirs, _ in os.walk(directory):
+            result.extend(dirs)
 
-        break
+            break
 
     return result
 

@@ -8,18 +8,25 @@
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import os
-from typing import List
+from typing import List, Set
 
-from k8t.util import makedirs, touch
+from k8t.project import find_files
+from k8t.util import list_files, makedirs, touch
 
 
-def list_all(path: str) -> List[str]:
-    result: List[str] = []
+def list_all(path: str) -> Set[str]:
+    env_dir = os.path.join(path, 'environments')
 
-    for _, dirs, _ in os.walk(os.path.join(path, "environments")):
-        result = dirs
+    result = set()
 
-        break
+    if os.path.isdir(env_dir):
+        result.update(list_files(env_dir, directories=True))
+
+    cluster_dir = os.path.join(path, 'clusters')
+
+    if os.path.isdir(cluster_dir):
+        for cluster in list_files(cluster_dir, directories=True):
+            result.update(list_all(os.path.join(cluster_dir, cluster)))
 
     return result
 
