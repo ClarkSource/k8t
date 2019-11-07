@@ -169,6 +169,6 @@ def envvalues() -> Dict:
 
     for key, value in os.environ.items():
         if key.startswith(prefix):
-            values[key.lstrip(prefix).lower()] = value
+            values[key.replace(prefix, '', 1).lower()] = value
 
     return values
