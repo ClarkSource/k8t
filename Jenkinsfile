@@ -19,7 +19,7 @@ pipeline {
   stages {
     stage('setup') {
       steps {
-        sh 'apk add git gcc musl-dev linux-headers libffi-dev'
+        sh 'apk add git gcc musl-dev linux-headers libffi-dev libressl-dev'
         sh 'pip install --upgrade tox'
       }
     }
