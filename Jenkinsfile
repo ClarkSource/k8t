@@ -19,7 +19,7 @@ pipeline {
   stages {
     stage('setup') {
       steps {
-        sh 'apk add git'
+        sh 'apk add git gcc'
         sh 'pip install --upgrade tox'
       }
     }
