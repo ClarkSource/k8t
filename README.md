@@ -33,6 +33,8 @@ run this
 $ pip install --user --upgrade k8t
 ```
 
+**note**: k8t is not Python 2 compatible
+
 ## usage
 
 ### scaffolding
