@@ -181,7 +181,7 @@ def new_template(cname, ename, name, prefix, kind, directory):
 
     scaffolding.new_template(
         kind, os.path.join(
-            template_dir, "{0}{1}.yaml.j2".format(prefix, name or kind))
+            template_dir, "{0}{1}.yaml.j2".format(prefix or '', name or kind))
     )
 
 
