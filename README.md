@@ -75,7 +75,7 @@ secrets:
 Values can be easily added/modified in the same way
 
 ```
-$ k8t edit values --cluster Ano creds to it anyway or dont know where to get
+$ k8t edit values --cluster A
 ```
 
 A typical setup should look something like this
