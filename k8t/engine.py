@@ -9,11 +9,11 @@
 
 import logging
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
+from k8t.filters import b64decode, b64encode, envvar, hashf, random_password
 from k8t.project import find_files
 from k8t.secrets import get_secret
-from k8t.util import b64decode, b64encode, envvar, hashf, random_password
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ def build(path: str, cluster: str, environment: str):
     LOGGER.debug(
         "building template environment")
 
-    env = Environment(loader=FileSystemLoader(template_paths))
+    env = Environment(undefined=StrictUndefined, loader=FileSystemLoader(template_paths))
 
     env.filters["b64decode"] = b64decode
     env.filters["b64encode"] = b64encode

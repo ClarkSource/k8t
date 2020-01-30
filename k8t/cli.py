@@ -13,6 +13,7 @@ import sys
 
 import click
 import coloredlogs
+from jinja2.exceptions import UndefinedError
 from termcolor import colored
 
 import k8t
@@ -130,10 +131,14 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
     if not validated:
         sys.exit(1)
 
-    for template_path in templates:
-        print("---")
-        print("# Source: {}".format(template_path))
-        print(eng.get_template(template_path).render(vals))
+    try:
+        for template_path in templates:
+            print("---")
+            print("# Source: {}".format(template_path))
+            print(eng.get_template(template_path).render(vals))
+    except UndefinedError as err:
+        print(colored("✗ -> {}".format(err), "red"))
+        sys.exit(1)
 
 
 @root.group(help="Code scaffolding commands.")
