@@ -43,14 +43,22 @@ def print_license():
 
 @root.command(name="validate", help="Validate template files for given context.")
 @click.option("-m", "--method", type=click.Choice(MERGE_METHODS), default="ltr", show_default=True, help="Value file merge method.")
+@click.option("--value-file", "value_files", multiple=True, type=click.Path(dir_okay=False, exists=True), help="Additional value file to include.")
+@click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="<KEY VALUE>", help="Additional value(s) to include.")
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
-def cli_validate(method, cname, ename, directory):   # pylint: disable=too-many-locals
+def cli_validate(method, value_files, cli_values, cname, ename, directory):   # pylint: disable=too-many-locals
     if not project.check_directory(directory):
         sys.exit("not a valid project: {}".format(directory))
 
-    vals = values.load_all(directory, cname, ename, method)
+    vals = deep_merge(  # pylint: disable=redefined-outer-name
+        values.load_all(directory, cname, ename, method),
+        *(load_yaml(p) for p in value_files),
+        dict(cli_values),
+        envvalues(),
+        method=method,
+    )
     conf = config.load_all(directory, cname, ename, method)
 
     eng = build(directory, cname, ename)
