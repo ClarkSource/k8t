@@ -1,0 +1,8 @@
+---
+  dataSource: "prs"
+  prefix: ""
+  onlyMilestones: false
+  ignore-labels:
+    - "closed"
+  groupBy: ""
+  changelogFilename: "CHANGELOG.md"
