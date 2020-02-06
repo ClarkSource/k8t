@@ -5,7 +5,9 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Creation](#creation)
+  - [Secrets](#secrets)
   - [Production](#production)
+    - [Secrets](#secrets-1)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -72,6 +74,47 @@ $ k8t gen
 ...
 ```
 
+### Secrets
+
+We would like to add a password as an environment variable to the pods. For now we'll add the secret resource and specify a key
+
+```bash
+k8t new template secret -n hello-world
+```
+
+edit templates/hello-world-secret.yaml.j2 to look like this:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: "{{ ns }}"
+  name: "{{ name }}"
+  labels:
+    app.kubernetes.io/name: "{{ name }}"
+type: Opaque
+data:
+  PASSWORD: "{{ get_secret('/application') | b64encode }}"
+```
+
+running validation will now show an error
+
+```bash
+$ k8t validate
+hello-world-deployment.yaml.j2: ✔
+hello-world-secret.yaml.j2: ✗
+- No secrets provider configured
+hello-world-service.yaml.j2: ✔
+```
+
+to fix this we edit `config.yaml`. For the purpose of this example we use the random provider. This will always return
+the same password for the same key.
+
+```yaml
+secrets:
+  provider: random
+```
+
 ### Production
 
 We want our production environment to be created with an ingress resource
@@ -106,3 +149,17 @@ Validation will now work for the environment and we can generate our resources
 $ k8t gen -e production
 ...
 ```
+
+#### Secrets
+
+In a real world example you would likely want to pull secrets from an external source. We can now configure ssm as our
+secret provider in `environments/production/config.yaml`
+
+```yaml
+secrets:
+  provider: ssm
+  prefix: '/production'
+```
+
+This will now attempt to request a secret value from AWS SSM with the key `/production/application` when generating
+templates for production.

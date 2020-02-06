@@ -1,0 +1,3 @@
+secrets:
+  provider: ssm
+  prefix: '/production'
