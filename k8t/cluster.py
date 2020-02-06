@@ -30,8 +30,6 @@ def new(root: str, name: str):
     directory = os.path.join(root, "clusters", name)
 
     makedirs(directory)
-    makedirs(os.path.join(directory, "templates"))
-    makedirs(os.path.join(directory, "environments"))
 
     touch(os.path.join(directory, "values.yaml"))
     touch(os.path.join(directory, "config.yaml"))
