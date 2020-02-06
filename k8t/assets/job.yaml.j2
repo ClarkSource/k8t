@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ name }}"
+  namespace: "{{ ns }}"
+  labels:
+    app.kubernetes.io/name: "{{ name }}"
+spec:
+  backoffLimit: "{{ backoff_limit | default(1) }}"
+  template:
+    spec:
+      restartPolicy: "{{ restart_policy | default('Never') }}"
+      containers:
+      - name: "{{ name }}"
+        image: "{{ image_repository }}:{{ image_tag }}"
+        imagePullPolicy: "{{ image_pull_policy | default('Always') }}"
+        resources:
+          limits:
+            cpu: "{{ limit_cpu }}"
+            memory: "{{ limit_memory }}"
+          requests:
+            cpu: "{{ request_cpu }}"
+            memory: "{{ request_memory }}"
