@@ -18,11 +18,11 @@ Simple cluster and environment specific aware templating for kubernetes manifest
 - [Concepts](#concepts)
   - [*Clusters* and *Environments*](#clusters-and-environments)
   - [Templating](#templating)
+    - [Template helper functions](#template-helper-functions)
 - [Usage](#usage)
   - [Scaffolding](#scaffolding)
   - [Config management](#config-management)
   - [Validate templates](#validate-templates)
-  - [Template helper functions](#template-helper-functions)
   - [Generate manifests](#generate-manifests)
   - [Overriding templates](#overriding-templates)
   - [Managing secrets](#managing-secrets)
@@ -73,13 +73,24 @@ the same application over multiple clusters and in different environments with c
 This idea is helped by the fact that k8t deep-merges values and configs, allowing easy variation through different
 stages of your application deployment.
 
-Both *clusters* and *environments* are intentionally working the same way and can be used to another degree of freedom when
-combined.
+Both *clusters* and *environments* are intentionally working the same way and can be used to add another degree of freedom when
+combined. *Environments* however are also available globally, meaning clusters can share environment specific
+configuration while specifying differences in those environments.
 
 ### Templating
 
-Templating is supported via jinja. k8t also comes with some additional [helper functions](#template-helper-functions) and
-a [validation function](#validate-templates) with verbose output to quickly verify the written templates.
+Templating is supported via [Jinja](https://jinja.palletsprojects.com). k8t also comes with some additional
+[helper functions](#template-helper-functions) and a [validation function](#validate-templates) with verbose output to
+quickly verify the written templates.
+
+#### Template helper functions
+
+* `random_password(N: int)` - generate a random string of length N
+* `envvar(key: str, [default])` - get a value from any environment variable with optional default
+* `b64encode(value: str)` - encodes a value in base64 (usually required for secrets)
+* `b64decode(value: str)` - decodes a value from base64
+* `hashf(value: str, [method: str])` - hashes a given value (default using `sha256`)
+* `get_secret(key: str)` - provides a secret value from a given provider (see [here](#managing-secrets))
 
 ## Usage
 
@@ -106,7 +117,7 @@ $ k8t new environment staging
 Generate a new deployment template for cluster A (for a list of available templates see the `k8t new template --help`)
 
 ```bash
-$ k8t new template deployment -c A
+$ k8t new template deployment -c A -e staging
 ```
 
 ### Config management
@@ -134,15 +145,6 @@ To validate for clusters/environments the usual options can be used
 ```bash
 $ k8t validate -c A -e production
 ```
-
-### Template helper functions
-
-* `random_password(N: int)` - generate a random string of length N
-* `envvar(key: str, [default])` - get a value from any environment variable with optional default
-* `b64encode(value: str)` - encodes a value in base64 (usually required for secrets)
-* `b64decode(value: str)` - decodes a value from base64
-* `hashf(value: str, [method: str])` - hashes a given value (default using `sha256`)
-* `get_secret(key: str)` - provides a secret value from a given provider (see [here](#managing-secrets))
 
 ### Generate manifests
 
