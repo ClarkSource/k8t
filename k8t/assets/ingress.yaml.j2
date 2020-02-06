@@ -4,7 +4,7 @@ metadata:
   name: platform
   namespace: "{{ ns }}"
   labels:
-    name: "{{ name }}"
+    app.kubernetes.io/name: "{{ name }}"
 spec:
   rules:
   - host: "{{ domain }}"
