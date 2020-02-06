@@ -39,9 +39,6 @@ def get_base_dir(root: str, cluster: str, environment: str) -> str:
 
 def new(directory: str):
     makedirs(directory)
-    makedirs(os.path.join(directory, "templates"))
-    makedirs(os.path.join(directory, "clusters"))
-    makedirs(os.path.join(directory, "environments"))
 
     touch(os.path.join(directory, "values.yaml"))
     touch(os.path.join(directory, "config.yaml"))

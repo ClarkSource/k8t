@@ -34,7 +34,7 @@ def list_all(path: str) -> Set[str]:
 def new(root: str, name: str):
     directory = os.path.join(root, "environments", name)
 
-    makedirs(os.path.join(directory, "templates"))
+    makedirs(directory)
 
     touch(os.path.join(directory, "values.yaml"))
     touch(os.path.join(directory, "config.yaml"))
