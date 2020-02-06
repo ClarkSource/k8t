@@ -5,6 +5,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Creation](#creation)
+  - [Production](#production)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -15,11 +16,8 @@ Scaffold files
 ```bash
 $ k8t new project single-cluster
 $ cd single-cluster
-$ k8t new environment staging
-$ k8t new environment production
 $ k8t new template deployment -n hello-world
 $ k8t new template service -n hello-world
-$ k8t new template ingress -n hello-world -e production
 ```
 
 Validate templates
@@ -71,9 +69,40 @@ Generate templates
 
 ```bash
 $ k8t gen
----
 ...
+```
+
+### Production
+
+We want our production environment to be created with an ingress resource
+
+```bash
+$ k8t new environment production
+$ k8t new template ingress -n hello-world -e production
+```
+
+Now validate
+
+```bash
+k8t validate
+hello-world-deployment.yaml.j2: ✔
+hello-world-ingress.yaml.j2: ✗
+- undefined variable: domain
+hello-world-service.yaml.j2: ✔
+```
+
+We need to set the external domain and also want our resources to be created in a separate namespace.
+
+Edit the environment value file `environments/production/values.yaml`
+
+```yaml
+domain: foobar.example.org
+ns: production
+```
+
+Validation will now work for the environment and we can generate our resources
+
+```bash
 $ k8t gen -e production
----
 ...
 ```
