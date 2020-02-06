@@ -13,128 +13,121 @@ Simple cluster and environment specific aware templating for kubernetes manifest
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [installation](#installation)
-- [usage](#usage)
-  - [scaffolding](#scaffolding)
-  - [validate files](#validate-files)
-  - [generate files](#generate-files)
+- [Installation](#installation)
+  - [Completion](#completion)
+- [Concepts](#concepts)
+- [Usage](#usage)
+  - [Scaffolding](#scaffolding)
+  - [Config management](#config-management)
+  - [Validate templates](#validate-templates)
+  - [Generate manifests](#generate-manifests)
   - [Overriding templates](#overriding-templates)
   - [Managing secrets](#managing-secrets)
-    - [SSM](#ssm)
+    - [Providers](#providers)
+      - [SSM](#ssm)
+      - [Random](#random)
 - [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## installation
+## Installation
 
 run this
 
-```
+```bash
 $ pip install --user --upgrade k8t
 ```
 
 **note**: k8t is not Python 2 compatible
 
-## usage
+### Completion
 
-### scaffolding
+Run the following and store the file in your distribution/OS specific spot
+
+bash:
+
+```bash
+$ _K8T_COMPLETE=source k8t > k8t-completion.sh
+```
+
+zsh:
+
+```zsh
+$ _K8T_COMPLETE=source_zsh k8t > k8t-completion.sh
+```
+
+## Concepts
+
+k8t comes with a builtin framework for *clusters* and *environments* (e.g. production, staging). This came from the need to be able to deploy
+the same application over multiple clusters and in different environments with completely different setups and values.
+This idea is helped by the fact that k8t deep-merges values and configs, allowing easy variation through different
+stages of your application deployment.
+
+Combining these features with the power of jinja you can quickly add completely new environments to your deployment
+pipeline just by modifying specializing values and sharing the rest.
+
+Check out the examples [here](examples/).
+
+## Usage
+
+### Scaffolding
 
 Create a new project folder with a cluster directory and an empty defaults file
 
-```
-$ k8t new project foobar
+```bash
+$ k8t new project .
 ```
 
 Create a new cluster
 
-```
+```bash
 $ k8t new cluster A
 ```
 
 Create a new environment
 
+```bash
+$ k8t new environment staging
 ```
-$ k8t new environment staging -c A
-$ k8t new environment production
 
-```
-Generate a new deployment template for cluster A (currently only `deployment` and `service` are supported)
+Generate a new deployment template for cluster A (for a list of available templates see the `k8t new template --help`)
 
-```
+```bash
 $ k8t new template deployment -c A
 ```
 
-Specify prefixes for secrets
+### Config management
 
-```
-$ k8t edit config --cluster A --environment staging
-secrets:
-  prefix: "staging/application"```
-```
+To ease file access a little bit k8t can open config and value files in your `$EDITOR` with a fallback to `vim`
 
-Values can be easily added/modified in the same way
-
-```
-$ k8t edit values --cluster A
+```bash
+$ k8t edit values --environment staging
 ```
 
-A typical setup should look something like this
-
-```
-.deploy/
-├── clusters
-│   ├── A
-│   │   ├── config.yaml
-│   │   ├── environments
-│   │   │   ├── production
-│   │   │   │   ├── config.yaml
-│   │   │   │   ├── files
-│   │   │   │   ├── templates
-│   │   │   │   └── values.yaml
-│   │   │   └── staging
-│   │   │       ├── config.yaml
-│   │   │       ├── files
-│   │   │       ├── templates
-│   │   │       └── values.yaml
-│   │   ├── files
-│   │   ├── templates
-│   │   └── values.yaml
-│   └── local
-│       ├── environments
-│       ├── files
-│       ├── secret.yaml.j2
-│       ├── templates
-│       │   ├── database.yaml.j2
-│       │   └── secret.yaml.j2
-│       └── values.yaml
-├── config.yaml
-├── files
-├── templates
-│   ├── deployment.yaml.j2
-│   └── secret.yaml.j2
-└── values.yaml
+```bash
+$ k8t edit config --cluster A
 ```
 
-### validate files
+### Validate templates
 
 While validation is done before generating, templates can be validated for environment files easily.
 
-```
+```bash
 $ k8t validate
 ```
 
 To validate for clusters/environments the usual options can be used
 
-```
+```bash
 $ k8t validate -c A -e production
 ```
 
-### generate files
+### Generate manifests
 
 The **--cluster** flag will load variables from a directory. By default the file **default.yaml** in that directory will be
 loaded, however an environment can be specified with **--environment**.
 
-```
+```bash
 $ k8t gen -c A -e staging
 ```
 
@@ -144,11 +137,7 @@ variables can be specified and selectively overriden via cluster and environment
 Additional values can be given via flag **--value-file** in the form of a file or **--value KEY VALUE**, both can be
 supplied multiple times.
 
-Variables will be merged via deep merging. Default merge strategy is left-to-right. For the merge order see the output of
-
-```
-$ k8t --help
-```
+Variables will be merged via deep merging. Default merge strategy is left-to-right.
 
 ### Overriding templates
 
@@ -159,19 +148,37 @@ cluster/environment template folder.
 
 ### Managing secrets
 
-#### SSM
+Secrets can be interpolated with the helper function `get_secret`. It requires a key as first argument and providers
+are configurable by environment/cluster.
+
+```yaml
+foobar: "{{ get_secret('/my-key/') }}"
+```
+
+#### Providers
+
+##### SSM
 
 Setup secrets on SSM
-```
-$ k8t edit config
+
+```yaml
 secrets:
   provider: ssm
-  prefix: "foobar"
-  ```
+  prefix: "/foobar"
+```
+
+##### Random
+
+Random secrets can be generated easily by using the random provider. This provider uses a global dictionary to store
+results for the time of the run in python so keys should always produce the same result.
+
+```yaml
+secrets:
+  provider: random
+```
 
 ## TODO
 
 * testing needs to be expanded
-* add more templates for manifest scaffolding
 * the ability to add additional template directories via the CLI
 * validation functions for template values (e.g. memory/cpu values)
