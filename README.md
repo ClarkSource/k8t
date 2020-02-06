@@ -105,7 +105,7 @@ $ k8t new project .
 Create a new cluster
 
 ```bash
-$ k8t new cluster A
+$ k8t new cluster MyCluster
 ```
 
 Create a new environment
@@ -114,10 +114,10 @@ Create a new environment
 $ k8t new environment staging
 ```
 
-Generate a new deployment template for cluster A (for a list of available templates see the `k8t new template --help`)
+Generate a new deployment template for cluster MyCluster (for a list of available templates see the `k8t new template --help`)
 
 ```bash
-$ k8t new template deployment -c A -e staging
+$ k8t new template deployment -c MyCluster -e staging
 ```
 
 ### Config management
@@ -129,7 +129,7 @@ $ k8t edit values --environment staging
 ```
 
 ```bash
-$ k8t edit config --cluster A
+$ k8t edit config --cluster MyCluster
 ```
 
 ### Validate templates
@@ -143,7 +143,7 @@ $ k8t validate
 To validate for clusters/environments the usual options can be used
 
 ```bash
-$ k8t validate -c A -e production
+$ k8t validate -c MyCluster -e production
 ```
 
 ### Generate manifests
@@ -152,7 +152,7 @@ The **--cluster** flag will load variables from a directory. By default the file
 loaded, however an environment can be specified with **--environment**.
 
 ```bash
-$ k8t gen -c A -e staging
+$ k8t gen -c MyCluster -e staging
 ```
 
 Additionally k8t will attempt to load a file **defaults.yaml** in the root directory. This way a set of default
