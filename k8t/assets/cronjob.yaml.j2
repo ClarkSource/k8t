@@ -1,0 +1,26 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: "{{ name }}"
+  namespace: "{{ ns }}"
+  labels:
+    app.kubernetes.io/name: "{{ name }}"
+spec:
+  schedule: "{{ schedule }}"
+  jobTemplate:
+    spec:
+      backoffLimit: "{{ backoff_limit | default(1) }}"
+      template:
+        spec:
+          restartPolicy: "{{ restart_policy | default('Never') }}"
+          containers:
+          - name: "{{ name }}"
+            image: "{{ image_repository }}:{{ image_tag }}"
+            imagePullPolicy: "{{ image_pull_policy | default('Always') }}"
+            resources:
+              limits:
+                cpu: "{{ limit_cpu }}"
+                memory: "{{ limit_memory }}"
+              requests:
+                cpu: "{{ request_cpu }}"
+                memory: "{{ request_memory }}"

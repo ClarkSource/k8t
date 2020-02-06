@@ -1,25 +1,15 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: "{{ name }}"
   namespace: "{{ ns }}"
   labels:
     app.kubernetes.io/name: "{{ name }}"
 spec:
-  replicas: "{{ replicas }}"
-  revisionHistoryLimit: "{{ revision_history_limit | default(3) }}"
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: "{{ name }}"
+  backoffLimit: "{{ backoff_limit | default(1) }}"
   template:
-    metadata:
-      name: "{{ name }}"
-      labels:
-        app.kubernetes.io/name: "{{ name }}"
     spec:
-      restartPolicy: "{{ restart_policy | default('Always') }}"
-      securityContext:
-        runAsUser: "{{ user_id | default(1000) }}"
+      restartPolicy: "{{ restart_policy | default('Never') }}"
       containers:
       - name: "{{ name }}"
         image: "{{ image_repository }}:{{ image_tag }}"
