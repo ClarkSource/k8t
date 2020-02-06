@@ -180,7 +180,7 @@ def new_environment(cname, name, directory):
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
 @click.option("--name", "-n", help="Template filename.")
 @click.option("--prefix", "-p", help="Prefix for filename.")
-@click.argument("kind", type=click.Choice(list(scaffolding.list_available_templates())))
+@click.argument("kind", type=click.Choice(sorted(list(scaffolding.list_available_templates()))))
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 def new_template(cname, ename, name, prefix, kind, directory):
     if not project.check_directory(directory):

@@ -8,8 +8,18 @@
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import logging
+import string
 
 import boto3
+
+try:
+    from secrets import choice
+except ImportError:
+    from random import SystemRandom
+
+    choice = SystemRandom().choice
+
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -25,3 +35,16 @@ def ssm(key: str) -> str:
         ]
     except client.exceptions.ParameterNotFound:
         raise RuntimeError("Could not find secret: {}".format(key))
+
+
+RANDOM_STORE = {}
+
+def random(key: str) -> str:
+    LOGGER.debug("Requesting secret from %s", key)
+
+    if key not in RANDOM_STORE:
+        RANDOM_STORE[key] = "".join(
+            choice(string.ascii_lowercase + string.digits) for _ in range(24)
+        )
+
+    return RANDOM_STORE[key]
