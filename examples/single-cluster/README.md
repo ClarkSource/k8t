@@ -19,6 +19,7 @@ $ k8t new environment staging
 $ k8t new environment production
 $ k8t new template deployment -n hello-world
 $ k8t new template service -n hello-world
+$ k8t new template ingress -n hello-world -e production
 ```
 
 Validate templates
@@ -71,54 +72,8 @@ Generate templates
 ```bash
 $ k8t gen
 ---
-# Source: hello-world-deployment.yaml.j2
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hello-world
-  namespace: default
-  labels:
-    app.kubernetes.io/name: hello-world
-spec:
-  replicas: 3
-  revisionHistoryLimit: 3
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: hello-world
-  template:
-    metadata:
-      name: hello-world
-      labels:
-        app.kubernetes.io/name: hello-world
-    spec:
-      restartPolicy: Always
-      securityContext:
-        runAsUser: 1000
-      containers:
-        - name: hello-world
-          image: hello-world:latest
-          imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: 200m
-              memory: 256M
-            requests:
-              cpu: 200m
-              memory: 256M
+...
+$ k8t gen -e production
 ---
-# Source: hello-world-service.yaml.j2
-apiVersion: v1
-kind: Service
-metadata:
-  name: hello-world
-  namespace: default
-  labels:
-    app.kubernetes.io/name: hello-world
-spec:
-  selector:
-    app.kubernetes.io/name: hello-world
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 3000
+...
 ```
