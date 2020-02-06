@@ -1,0 +1,12 @@
+ns: default
+name: hello-world
+replicas: 3
+image_repository: hello-world
+image_tag: latest
+
+request_memory: 256M
+request_cpu: 200m
+limit_memory: 256M
+limit_cpu: 200m
+
+traffic_port: 3000
