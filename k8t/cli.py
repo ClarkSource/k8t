@@ -192,9 +192,16 @@ def new_template(cname, ename, name, prefix, kind, directory):
 
     makedirs(template_dir, warn_exists=False)
 
+    suffix = None if not name else "-{}".format(kind)
+
     scaffolding.new_template(
         kind, os.path.join(
-            template_dir, "{0}{1}.yaml.j2".format(prefix or '', name or kind))
+            template_dir,
+            "{0}{1}{2}.yaml.j2".format(
+                prefix or '',
+                name or kind,
+                suffix or ''
+            ))
     )
 
 
