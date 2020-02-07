@@ -122,7 +122,8 @@ $ k8t new template deployment -c MyCluster -e staging
 
 ### Config management
 
-To ease file access a little bit k8t can open config and value files in your `$EDITOR` with a fallback to `vim`
+To ease file access a little bit k8t can open config and value files in your `$EDITOR` or fallback to a sensible
+default.
 
 ```bash
 $ k8t edit values --environment staging

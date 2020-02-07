@@ -271,7 +271,7 @@ def edit_config(directory, cname, ename):  # pylint: disable=redefined-outer-nam
     else:
         file_path = os.path.join(directory, "config.yaml")
 
-    os.system("%s %s" % (os.getenv("EDITOR", "vim"), file_path))
+    click.edit(filename=file_path)
 
 
 @edit.command(name="values", help="Edit value files in chosen context.")
@@ -286,7 +286,7 @@ def edit_values(directory, cname, ename):  # pylint: disable=redefined-outer-nam
 
     file_path = os.path.join(base_dir, "values.yaml")
 
-    os.system("%s %s" % (os.getenv("EDITOR", "vim"), file_path))
+    click.edit(filename=file_path)
 
 
 def main():
