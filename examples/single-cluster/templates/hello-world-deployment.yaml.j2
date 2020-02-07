@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ name }}"
+  namespace: "{{ ns }}"
+  labels:
+    app.kubernetes.io/name: "{{ name }}"
+spec:
+  replicas: "{{ replicas }}"
+  revisionHistoryLimit: "{{ revision_history_limit | default(3) }}"
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "{{ name }}"
+  template:
+    metadata:
+      name: "{{ name }}"
+      labels:
+        app.kubernetes.io/name: "{{ name }}"
+    spec:
+      restartPolicy: "{{ restart_policy | default('Always') }}"
+      securityContext:
+        runAsUser: "{{ user_id | default(1000) }}"
+      containers:
+      - name: "{{ name }}"
+        image: "{{ image_repository }}:{{ image_tag }}"
+        imagePullPolicy: "{{ image_pull_policy | default('Always') }}"
+        resources:
+          limits:
+            cpu: "{{ limit_cpu }}"
+            memory: "{{ limit_memory }}"
+          requests:
+            cpu: "{{ request_cpu }}"
+            memory: "{{ request_memory }}"
