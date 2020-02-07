@@ -11,10 +11,12 @@ from k8t.secret_providers import random
 
 
 def test_random():
-    assert random('/foobar') == random('/foobar') != random('/foobaz')
+    length = 12
 
-    result = random('/foobam')
+    assert random('/foobar', length) == random('/foobar', length) != random('/foobaz', length)
 
-    assert result == random('/foobam')
+    result = random('/foobam', length)
+
+    assert result == random('/foobam', length)
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab

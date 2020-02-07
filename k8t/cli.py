@@ -41,7 +41,7 @@ def root(debug, trace):
 def print_license():
     print(k8t.__license__)
 
-
+# pylint: disable=too-many-locals,too-many-arguments
 @root.command(name="validate", help="Validate template files for given context.")
 @click.option("-m", "--method", type=click.Choice(MERGE_METHODS), default="ltr", show_default=True, help="Value file merge method.")
 @click.option("--value-file", "value_files", multiple=True, type=click.Path(dir_okay=False, exists=True), help="Additional value file to include.")
@@ -49,7 +49,7 @@ def print_license():
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
-def cli_validate(method, value_files, cli_values, cname, ename, directory):   # pylint: disable=too-many-locals
+def cli_validate(method, value_files, cli_values, cname, ename, directory):
     if not project.check_directory(directory):
         sys.exit("not a valid project: {}".format(directory))
 
@@ -60,7 +60,7 @@ def cli_validate(method, value_files, cli_values, cname, ename, directory):   # 
         envvalues(),
         method=method,
     )
-    conf = config.load_all(directory, cname, ename, method)
+    config.CONFIG = config.load_all(directory, cname, ename, method)
 
     eng = build(directory, cname, ename)
 
@@ -81,7 +81,7 @@ def cli_validate(method, value_files, cli_values, cname, ename, directory):   # 
                 errors.add("invalid variable: {}".format(var))
 
         if secrets:
-            if "secrets" not in conf or "provider" not in conf["secrets"]:
+            if "secrets" not in config.CONFIG or "provider" not in config.CONFIG["secrets"]:
                 errors.add("No secrets provider configured")
 
         if errors:
@@ -108,7 +108,6 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
     if not project.check_directory(directory):
         sys.exit("not a valid project: {}".format(directory))
 
-    conf = config.load_all(directory, cname, ename, method)
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -116,6 +115,7 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
         envvalues(),
         method=method,
     )
+    config.CONFIG = config.load_all(directory, cname, ename, method)
 
     eng = build(directory, cname, ename)
 
@@ -123,7 +123,7 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
     validated = True
 
     for template_path in templates:
-        if not validate(template_path, vals, eng, conf):
+        if not validate(template_path, vals, eng):
             print("Failed to validate template {}".format(template_path))
 
             validated = False

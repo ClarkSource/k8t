@@ -17,6 +17,8 @@ import os
 import string
 from typing import Any
 
+from k8t import config, secret_providers
+
 try:
     from secrets import choice
 except ImportError:
@@ -78,5 +80,15 @@ def hashf(value, method="sha256"):
     return hash_method.hexdigest()
 
 
+def get_secret(key: str, length: int = None) -> str:
+    try:
+        provider = getattr(secret_providers, config.CONFIG["secrets"]["provider"].lower())
 
-# vim: fenc=utf-8:ts=4:sw=4:expandtab
+        return provider(
+            "{0}/{1}".format(config.CONFIG['secrets']['prefix'], key) if "prefix" in config.CONFIG["secrets"] else key,
+            length
+        )
+    except AttributeError:
+        raise NotImplementedError("secret provider {} does not exist.".format(config.CONFIG["secrets"]["provider"].lower()))
+    except KeyError:
+        raise RuntimeError("Secrets provider not configured.")

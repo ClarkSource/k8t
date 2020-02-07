@@ -14,13 +14,7 @@ from k8t.project import find_files
 from k8t.util import deep_merge, load_yaml
 
 LOGGER = logging.getLogger(__name__)
-
-
-def validate(config: Dict[str, Any]) -> bool:
-    if "secrets" in config:
-        assert "provider" in config["secrets"]
-
-    return True
+CONFIG = {}
 
 
 def load_all(root: str, cluster: str, environment: str, method: str) -> Dict[str, Any]:

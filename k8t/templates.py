@@ -13,6 +13,8 @@ from typing import Set, Tuple
 
 from jinja2 import meta, nodes
 
+from k8t import config
+
 LOGGER = logging.getLogger(__name__)
 PROHIBITED_VARIABLE_NAMES = {
     'namespace',
@@ -43,7 +45,7 @@ def analyze(template_path: str, values: dict, engine) -> Tuple[Set[str], Set[str
     return (undefined_variables - invalid_variables), unused_variables, invalid_variables, secrets
 
 
-def validate(template_path: str, values: dict, engine, config) -> bool:
+def validate(template_path: str, values: dict, engine) -> bool:
     config_ok = True
     undefined, _, invalid, secrets = analyze(template_path, values, engine)
 
@@ -56,9 +58,9 @@ def validate(template_path: str, values: dict, engine, config) -> bool:
             "Invalid variable names found: %s", sorted(invalid))
 
     if secrets:
-        if "secrets" not in config:
+        if "secrets" not in config.CONFIG:
             LOGGER.error(
-                "No configuration for secrets found: %s", config)
+                "No configuration for secrets found: %s", config.CONFIG)
             config_ok = False
 
     return config_ok and not (invalid or undefined)
