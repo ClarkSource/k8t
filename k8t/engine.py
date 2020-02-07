@@ -11,9 +11,9 @@ import logging
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-from k8t.filters import b64decode, b64encode, envvar, hashf, random_password
+from k8t.filters import (b64decode, b64encode, envvar, get_secret, hashf,
+                         random_password)
 from k8t.project import find_files
-from k8t.secrets import get_secret
 
 LOGGER = logging.getLogger(__name__)
 
