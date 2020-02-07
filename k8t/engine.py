@@ -26,16 +26,16 @@ def build(path: str, cluster: str, environment: str):
 
     env = Environment(undefined=StrictUndefined, loader=FileSystemLoader(template_paths))
 
+    ### Filter functions ###
     env.filters["b64decode"] = b64decode
     env.filters["b64encode"] = b64encode
     env.filters["hash"] = hashf
 
+    ### Global functions ###
     # env.globals['include_raw'] = include_file
     # env.globals['include_file'] = include_file
     env.globals["random_password"] = random_password
-    env.globals["get_secret"] = lambda key: get_secret(
-        key, path, cluster, environment)
-
+    env.globals["get_secret"] = get_secret
     env.globals["env"] = envvar
 
     return env

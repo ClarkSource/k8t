@@ -10,8 +10,6 @@
 import os
 from typing import List
 
-from simple_tools.interaction import confirm
-
 from k8t.util import makedirs, touch
 
 
@@ -46,6 +44,7 @@ def new(directory: str):
     touch(os.path.join(directory, ".k8t"))
 
 
+# pylint: disable=too-many-arguments
 def find_files(root: str, cluster: str, environment: str, name: str, file_ok=True, dir_ok=True) -> List[str]:
     def check(path):
         return (file_ok and os.path.isfile(path)) or (dir_ok and os.path.isdir(root_path))

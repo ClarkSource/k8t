@@ -13,38 +13,38 @@ import string
 import boto3
 
 try:
-    from secrets import choice
+    from secrets import SystemRandom
 except ImportError:
     from random import SystemRandom
 
-    choice = SystemRandom().choice
-
-
 
 LOGGER = logging.getLogger(__name__)
+RANDOM_STORE = {}
 
 
-def ssm(key: str) -> str:
+def ssm(key: str, length: int = None) -> str:
     LOGGER.debug("Requesting secret from %s", key)
 
     client = boto3.client("ssm")
 
     try:
-        return client.get_parameter(Name="/{}".format(key), WithDecryption=True)["Parameter"][
-            "Value"
-        ]
+        result = client.get_parameter(Name="/{}".format(key), WithDecryption=True)["Parameter"]["Value"]
+
+        if length is not None:
+            if len(result) != length:
+                raise AssertionError("Secret '{}' did not have expected length of {}".format(key, length))
+
+        return result
     except client.exceptions.ParameterNotFound:
         raise RuntimeError("Could not find secret: {}".format(key))
 
 
-RANDOM_STORE = {}
-
-def random(key: str) -> str:
+def random(key: str, length: int = None) -> str:
     LOGGER.debug("Requesting secret from %s", key)
 
     if key not in RANDOM_STORE:
         RANDOM_STORE[key] = "".join(
-            choice(string.ascii_lowercase + string.digits) for _ in range(24)
+            SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(length or SystemRandom().randint(12, 32))
         )
 
     return RANDOM_STORE[key]

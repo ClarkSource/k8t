@@ -17,8 +17,7 @@ import os
 import string
 from typing import Any
 
-from k8t import secret_providers
-from k8t.config import load_all
+from k8t import config, secret_providers
 
 try:
     from secrets import choice
@@ -81,19 +80,15 @@ def hashf(value, method="sha256"):
     return hash_method.hexdigest()
 
 
-def get_secret(key: str, path: str, cluster: str, environment: str) -> str:
-    config = load_all(path, cluster, environment, 'ltr')
-
-    if "secrets" not in config:
-        raise RuntimeError(
-            "No configuration for secrets found: {}".format(config))
-
+def get_secret(key: str, length: int = None) -> str:
     try:
-        provider = getattr(secret_providers, config["secrets"]["provider"].lower())
-    except AttributeError:
-        raise NotImplementedError("secret provider {} does not exist.".format(config["secrets"]["provider"].lower()))
+        provider = getattr(secret_providers, config.CONFIG["secrets"]["provider"].lower())
 
-    return provider(
-        "{0}/{1}".format(config['secrets']['prefix'],
-                         key) if "prefix" in config["secrets"] else key
-    )
+        return provider(
+            "{0}/{1}".format(config.CONFIG['secrets']['prefix'], key) if "prefix" in config.CONFIG["secrets"] else key,
+            length
+        )
+    except AttributeError:
+        raise NotImplementedError("secret provider {} does not exist.".format(config.CONFIG["secrets"]["provider"].lower()))
+    except KeyError:
+        raise RuntimeError("Secrets provider not configured.")
