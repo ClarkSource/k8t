@@ -85,7 +85,7 @@ def get_secret(key: str, length: int = None) -> str:
         provider = getattr(secret_providers, config.CONFIG["secrets"]["provider"].lower())
 
         return provider(
-            "{0}/{1}".format(config.CONFIG['secrets']['prefix'], key) if "prefix" in config.CONFIG["secrets"] else key,
+            "{0}{1}".format(config.CONFIG['secrets']['prefix'], key) if "prefix" in config.CONFIG["secrets"] else key,
             length
         )
     except AttributeError:

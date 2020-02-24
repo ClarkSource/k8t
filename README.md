@@ -177,7 +177,7 @@ Secrets can be interpolated with the helper function `get_secret`. It requires a
 are configurable by environment/cluster.
 
 ```yaml
-foobar: "{{ get_secret('/my-key/') }}"
+foobar: "{{ get_secret('/my-key') }}"
 ```
 
 #### Providers
@@ -191,6 +191,10 @@ secrets:
   provider: ssm
   prefix: "/foobar"
 ```
+
+> Keep in mind that SSM parameter names can be formed as a path and  they can only consist of sub-paths divided by slash symbol; each sub-path can be formed as a mix of letters, numbers and the following 3 symbols: `.-_`
+>
+> Be careful to follow this format when setting up the provider `prefix` and `get_secret(key)`.
 
 ##### Random
 
