@@ -22,13 +22,13 @@ LOGGER = logging.getLogger(__name__)
 RANDOM_STORE = {}
 
 
-def ssm(key: str, length: int = None) -> str:
+def ssm(key: str, region: str, length: int = None) -> str:
     LOGGER.debug("Requesting secret from %s", key)
 
-    client = boto3.client("ssm")
+    client = boto3.client("ssm", region_name=region)
 
     try:
-        result = client.get_parameter(Name="/{}".format(key), WithDecryption=True)["Parameter"]["Value"]
+        result = client.get_parameter(Name=key, WithDecryption=True)["Parameter"]["Value"]
 
         if length is not None:
             if len(result) != length:
@@ -46,5 +46,9 @@ def random(key: str, length: int = None) -> str:
         RANDOM_STORE[key] = "".join(
             SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(length or SystemRandom().randint(12, 32))
         )
+
+        if length is not None:
+            if len(RANDOM_STORE[key]) != length:
+                raise AssertionError("Secret '{}' did not have expected length of {}".format(key, length))
 
     return RANDOM_STORE[key]
