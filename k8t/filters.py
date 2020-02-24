@@ -82,10 +82,12 @@ def hashf(value, method="sha256"):
 
 def get_secret(key: str, length: int = None) -> str:
     try:
+        default_region = "eu-central-1"
         provider = getattr(secret_providers, config.CONFIG["secrets"]["provider"].lower())
 
         return provider(
             "{0}{1}".format(config.CONFIG['secrets']['prefix'], key) if "prefix" in config.CONFIG["secrets"] else key,
+            "{}".format(config.CONFIG['secrets']['region']) if "region" in config.CONFIG["secrets"] else default_region,
             length
         )
     except AttributeError:

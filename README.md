@@ -189,6 +189,7 @@ Setup secrets on SSM
 ```yaml
 secrets:
   provider: ssm
+  region: "eu-central-1"
   prefix: "/foobar"
 ```
 

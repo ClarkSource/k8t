@@ -26,7 +26,8 @@ def test_random():
 
 @mock_ssm
 def test_ssm():
-    client = boto3.client("ssm", region_name="eu-central-1")
+    region = "eu-central-1"
+    client = boto3.client("ssm", region_name=region)
 
     client.put_parameter(
         Name="foo",
@@ -51,16 +52,18 @@ def test_ssm():
         KeyId="alias/aws/ssm",
     )
 
-    response = ssm("foo")
+    response = ssm("foo", region)
     assert response == 'global_secret_value'
-    response = ssm("/dev/test1")
+    response = ssm("/dev/test1", region)
     assert response == 'string_value'
-    response = ssm("/app/dev/password")
+    response = ssm("/app/dev/password", region)
     assert response == 'my_secret_value'
 
 @mock_ssm
 def test_ssm_nonexistent_parameter():
+    region = "eu-central-1"
+
     with pytest.raises(RuntimeError, match=r"Could not find secret: /Application/non_existent"):
-        ssm("/Application/non_existent")
+        ssm("/Application/non_existent", region)
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab

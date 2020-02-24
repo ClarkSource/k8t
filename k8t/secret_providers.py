@@ -22,10 +22,10 @@ LOGGER = logging.getLogger(__name__)
 RANDOM_STORE = {}
 
 
-def ssm(key: str, length: int = None) -> str:
+def ssm(key: str, region: str, length: int = None) -> str:
     LOGGER.debug("Requesting secret from %s", key)
 
-    client = boto3.client("ssm")
+    client = boto3.client("ssm", region_name=region)
 
     try:
         result = client.get_parameter(Name=key, WithDecryption=True)["Parameter"]["Value"]

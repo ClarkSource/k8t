@@ -1,3 +1,4 @@
 secrets:
   provider: ssm
+  region: 'eu-central-1'
   prefix: '/production'
