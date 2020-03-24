@@ -89,7 +89,7 @@ quickly verify the written templates.
 * `envvar(key: str, [default])` - get a value from any environment variable with optional default
 * `b64encode(value: str)` - encodes a value in base64 (usually required for secrets)
 * `b64decode(value: str)` - decodes a value from base64
-* `hashf(value: str, [method: str])` - hashes a given value (default using `sha256`)
+* `hash(value: str, [method: str])` - hashes a given value (default using `sha256`)
 * `get_secret(key: str)` - provides a secret value from a given provider (see [here](#managing-secrets))
 
 ## Usage
