@@ -22,4 +22,12 @@ def load_all(root: str, cluster: str, environment: str, method: str) -> Dict[str
 
     LOGGER.debug("using value files: %s", values)
 
-    return deep_merge(*[load_yaml(f) for f in values], method=method)
+    base = dict()
+
+    if cluster is not None:
+        base['cluster'] = cluster
+
+    if environment is not None:
+        base['environment'] = environment
+
+    return deep_merge(base, *[load_yaml(f) for f in values], method=method)
