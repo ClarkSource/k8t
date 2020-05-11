@@ -64,6 +64,7 @@ def b64decode(value: Any) -> str:
 
     return result
 
+
 def hashf(value, method="sha256"):
     try:
         hash_method = getattr(hashlib, method)()
@@ -94,3 +95,13 @@ def get_secret(key: str, length: int = None) -> str:
         raise NotImplementedError("secret provider {} does not exist.".format(config.CONFIG["secrets"]["provider"].lower()))
     except KeyError:
         raise RuntimeError("Secrets provider not configured.")
+
+
+def to_bool(value: Any):
+    if value is None or isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        value = value.lower()
+    if value in ('yes', 'on', '1', 'true', 1):
+        return True
+    return False
