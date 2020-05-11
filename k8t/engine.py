@@ -12,7 +12,7 @@ import logging
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from k8t.filters import (b64decode, b64encode, envvar, get_secret, hashf,
-                         random_password)
+                         random_password, to_bool)
 from k8t.project import find_files
 
 LOGGER = logging.getLogger(__name__)
@@ -30,6 +30,7 @@ def build(path: str, cluster: str, environment: str):
     env.filters["b64decode"] = b64decode
     env.filters["b64encode"] = b64encode
     env.filters["hash"] = hashf
+    env.filters["bool"] = to_bool
 
     ### Global functions ###
     # env.globals['include_raw'] = include_file

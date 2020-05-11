@@ -13,7 +13,7 @@
 
 import random
 
-from k8t.filters import b64decode, b64encode, hashf, random_password
+from k8t.filters import b64decode, b64encode, hashf, random_password, to_bool
 
 
 def test_b64encode():
@@ -38,5 +38,25 @@ def test_hashf():
     assert hashf(string) != string
     assert hashf(string) == hashf(string)
     assert hashf(string) != hashf("foobaz")
+
+
+def test_to_bool():
+    assert to_bool(True)
+    assert to_bool("Yes")
+    assert to_bool("yes")
+    assert to_bool("True")
+    assert to_bool("true")
+    assert to_bool("On")
+    assert to_bool("on")
+    assert to_bool("1")
+    assert to_bool(1)
+
+    assert not to_bool(None)
+    assert not to_bool(False)
+    assert not to_bool("False")
+    assert not to_bool("false")
+    assert not to_bool("anything")
+    assert not to_bool("0")
+    assert not to_bool(0)
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab
