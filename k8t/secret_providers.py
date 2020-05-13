@@ -12,6 +12,8 @@ import string
 
 import boto3
 
+from k8t import config
+
 try:
     from secrets import SystemRandom
 except ImportError:
@@ -22,9 +24,12 @@ LOGGER = logging.getLogger(__name__)
 RANDOM_STORE = {}
 
 
-def ssm(key: str, region: str, length: int = None) -> str:
+def ssm(key: str, length: int = None) -> str:
+    key = "{0}{1}".format(config.CONFIG['secrets']['prefix'], key) if "prefix" in config.CONFIG["secrets"] else key
     LOGGER.debug("Requesting secret from %s", key)
 
+    default_region = "eu-central-1"
+    region = "{}".format(config.CONFIG['secrets']['region']) if "region" in config.CONFIG["secrets"] else default_region
     client = boto3.client("ssm", region_name=region)
 
     try:

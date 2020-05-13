@@ -83,16 +83,12 @@ def hashf(value, method="sha256"):
 
 def get_secret(key: str, length: int = None) -> str:
     try:
-        default_region = "eu-central-1"
-        provider = getattr(secret_providers, config.CONFIG["secrets"]["provider"].lower())
+        provider_name = config.CONFIG["secrets"]["provider"].lower()
+        provider = getattr(secret_providers, provider_name)
 
-        return provider(
-            "{0}{1}".format(config.CONFIG['secrets']['prefix'], key) if "prefix" in config.CONFIG["secrets"] else key,
-            "{}".format(config.CONFIG['secrets']['region']) if "region" in config.CONFIG["secrets"] else default_region,
-            length
-        )
+        return provider(key, length)
     except AttributeError:
-        raise NotImplementedError("secret provider {} does not exist.".format(config.CONFIG["secrets"]["provider"].lower()))
+        raise NotImplementedError("secret provider {} does not exist.".format(provider_name))
     except KeyError:
         raise RuntimeError("Secrets provider not configured.")
 

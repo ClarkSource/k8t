@@ -10,11 +10,13 @@
 import boto3
 import pytest
 from moto import mock_ssm
+from k8t import config
 from k8t.secret_providers import random
 from k8t.secret_providers import ssm
 
 
 def test_random():
+    config.CONFIG = {'secrets': {'provider': 'random'}}
     length = 12
 
     assert random('/foobar', length) == random('/foobar', length) != random('/foobaz', length)
@@ -26,7 +28,7 @@ def test_random():
 
 @mock_ssm
 def test_ssm():
-    region = "eu-central-1"
+    region = "eu-west-1"
     client = boto3.client("ssm", region_name=region)
 
     client.put_parameter(
@@ -52,16 +54,19 @@ def test_ssm():
         KeyId="alias/aws/ssm",
     )
 
-    response = ssm("foo", region)
+    config.CONFIG = {'secrets': {'provider': 'ssm', 'region': region}}
+
+    response = ssm("foo")
     assert response == 'global_secret_value'
-    response = ssm("/dev/test1", region)
+    response = ssm("/dev/test1")
     assert response == 'string_value'
-    response = ssm("/app/dev/password", region)
+    response = ssm("/app/dev/password")
     assert response == 'my_secret_value'
 
 @mock_ssm
 def test_ssm_nonexistent_parameter():
-    region = "eu-central-1"
+    region = "eu-west-1"
+    config.CONFIG = {'secrets': {'provider': 'ssm', 'region': region}}
 
     with pytest.raises(RuntimeError, match=r"Could not find secret: /Application/non_existent"):
         ssm("/Application/non_existent", region)
