@@ -82,15 +82,17 @@ def hashf(value, method="sha256"):
 
 
 def get_secret(key: str, length: int = None) -> str:
-    try:
-        provider_name = config.CONFIG["secrets"]["provider"].lower()
-        provider = getattr(secret_providers, provider_name)
+    provider_name = config.get_secrets("provider")
+    if not provider_name:
+        raise RuntimeError("Secrets provider not configured.")
 
-        return provider(key, length)
+    provider_name = str(provider_name).lower()
+    try:
+        provider = getattr(secret_providers, provider_name)
     except AttributeError:
         raise NotImplementedError("secret provider {} does not exist.".format(provider_name))
-    except KeyError:
-        raise RuntimeError("Secrets provider not configured.")
+
+    return provider(key, length)
 
 
 def to_bool(value: Any):

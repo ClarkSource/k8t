@@ -22,14 +22,15 @@ except ImportError:
 
 LOGGER = logging.getLogger(__name__)
 RANDOM_STORE = {}
+DEFAULT_SSM_PREFIX = ""
+DEFAULT_SSM_REGION = "eu-central-1"
 
 
 def ssm(key: str, length: int = None) -> str:
-    key = "{0}{1}".format(config.CONFIG['secrets']['prefix'], key) if "prefix" in config.CONFIG["secrets"] else key
+    key = str(config.get_secrets("prefix", DEFAULT_SSM_PREFIX)) + key
     LOGGER.debug("Requesting secret from %s", key)
 
-    default_region = "eu-central-1"
-    region = "{}".format(config.CONFIG['secrets']['region']) if "region" in config.CONFIG["secrets"] else default_region
+    region = str(config.get_secrets("region", DEFAULT_SSM_REGION))
     client = boto3.client("ssm", region_name=region)
 
     try:
