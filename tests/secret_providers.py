@@ -21,9 +21,8 @@ def test_random():
     assert random("/foobar") != random("/foobaz")
 
     assert len(random("/foo", 12)) == 12
-
-    # TODO: Once secret is generated, it ignores length. Have to figure out something with that.
-    # assert len(random("/foo", 10)) == 10
+    with pytest.raises(AssertionError, match=r"Secret '/foo' did not have expected length of 3"):
+        random("/foo", 3)
 
 
 @mock_ssm

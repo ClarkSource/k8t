@@ -54,8 +54,8 @@ def random(key: str, length: int = None) -> str:
             SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(length or SystemRandom().randint(12, 32))
         )
 
-        if length is not None:
-            if len(RANDOM_STORE[key]) != length:
-                raise AssertionError("Secret '{}' did not have expected length of {}".format(key, length))
+    if length is not None:
+        if len(RANDOM_STORE[key]) != length:
+            raise AssertionError("Secret '{}' did not have expected length of {}".format(key, length))
 
     return RANDOM_STORE[key]
