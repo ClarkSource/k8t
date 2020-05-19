@@ -27,10 +27,11 @@ DEFAULT_SSM_REGION = "eu-central-1"
 
 
 def ssm(key: str, length: int = None) -> str:
-    key = str(config.get_secrets("prefix", DEFAULT_SSM_PREFIX)) + key
+    prefix = str(config.CONFIG.get("secrets", {}).get("prefix", DEFAULT_SSM_PREFIX))
+    key = prefix + key
     LOGGER.debug("Requesting secret from %s", key)
 
-    region = str(config.get_secrets("region", DEFAULT_SSM_REGION))
+    region = str(config.CONFIG.get("secrets", {}).get("region", DEFAULT_SSM_REGION))
     client = boto3.client("ssm", region_name=region)
 
     try:
