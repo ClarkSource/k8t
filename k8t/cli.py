@@ -14,7 +14,6 @@ import sys
 import click
 import coloredlogs
 from jinja2.exceptions import UndefinedError
-from termcolor import colored
 
 import k8t
 from k8t import cluster, config, environment, project, scaffolding, values
@@ -39,7 +38,7 @@ def root(debug, trace):
 
 @root.command(name="license", help="Print software license.")
 def print_license():
-    print(k8t.__license__)
+    click.echo(k8t.__license__)
 
 # pylint: disable=too-many-locals,too-many-arguments
 @root.command(name="validate", help="Validate template files for given context.")
@@ -87,12 +86,12 @@ def cli_validate(method, value_files, cli_values, cname, ename, directory):
         if errors:
             all_validated = False
 
-            print(colored("{}: ✗".format(template_path), "red"))
+            click.secho("{}: ✗".format(template_path), fg="red")
 
             for error in errors:
-                print("- {}".format(error))
+                click.echo("- {}".format(error))
         else:
-            print(colored("{}: ✔".format(template_path), "green"))
+            click.secho("{}: ✔".format(template_path), fg="green")
 
     sys.exit(not all_validated)
 
@@ -124,7 +123,7 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
 
     for template_path in templates:
         if not validate(template_path, vals, eng):
-            print("Failed to validate template {}".format(template_path))
+            click.echo("Failed to validate template {}".format(template_path))
 
             validated = False
 
@@ -133,11 +132,11 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
 
     try:
         for template_path in templates:
-            print("---")
-            print("# Source: {}".format(template_path))
-            print(eng.get_template(template_path).render(vals))
+            click.echo("---")
+            click.echo("# Source: {}".format(template_path))
+            click.echo(eng.get_template(template_path).render(vals))
     except UndefinedError as err:
-        print(colored("✗ -> {}".format(err), "red"))
+        click.secho("✗ -> {}".format(err), fg="red")
         sys.exit(1)
 
 
@@ -217,7 +216,7 @@ def get_clusters(directory):
         sys.exit("not a valid project: {}".format(directory))
 
     for cluster_path in cluster.list_all(directory):
-        print(cluster_path)
+        click.echo(cluster_path)
 
 
 @get.command(name="environments", help="Get configured environments.")
@@ -230,7 +229,7 @@ def get_environments(cname, directory):  # pylint: disable=redefined-outer-name
     path = project.get_base_dir(directory, cname, environment=None)
 
     for environment_path in environment.list_all(path):
-        print(environment_path)
+        click.echo(environment_path)
 
 
 @get.command(name="templates", help="Get stored templates.")
@@ -242,7 +241,7 @@ def get_templates(directory, cname, ename):  # pylint: disable=redefined-outer-n
         sys.exit("not a valid project: {}".format(directory))
 
     for template_path in build(directory, cname, ename).list_templates():
-        print(template_path)
+        click.echo(template_path)
 
 
 @root.group(help="Edit local project files.")
