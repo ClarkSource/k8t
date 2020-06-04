@@ -73,7 +73,7 @@ def get_variables(template_path: str, engine) -> Set[str]:
     abstract_syntax_tree = engine.parse(template_source)
 
     defaults = {
-        filter.node.name
+        hasattr(filter.node, "name") and filter.node.name
 
         for filter in abstract_syntax_tree.find_all(nodes.Filter)
 
