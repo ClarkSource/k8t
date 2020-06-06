@@ -74,7 +74,7 @@ def validate(template_path: str, values: dict, engine: Environment) -> bool:
 
 
 def get_variables(template_path: str, engine: Environment) -> Set[str]:
-    template_source = engine.loader.get_source(engine, os.path.basename(template_path))[
+    template_source = engine.loader.get_source(engine, template_path)[
         0
     ]
     abstract_syntax_tree = engine.parse(template_source)
@@ -94,7 +94,7 @@ def get_variables(template_path: str, engine: Environment) -> Set[str]:
 
 
 def get_secrets(template_path: str, engine: Environment) -> Set[str]:
-    template_source = engine.loader.get_source(engine, os.path.basename(template_path))[
+    template_source = engine.loader.get_source(engine, template_path)[
         0
     ]
     abstract_syntax_tree = engine.parse(template_source)
