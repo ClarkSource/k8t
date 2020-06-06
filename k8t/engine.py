@@ -18,7 +18,7 @@ from k8t.project import find_files
 LOGGER = logging.getLogger(__name__)
 
 
-def build(path: str, cluster: str, environment: str):
+def build(path: str, cluster: str, environment: str) -> Environment:
     template_paths = find_template_paths(path, cluster, environment)
 
     LOGGER.debug(

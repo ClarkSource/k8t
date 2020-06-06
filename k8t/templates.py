@@ -12,7 +12,7 @@ import os
 from typing import Set, Tuple
 import yaml
 
-from jinja2 import meta, nodes
+from jinja2 import meta, nodes, Environment
 
 from k8t import config
 
@@ -33,7 +33,7 @@ class YamlValidationError(Exception):
     """
 
 
-def analyze(template_path: str, values: dict, engine) -> Tuple[Set[str], Set[str], Set[str], Set[str]]:
+def analyze(template_path: str, values: dict, engine: Environment) -> Tuple[Set[str], Set[str], Set[str], Set[str]]:
     secrets = get_secrets(template_path, engine)
     required_variables = get_variables(template_path, engine)
     defined_variables = set(values.keys())
@@ -52,7 +52,7 @@ def analyze(template_path: str, values: dict, engine) -> Tuple[Set[str], Set[str
     return (undefined_variables - invalid_variables), unused_variables, invalid_variables, secrets
 
 
-def validate(template_path: str, values: dict, engine) -> bool:
+def validate(template_path: str, values: dict, engine: Environment) -> bool:
     config_ok = True
     undefined, _, invalid, secrets = analyze(template_path, values, engine)
 
@@ -73,7 +73,7 @@ def validate(template_path: str, values: dict, engine) -> bool:
     return config_ok and not (invalid or undefined)
 
 
-def get_variables(template_path: str, engine) -> Set[str]:
+def get_variables(template_path: str, engine: Environment) -> Set[str]:
     template_source = engine.loader.get_source(engine, os.path.basename(template_path))[
         0
     ]
@@ -93,7 +93,7 @@ def get_variables(template_path: str, engine) -> Set[str]:
     )
 
 
-def get_secrets(template_path: str, engine) -> Set[str]:
+def get_secrets(template_path: str, engine: Environment) -> Set[str]:
     template_source = engine.loader.get_source(engine, os.path.basename(template_path))[
         0
     ]
@@ -108,7 +108,7 @@ def get_secrets(template_path: str, engine) -> Set[str]:
     }
 
 
-def render(template_path: str, values: dict, engine) -> str:
+def render(template_path: str, values: dict, engine: Environment) -> str:
     output = engine.get_template(template_path).render(values)
 
     try:
