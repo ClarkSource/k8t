@@ -10,6 +10,7 @@
 import logging
 import os
 from typing import Set, Tuple
+import yaml
 
 from jinja2 import meta, nodes
 
@@ -24,6 +25,12 @@ PROHIBITED_VARIABLE_NAMES = {
     'lipsum',
     'joiner'
 }
+
+
+class YamlValidationError(Exception):
+    """
+    Raised if template is rendered into incorrect yaml
+    """
 
 
 def analyze(template_path: str, values: dict, engine) -> Tuple[Set[str], Set[str], Set[str], Set[str]]:
@@ -99,3 +106,14 @@ def get_secrets(template_path: str, engine) -> Set[str]:
 
         if call.node.name == "get_secret"
     }
+
+
+def render(template_path: str, values: dict, engine) -> str:
+    output = engine.get_template(template_path).render(values)
+
+    try:
+        yaml.safe_load(output)
+    except (yaml.scanner.ScannerError, yaml.parser.ParserError) as err:
+        raise YamlValidationError(err)
+
+    return output

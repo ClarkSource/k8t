@@ -18,7 +18,7 @@ from jinja2.exceptions import UndefinedError
 import k8t
 from k8t import cluster, config, environment, project, scaffolding, values
 from k8t.engine import build
-from k8t.templates import analyze, validate
+from k8t.templates import analyze, validate, render, YamlValidationError
 from k8t.util import MERGE_METHODS, deep_merge, envvalues, load_yaml, makedirs
 
 
@@ -134,8 +134,10 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
         for template_path in templates:
             click.echo("---")
             click.echo("# Source: {}".format(template_path))
-            click.echo(eng.get_template(template_path).render(vals))
-    except UndefinedError as err:
+
+            template_output = render(template_path, vals, eng)
+            click.echo(template_output)
+    except (UndefinedError, YamlValidationError) as err:
         click.secho("✗ -> {}".format(err), fg="red")
         sys.exit(1)
 
