@@ -176,7 +176,7 @@ def new_environment(cname, name, directory):
     scaffolding.new_environment(base_path, name)
 
 
-@new.command(name="template")
+@new.command(name="template", help="Create specified kubernetes manifest template.")
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
 @click.option("--name", "-n", help="Template filename.")
