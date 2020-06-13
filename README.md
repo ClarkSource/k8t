@@ -208,6 +208,16 @@ secrets:
   provider: random
 ```
 
+##### Stub
+
+Stubs secrets with `SECRET(name, length)`. Output won't be a valid kubernetes manifest, but it might be handy for
+debug purposes, e.g. if you don't have access to ssm provider.
+
+```yaml
+secrets:
+  provider: stub
+```
+
 ## TODO
 
 * testing needs to be expanded
