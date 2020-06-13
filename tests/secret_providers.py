@@ -10,9 +10,8 @@
 import boto3
 import pytest
 from moto import mock_ssm
-from k8t import config
-from k8t.secret_providers import random
-from k8t.secret_providers import ssm
+from k8t import config, engine
+from k8t.secret_providers import random, ssm, stub
 
 
 def test_random():
@@ -86,5 +85,21 @@ def test_ssm_default_region():
 
     config.CONFIG = {"secrets": {"provider": "ssm"}}
     assert ssm("foo"), "global_secret_value"
+
+
+def test_stub():
+    config.CONFIG = {"secrets": {"provider": "stub"}}
+
+    assert str(stub("/foobar")) == '{{ SECRET("/foobar") }}'
+    assert str(stub("/foobaz", 12)) == '{{ SECRET("/foobaz", 12) }}'
+
+
+def test_stub_filter_chaining():
+    config.CONFIG = {"secrets": {"provider": "stub"}}
+    values = {}
+    eng = engine.build(".", None, None)
+
+    template = eng.from_string('test: {{ get_secret("foo", 10) | default("bar") | hash }}')
+    assert template.render(values) == 'test: {{ SECRET("foo", 10) | FILTER(do_default) | FILTER(hashf) }}'
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab

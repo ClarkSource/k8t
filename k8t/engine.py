@@ -9,11 +9,13 @@
 
 import logging
 
+from functools import wraps
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from k8t.filters import (b64decode, b64encode, envvar, get_secret, hashf,
                          random_password, to_bool)
 from k8t.project import find_files
+from k8t.types import StubString
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,6 +41,9 @@ def build(path: str, cluster: str, environment: str) -> Environment:
     env.globals["get_secret"] = get_secret
     env.globals["env"] = envvar
 
+    for key in env.filters:
+        env.filters[key] = _decorate_filter(env.filters[key])
+
     return env
 
 
@@ -54,3 +59,13 @@ def find_template_paths(path: str, cluster: str, environment: str):
         "found template paths: %s", template_paths)
 
     return reversed(template_paths)
+
+
+def _decorate_filter(func):
+    @wraps(func)
+    def wrapper_decorator(value, *args, **kwargs):
+        if isinstance(value, StubString):
+            return StubString(value.string + f" | FILTER({func.__name__})")
+
+        return func(value, *args, **kwargs)
+    return wrapper_decorator

@@ -13,6 +13,7 @@ import string
 import boto3
 
 from k8t import config
+from k8t.types import StubString
 
 try:
     from secrets import SystemRandom
@@ -59,3 +60,12 @@ def random(key: str, length: int = None) -> str:
             raise AssertionError("Secret '{}' did not have expected length of {}".format(key, length))
 
     return RANDOM_STORE[key]
+
+
+def stub(key: str, length: int = None) -> str:
+    LOGGER.debug("Requesting secret from %s", key)
+
+    return StubString('SECRET("{key}"{length})'.format(
+        key=key,
+        length=f", {length}" if length else ""
+    ))
