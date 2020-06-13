@@ -11,6 +11,7 @@ import logging
 import os
 import sys
 
+from functools import update_wrapper
 import click
 import coloredlogs
 from jinja2.exceptions import UndefinedError
@@ -20,6 +21,16 @@ from k8t import cluster, config, environment, project, scaffolding, values
 from k8t.engine import build
 from k8t.templates import analyze, validate, render, YamlValidationError
 from k8t.util import MERGE_METHODS, deep_merge, envvalues, load_yaml
+
+
+def requires_project_directory(func):
+    @click.pass_context
+    def new_func(ctx, *args, **kwargs):
+        if not project.check_directory(kwargs["directory"]):
+            sys.exit("not a valid project: {}".format(kwargs["directory"]))
+
+        return ctx.invoke(func, *args, **kwargs)
+    return update_wrapper(new_func, func)
 
 
 @click.group()
@@ -48,10 +59,8 @@ def print_license():
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
+@requires_project_directory
 def cli_validate(method, value_files, cli_values, cname, ename, directory):
-    if not project.check_directory(directory):
-        sys.exit("not a valid project: {}".format(directory))
-
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -103,10 +112,8 @@ def cli_validate(method, value_files, cli_values, cname, ename, directory):
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
+@requires_project_directory
 def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
-    if not project.check_directory(directory):
-        sys.exit("not a valid project: {}".format(directory))
-
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -156,10 +163,8 @@ def new_project(directory):
 @new.command(name="cluster", help="Create a new cluster context.")
 @click.argument("name")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
+@requires_project_directory
 def new_cluster(name, directory):
-    if not project.check_directory(directory):
-        sys.exit("not a valid project: {}".format(directory))
-
     scaffolding.new_cluster(directory, name)
 
 
@@ -167,10 +172,8 @@ def new_cluster(name, directory):
 @click.option("--cluster", "-c", "cname")
 @click.argument("name")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
+@requires_project_directory
 def new_environment(cname, name, directory):
-    if not project.check_directory(directory):
-        sys.exit("not a valid project: {}".format(directory))
-
     base_path = project.get_base_dir(directory, cname, environment=None)
 
     scaffolding.new_environment(base_path, name)
@@ -183,10 +186,8 @@ def new_environment(cname, name, directory):
 @click.option("--prefix", "-p", help="Prefix for filename.")
 @click.argument("kind", type=click.Choice(sorted(list(scaffolding.list_available_templates()))))
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
+@requires_project_directory
 def new_template(cname, ename, name, prefix, kind, directory):
-    if not project.check_directory(directory):
-        sys.exit("not a valid project: {}".format(directory))
-
     base_path = project.get_base_dir(directory, cname, ename)
 
     template_name = "{0}{1}{2}{3}.yaml.j2".format(
@@ -206,10 +207,8 @@ def get():
 
 @get.command(name="clusters", help="Get configured clusters.")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
+@requires_project_directory
 def get_clusters(directory):
-    if not project.check_directory(directory):
-        sys.exit("not a valid project: {}".format(directory))
-
     for cluster_path in cluster.list_all(directory):
         click.echo(cluster_path)
 
@@ -217,10 +216,8 @@ def get_clusters(directory):
 @get.command(name="environments", help="Get configured environments.")
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
+@requires_project_directory
 def get_environments(cname, directory):  # pylint: disable=redefined-outer-name
-    if not project.check_directory(directory):
-        sys.exit("not a valid project: {}".format(directory))
-
     path = project.get_base_dir(directory, cname, environment=None)
 
     for environment_path in environment.list_all(path):
@@ -231,10 +228,8 @@ def get_environments(cname, directory):  # pylint: disable=redefined-outer-name
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
+@requires_project_directory
 def get_templates(directory, cname, ename):  # pylint: disable=redefined-outer-name
-    if not project.check_directory(directory):
-        sys.exit("not a valid project: {}".format(directory))
-
     for template_path in build(directory, cname, ename).list_templates():
         click.echo(template_path)
 
@@ -248,10 +243,8 @@ def edit():
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
+@requires_project_directory
 def edit_config(directory, cname, ename):  # pylint: disable=redefined-outer-name
-    if not project.check_directory(directory):
-        sys.exit("not a valid project: {}".format(directory))
-
     file_path: str
 
     if cname is not None:
@@ -272,10 +265,8 @@ def edit_config(directory, cname, ename):  # pylint: disable=redefined-outer-nam
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
+@requires_project_directory
 def edit_values(directory, cname, ename):  # pylint: disable=redefined-outer-name
-    if not project.check_directory(directory):
-        sys.exit("not a valid project: {}".format(directory))
-
     base_dir = project.get_base_dir(directory, cname, ename)
 
     file_path = os.path.join(base_dir, "values.yaml")
