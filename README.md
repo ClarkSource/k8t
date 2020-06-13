@@ -29,6 +29,7 @@ Simple cluster and environment specific aware templating for kubernetes manifest
     - [Providers](#providers)
       - [SSM](#ssm)
       - [Random](#random)
+      - [Stub](#stub)
 - [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
