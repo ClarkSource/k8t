@@ -11,9 +11,9 @@ import copy
 import logging
 import os
 import shutil
-from click import secho
 from functools import reduce
 from typing import Dict, List
+from click import secho
 
 import yaml
 from simple_tools.interaction import confirm
@@ -50,14 +50,11 @@ def makedirs(path, warn_exists=True):
             if confirm("directory {} already exists, go ahead?".format(path)):
                 secho(f"Directory exists: {path}", fg="yellow")
                 return
-            else:
-                raise RuntimeError("aborting")
-        else:
-            secho(f"Directory exists: {path}", fg="yellow")
-            return
-
-    os.makedirs(path, exist_ok=True)
-    secho(f"Directory created: {path}", fg="green")
+            raise RuntimeError("aborting")
+        secho(f"Directory exists: {path}", fg="yellow")
+    else:
+        os.makedirs(path, exist_ok=True)
+        secho(f"Directory created: {path}", fg="green")
 
 
 def replace(source: str, dest: str):
