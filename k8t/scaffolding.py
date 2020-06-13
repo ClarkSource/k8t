@@ -26,18 +26,26 @@ def list_available_templates():
         break
 
 
-def new_template(kind, dest):
-    source = os.path.join(ASSET_DIR, "{}.yaml.j2".format(kind))
+def new_template(root: str, filename: str, kind: str) -> List[str]:
+    created_objects = []
 
-    if not os.path.isfile(source):
-        raise RuntimeError(
-            "Invalid resource {0}, file does not exist: {1}".format(kind, source))
+    sourcepath = os.path.join(ASSET_DIR, f"{kind}.yaml.j2")
+    if not os.path.isfile(sourcepath):
+        raise RuntimeError(f"Invalid resource {kind}, file does not exist: {sourcepath}")
 
-    if os.path.exists(dest):
-        if not confirm("file {} already exists, overwrite?".format(dest)):
-            raise RuntimeError("aborting")
+    directory = os.path.join(root, "templates")
+    makedirs(directory, warn_exists=False)
+    created_objects.append(directory)
 
-    shutil.copyfile(source, dest)
+    filepath = os.path.join(directory, filename)
+    if os.path.exists(filepath):
+        if not confirm(f"file {filepath} already exists, overwrite?"):
+            return created_objects
+
+    shutil.copyfile(sourcepath, filepath)
+    created_objects.append(filepath)
+
+    return created_objects
 
 
 def new_project(directory: str) -> List[str]:

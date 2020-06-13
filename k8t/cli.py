@@ -198,21 +198,17 @@ def new_template(cname, ename, name, prefix, kind, directory):
 
     base_path = project.get_base_dir(directory, cname, ename)
 
-    template_dir = os.path.join(base_path, "templates")
-
-    makedirs(template_dir, warn_exists=False)
-
-    suffix = None if not name else "-{}".format(kind)
-
-    scaffolding.new_template(
-        kind, os.path.join(
-            template_dir,
-            "{0}{1}{2}.yaml.j2".format(
-                prefix or '',
-                name or kind,
-                suffix or ''
-            ))
+    template_name = "{0}{1}{2}{3}.yaml.j2".format(
+        prefix or '',
+        name or '',
+        '-' if name else '',
+        kind
     )
+
+    created_items = scaffolding.new_template(base_path, template_name, kind)
+
+    for item in created_items:
+        click.secho(f"Created {item}", fg="green")
 
 
 @root.group(help="Project inspection commands.")
