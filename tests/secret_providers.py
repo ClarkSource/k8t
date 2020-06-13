@@ -16,7 +16,7 @@ from k8t.secret_providers import random, ssm, stub
 
 def test_random():
     config.CONFIG = {"secrets": {"provider": "random"}}
-    assert random("/foobar"), random("/foobar")
+    assert random("/foobar") == random("/foobar")
     assert random("/foobar") != random("/foobaz")
 
     assert len(random("/foo", 12)) == 12
@@ -53,9 +53,9 @@ def test_ssm():
     )
 
     config.CONFIG = {"secrets": {"provider": "ssm", "region": region}}
-    assert ssm("foo"), "global_secret_value"
-    assert ssm("/dev/test1"), "string_value"
-    assert ssm("/app/dev/password"), "my_secret_value"
+    assert ssm("foo") == "global_secret_value"
+    assert ssm("/dev/test1") == "string_value"
+    assert ssm("/app/dev/password") == "my_secret_value"
 
     with pytest.raises(AssertionError, match=r"Secret '/app/dev/password' did not have expected length of 3"):
         ssm("/app/dev/password", 3)
@@ -63,7 +63,7 @@ def test_ssm():
         ssm("/Application/non_existent")
 
     config.CONFIG = {"secrets": {"provider": "ssm", "region": region, "prefix": "/app/dev"}}
-    assert ssm("/password"), "my_secret_value"
+    assert ssm("/password") == "my_secret_value"
 
     config.CONFIG = {"secrets": {"provider": "ssm", "region": "eu-central-1"}}
     with pytest.raises(RuntimeError, match=r"Could not find secret: foo"):
@@ -84,7 +84,7 @@ def test_ssm_default_region():
     )
 
     config.CONFIG = {"secrets": {"provider": "ssm"}}
-    assert ssm("foo"), "global_secret_value"
+    assert ssm("foo") == "global_secret_value"
 
 
 def test_stub():
