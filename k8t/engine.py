@@ -12,8 +12,8 @@ import logging
 from functools import wraps
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-from k8t.filters import (b64decode, b64encode, envvar, get_secret, hashf,
-                         random_password, to_bool)
+from k8t.filters import (b64decode, b64encode, envvar, hashf, random_password, to_bool)
+from k8t.secret_providers import get_secret
 from k8t.project import find_files
 from k8t.types import StubString
 

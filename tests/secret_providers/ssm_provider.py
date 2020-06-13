@@ -10,18 +10,8 @@
 import boto3
 import pytest
 from moto import mock_ssm
-from k8t import config, engine
-from k8t.secret_providers import random, ssm, stub
-
-
-def test_random():
-    config.CONFIG = {"secrets": {"provider": "random"}}
-    assert random("/foobar") == random("/foobar")
-    assert random("/foobar") != random("/foobaz")
-
-    assert len(random("/foo", 12)) == 12
-    with pytest.raises(AssertionError, match=r"Secret '/foo' did not have expected length of 3"):
-        random("/foo", 3)
+from k8t import config
+from k8t.secret_providers.ssm_provider import get_secret
 
 
 @mock_ssm
@@ -53,21 +43,21 @@ def test_ssm():
     )
 
     config.CONFIG = {"secrets": {"provider": "ssm", "region": region}}
-    assert ssm("foo") == "global_secret_value"
-    assert ssm("/dev/test1") == "string_value"
-    assert ssm("/app/dev/password") == "my_secret_value"
+    assert get_secret("foo") == "global_secret_value"
+    assert get_secret("/dev/test1") == "string_value"
+    assert get_secret("/app/dev/password") == "my_secret_value"
 
     with pytest.raises(AssertionError, match=r"Secret '/app/dev/password' did not have expected length of 3"):
-        ssm("/app/dev/password", 3)
+        get_secret("/app/dev/password", 3)
     with pytest.raises(RuntimeError, match=r"Could not find secret: /Application/non_existent"):
-        ssm("/Application/non_existent")
+        get_secret("/Application/non_existent")
 
     config.CONFIG = {"secrets": {"provider": "ssm", "region": region, "prefix": "/app/dev"}}
-    assert ssm("/password") == "my_secret_value"
+    assert get_secret("/password") == "my_secret_value"
 
     config.CONFIG = {"secrets": {"provider": "ssm", "region": "eu-central-1"}}
     with pytest.raises(RuntimeError, match=r"Could not find secret: foo"):
-        ssm("foo")
+        get_secret("foo")
 
 
 @mock_ssm
@@ -84,22 +74,6 @@ def test_ssm_default_region():
     )
 
     config.CONFIG = {"secrets": {"provider": "ssm"}}
-    assert ssm("foo") == "global_secret_value"
-
-
-def test_stub():
-    config.CONFIG = {"secrets": {"provider": "stub"}}
-
-    assert str(stub("/foobar")) == '{{ SECRET("/foobar") }}'
-    assert str(stub("/foobaz", 12)) == '{{ SECRET("/foobaz", 12) }}'
-
-
-def test_stub_filter_chaining():
-    config.CONFIG = {"secrets": {"provider": "stub"}}
-    values = {}
-    eng = engine.build(".", None, None)
-
-    template = eng.from_string('test: {{ get_secret("foo", 10) | default("bar") | hash }}')
-    assert template.render(values) == 'test: {{ SECRET("foo", 10) | FILTER(do_default) | FILTER(hashf) }}'
+    assert get_secret("foo") == "global_secret_value"
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab

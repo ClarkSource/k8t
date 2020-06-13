@@ -7,27 +7,16 @@
 #
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import logging
-import string
-
 import boto3
 
-from k8t import config
-from k8t.types import StubString
+from . import config
+from . import LOGGER
 
-try:
-    from secrets import SystemRandom
-except ImportError:
-    from random import SystemRandom
-
-
-LOGGER = logging.getLogger(__name__)
-RANDOM_STORE = {}
 DEFAULT_SSM_PREFIX = ""
 DEFAULT_SSM_REGION = "eu-central-1"
 
 
-def ssm(key: str, length: int = None) -> str:
+def get_secret(key: str, length: int = None) -> str:
     prefix = str(config.CONFIG.get("secrets", {}).get("prefix", DEFAULT_SSM_PREFIX))
     key = prefix + key
     LOGGER.debug("Requesting secret from %s", key)
@@ -45,27 +34,3 @@ def ssm(key: str, length: int = None) -> str:
         return result
     except client.exceptions.ParameterNotFound:
         raise RuntimeError("Could not find secret: {}".format(key))
-
-
-def random(key: str, length: int = None) -> str:
-    LOGGER.debug("Requesting secret from %s", key)
-
-    if key not in RANDOM_STORE:
-        RANDOM_STORE[key] = "".join(
-            SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(length or SystemRandom().randint(12, 32))
-        )
-
-    if length is not None:
-        if len(RANDOM_STORE[key]) != length:
-            raise AssertionError("Secret '{}' did not have expected length of {}".format(key, length))
-
-    return RANDOM_STORE[key]
-
-
-def stub(key: str, length: int = None) -> str:
-    LOGGER.debug("Requesting secret from %s", key)
-
-    return StubString('SECRET("{key}"{length})'.format(
-        key=key,
-        length=f", {length}" if length else ""
-    ))

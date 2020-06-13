@@ -17,8 +17,6 @@ import os
 import string
 from typing import Any
 
-from k8t import config, secret_providers
-
 try:
     from secrets import choice
 except ImportError:
@@ -79,20 +77,6 @@ def hashf(value, method="sha256"):
         raise TypeError("invalid input: {}".format(value))
 
     return hash_method.hexdigest()
-
-
-def get_secret(key: str, length: int = None) -> str:
-    provider_name = config.CONFIG.get("secrets", {}).get("provider")
-    if not provider_name:
-        raise RuntimeError("Secrets provider not configured.")
-
-    provider_name = str(provider_name).lower()
-    try:
-        provider = getattr(secret_providers, provider_name)
-    except AttributeError:
-        raise NotImplementedError("secret provider {} does not exist.".format(provider_name))
-
-    return provider(key, length)
 
 
 def to_bool(value: Any):

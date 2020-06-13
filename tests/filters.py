@@ -12,11 +12,8 @@
 # Author: Aljosha Friemann <aljosha.friemann@clark.de>
 
 import random
-import pytest
-from mock import patch
 
-from k8t import config, secret_providers
-from k8t.filters import b64decode, b64encode, hashf, random_password, to_bool, get_secret
+from k8t.filters import b64decode, b64encode, hashf, random_password, to_bool
 
 
 def test_b64encode():
@@ -41,30 +38,6 @@ def test_hashf():
     assert hashf(string) != string
     assert hashf(string) == hashf(string)
     assert hashf(string) != hashf("foobaz")
-
-
-def test_get_secret():
-    config.CONFIG = {"secrets": {"provider": "random"}}
-    with patch.object(secret_providers, "random") as mock:
-        get_secret("any")
-        mock.assert_called_with("any", None)
-        get_secret("any", 99)
-        mock.assert_called_with("any", 99)
-
-    config.CONFIG = {"secrets": {"provider": "ssm"}}
-    with patch.object(secret_providers, "ssm") as mock:
-        get_secret("any")
-        mock.assert_called_with("any", None)
-        get_secret("any", 99)
-        mock.assert_called_with("any", 99)
-
-    config.CONFIG = {"secrets": {"provider": "nothing"}}
-    with pytest.raises(NotImplementedError, match=r"secret provider nothing does not exist."):
-        get_secret("any")
-
-    config.CONFIG = {}
-    with pytest.raises(RuntimeError, match=r"Secrets provider not configured."):
-        get_secret("any")
 
 
 def test_to_bool():
