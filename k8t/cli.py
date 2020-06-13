@@ -58,9 +58,10 @@ def print_license():
 @click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="<KEY VALUE>", help="Additional value(s) to include.")
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--stub-secrets", is_flag=True, default=False, show_default=True, help="Force use stub secret provider.")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 @requires_project_directory
-def cli_validate(method, value_files, cli_values, cname, ename, directory):
+def cli_validate(method, value_files, cli_values, cname, ename, stub_secrets, directory):
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -69,6 +70,9 @@ def cli_validate(method, value_files, cli_values, cname, ename, directory):
         method=method,
     )
     config.CONFIG = config.load_all(directory, cname, ename, method)
+
+    if stub_secrets:
+        config.stub_secrets()
 
     eng = build(directory, cname, ename)
 
@@ -111,9 +115,10 @@ def cli_validate(method, value_files, cli_values, cname, ename, directory):
 @click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="<KEY VALUE>", help="Additional value(s) to include.")
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--stub-secrets", is_flag=True, default=False, show_default=True, help="Force use stub secret provider.")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 @requires_project_directory
-def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
+def cli_gen(method, value_files, cli_values, cname, ename, stub_secrets, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -122,6 +127,9 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
         method=method,
     )
     config.CONFIG = config.load_all(directory, cname, ename, method)
+
+    if stub_secrets:
+        config.stub_secrets()
 
     eng = build(directory, cname, ename)
 

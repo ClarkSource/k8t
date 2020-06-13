@@ -165,6 +165,8 @@ supplied multiple times.
 
 Variables will be merged via deep merging. Default merge strategy is left-to-right.
 
+The **--stub-secrets** flag force stubs all secrets and may be handy for debug purposes. (See [here](#stub))
+
 ### Overriding templates
 
 Templates can be overriden on a cluster/environment level.

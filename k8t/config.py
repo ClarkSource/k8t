@@ -24,3 +24,7 @@ def load_all(root: str, cluster: str, environment: str, method: str) -> Dict[str
     LOGGER.debug("using config files: %s", configs)
 
     return deep_merge(*[load_yaml(f) for f in configs], method=method)
+
+
+def stub_secrets() -> None:
+    CONFIG["secrets"] = {"provider": "stub"}
