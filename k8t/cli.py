@@ -19,7 +19,7 @@ import k8t
 from k8t import cluster, config, environment, project, scaffolding, values
 from k8t.engine import build
 from k8t.templates import analyze, validate, render, YamlValidationError
-from k8t.util import MERGE_METHODS, deep_merge, envvalues, load_yaml, makedirs
+from k8t.util import MERGE_METHODS, deep_merge, envvalues, load_yaml
 
 
 @click.group()
@@ -150,10 +150,7 @@ def new():
 @new.command(name="project", help="Create a new project.")
 @click.argument("directory", type=click.Path())
 def new_project(directory):
-    created_items = scaffolding.new_project(directory)
-
-    for item in created_items:
-        click.secho(f"Created {item}", fg="green")
+    scaffolding.new_project(directory)
 
 
 @new.command(name="cluster", help="Create a new cluster context.")
@@ -163,10 +160,7 @@ def new_cluster(name, directory):
     if not project.check_directory(directory):
         sys.exit("not a valid project: {}".format(directory))
 
-    created_items = scaffolding.new_cluster(directory, name)
-
-    for item in created_items:
-        click.secho(f"Created {item}", fg="green")
+    scaffolding.new_cluster(directory, name)
 
 
 @new.command(name="environment", help="Create a new environment context.")
@@ -179,10 +173,7 @@ def new_environment(cname, name, directory):
 
     base_path = project.get_base_dir(directory, cname, environment=None)
 
-    created_items = scaffolding.new_environment(base_path, name)
-
-    for item in created_items:
-        click.secho(f"Created {item}", fg="green")
+    scaffolding.new_environment(base_path, name)
 
 
 @new.command(name="template")
@@ -205,10 +196,7 @@ def new_template(cname, ename, name, prefix, kind, directory):
         kind
     )
 
-    created_items = scaffolding.new_template(base_path, template_name, kind)
-
-    for item in created_items:
-        click.secho(f"Created {item}", fg="green")
+    scaffolding.new_template(base_path, template_name, kind)
 
 
 @root.group(help="Project inspection commands.")
