@@ -69,8 +69,8 @@ def cli_validate(method, value_files, cli_values, cname, ename, stub_secrets, di
         envvalues(),
         method=method,
     )
-    config.CONFIG = config.load_all(directory, cname, ename, method)
 
+    config.initialize(directory, cname, ename, method)
     if stub_secrets:
         config.stub_secrets()
 
@@ -126,8 +126,8 @@ def cli_gen(method, value_files, cli_values, cname, ename, stub_secrets, directo
         envvalues(),
         method=method,
     )
-    config.CONFIG = config.load_all(directory, cname, ename, method)
 
+    config.initialize(directory, cname, ename, method)
     if stub_secrets:
         config.stub_secrets()
 

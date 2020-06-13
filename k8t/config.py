@@ -8,6 +8,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import logging
+from sys import modules
 from typing import Any, Dict, List
 
 from k8t.project import find_files
@@ -15,6 +16,10 @@ from k8t.util import deep_merge, load_yaml
 
 LOGGER = logging.getLogger(__name__)
 CONFIG = {}
+
+
+def initialize(*args, **kwargs) -> None:
+    modules[__name__].CONFIG = load_all(*args, **kwargs)
 
 
 def load_all(root: str, cluster: str, environment: str, method: str) -> Dict[str, Any]:
