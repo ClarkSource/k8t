@@ -10,8 +10,6 @@
 import os
 from typing import List
 
-from k8t.util import makedirs, touch
-
 
 def check_directory(path: str) -> bool:
     return os.path.exists(os.path.join(path, ".k8t"))
@@ -33,15 +31,6 @@ def get_base_dir(root: str, cluster: str, environment: str) -> str:
             raise RuntimeError("No such environment: {}".format(environment))
 
     return base_path
-
-
-def new(directory: str):
-    makedirs(directory)
-
-    touch(os.path.join(directory, "values.yaml"))
-    touch(os.path.join(directory, "config.yaml"))
-
-    touch(os.path.join(directory, ".k8t"))
 
 
 # pylint: disable=too-many-arguments

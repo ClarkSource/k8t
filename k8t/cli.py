@@ -150,7 +150,10 @@ def new():
 @new.command(name="project", help="Create a new project.")
 @click.argument("directory", type=click.Path())
 def new_project(directory):
-    project.new(directory)
+    created_items = scaffolding.new_project(directory)
+
+    for item in created_items:
+        click.secho(f"Created {item}", fg="green")
 
 
 @new.command(name="cluster", help="Create a new cluster context.")
@@ -160,7 +163,10 @@ def new_cluster(name, directory):
     if not project.check_directory(directory):
         sys.exit("not a valid project: {}".format(directory))
 
-    cluster.new(directory, name)
+    created_items = scaffolding.new_cluster(directory, name)
+
+    for item in created_items:
+        click.secho(f"Created {item}", fg="green")
 
 
 @new.command(name="environment", help="Create a new environment context.")
@@ -173,7 +179,10 @@ def new_environment(cname, name, directory):
 
     base_path = project.get_base_dir(directory, cname, environment=None)
 
-    environment.new(base_path, name)
+    created_items = scaffolding.new_environment(base_path, name)
+
+    for item in created_items:
+        click.secho(f"Created {item}", fg="green")
 
 
 @new.command(name="template")

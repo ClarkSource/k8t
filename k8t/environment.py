@@ -10,7 +10,7 @@
 import os
 from typing import Set
 
-from k8t.util import list_files, makedirs, touch
+from k8t.util import list_files
 
 
 def list_all(path: str) -> Set[str]:
@@ -28,15 +28,6 @@ def list_all(path: str) -> Set[str]:
             result.update(list_all(os.path.join(cluster_dir, cluster)))
 
     return result
-
-
-def new(root: str, name: str):
-    directory = os.path.join(root, "environments", name)
-
-    makedirs(directory)
-
-    touch(os.path.join(directory, "values.yaml"))
-    touch(os.path.join(directory, "config.yaml"))
 
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab

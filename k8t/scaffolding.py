@@ -9,8 +9,10 @@
 
 import os
 import shutil
+from typing import List
 
 from simple_tools.interaction import confirm
+from k8t.util import makedirs, touch
 
 import k8t
 
@@ -37,5 +39,42 @@ def new_template(kind, dest):
 
     shutil.copyfile(source, dest)
 
+
+def new_project(directory: str) -> List[str]:
+    return _create_scaffold_directory(
+        directory=os.path.join(directory),
+        files=[".k8t", "values.yaml", "config.yaml"]
+    )
+
+
+def new_cluster(root: str, name: str):
+    return _create_scaffold_directory(
+        directory=os.path.join(root, "clusters", name),
+        files=["values.yaml", "config.yaml"]
+    )
+
+
+def new_environment(root: str, name: str) -> List[str]:
+    return _create_scaffold_directory(
+        directory=os.path.join(root, "environments", name),
+        files=["values.yaml", "config.yaml"]
+    )
+
+
+def _create_scaffold_directory(*, directory: str, files: List[str] = None) -> List[str]:
+    created_objects = []
+
+    makedirs(directory)
+    created_objects.append(directory)
+
+    if files:
+        filepaths = [os.path.join(directory, filename) for filename in files]
+
+        for filepath in filepaths:
+            touch(filepath)
+
+        created_objects.extend(filepaths)
+
+    return created_objects
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab
