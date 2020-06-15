@@ -12,6 +12,8 @@ import string
 
 import boto3
 
+from k8t import config
+
 try:
     from secrets import SystemRandom
 except ImportError:
@@ -20,11 +22,16 @@ except ImportError:
 
 LOGGER = logging.getLogger(__name__)
 RANDOM_STORE = {}
+DEFAULT_SSM_PREFIX = ""
+DEFAULT_SSM_REGION = "eu-central-1"
 
 
-def ssm(key: str, region: str, length: int = None) -> str:
+def ssm(key: str, length: int = None) -> str:
+    prefix = str(config.CONFIG.get("secrets", {}).get("prefix", DEFAULT_SSM_PREFIX))
+    key = prefix + key
     LOGGER.debug("Requesting secret from %s", key)
 
+    region = str(config.CONFIG.get("secrets", {}).get("region", DEFAULT_SSM_REGION))
     client = boto3.client("ssm", region_name=region)
 
     try:
@@ -47,8 +54,8 @@ def random(key: str, length: int = None) -> str:
             SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(length or SystemRandom().randint(12, 32))
         )
 
-        if length is not None:
-            if len(RANDOM_STORE[key]) != length:
-                raise AssertionError("Secret '{}' did not have expected length of {}".format(key, length))
+    if length is not None:
+        if len(RANDOM_STORE[key]) != length:
+            raise AssertionError("Secret '{}' did not have expected length of {}".format(key, length))
 
     return RANDOM_STORE[key]

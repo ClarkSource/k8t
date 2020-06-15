@@ -10,23 +10,24 @@
 import boto3
 import pytest
 from moto import mock_ssm
+from k8t import config
 from k8t.secret_providers import random
 from k8t.secret_providers import ssm
 
 
 def test_random():
-    length = 12
+    config.CONFIG = {"secrets": {"provider": "random"}}
+    assert random("/foobar"), random("/foobar")
+    assert random("/foobar") != random("/foobaz")
 
-    assert random('/foobar', length) == random('/foobar', length) != random('/foobaz', length)
-
-    result = random('/foobam', length)
-
-    assert result == random('/foobam', length)
+    assert len(random("/foo", 12)) == 12
+    with pytest.raises(AssertionError, match=r"Secret '/foo' did not have expected length of 3"):
+        random("/foo", 3)
 
 
 @mock_ssm
 def test_ssm():
-    region = "eu-central-1"
+    region = "eu-west-1"
     client = boto3.client("ssm", region_name=region)
 
     client.put_parameter(
@@ -52,18 +53,38 @@ def test_ssm():
         KeyId="alias/aws/ssm",
     )
 
-    response = ssm("foo", region)
-    assert response == 'global_secret_value'
-    response = ssm("/dev/test1", region)
-    assert response == 'string_value'
-    response = ssm("/app/dev/password", region)
-    assert response == 'my_secret_value'
+    config.CONFIG = {"secrets": {"provider": "ssm", "region": region}}
+    assert ssm("foo"), "global_secret_value"
+    assert ssm("/dev/test1"), "string_value"
+    assert ssm("/app/dev/password"), "my_secret_value"
+
+    with pytest.raises(AssertionError, match=r"Secret '/app/dev/password' did not have expected length of 3"):
+        ssm("/app/dev/password", 3)
+    with pytest.raises(RuntimeError, match=r"Could not find secret: /Application/non_existent"):
+        ssm("/Application/non_existent")
+
+    config.CONFIG = {"secrets": {"provider": "ssm", "region": region, "prefix": "/app/dev"}}
+    assert ssm("/password"), "my_secret_value"
+
+    config.CONFIG = {"secrets": {"provider": "ssm", "region": "eu-central-1"}}
+    with pytest.raises(RuntimeError, match=r"Could not find secret: foo"):
+        ssm("foo")
+
 
 @mock_ssm
-def test_ssm_nonexistent_parameter():
+def test_ssm_default_region():
     region = "eu-central-1"
+    client = boto3.client("ssm", region_name=region)
 
-    with pytest.raises(RuntimeError, match=r"Could not find secret: /Application/non_existent"):
-        ssm("/Application/non_existent", region)
+    client.put_parameter(
+        Name="foo",
+        Description="Global parameter",
+        Value="global_secret_value",
+        Type="SecureString",
+        KeyId="alias/aws/ssm",
+    )
+
+    config.CONFIG = {"secrets": {"provider": "ssm"}}
+    assert ssm("foo"), "global_secret_value"
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab
