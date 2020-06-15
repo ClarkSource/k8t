@@ -10,8 +10,10 @@
 import copy
 import logging
 import os
+import shutil
 from functools import reduce
 from typing import Dict, List
+from click import secho
 
 import yaml
 from simple_tools.interaction import confirm
@@ -29,7 +31,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 def touch(fname: str, mode=0o666, dir_fd=None, **kwargs) -> None:
-    if not os.path.exists(fname):
+    if os.path.exists(fname):
+        secho(f"File exists: {fname}", fg="yellow")
+    else:
         flags = os.O_CREAT | os.O_APPEND
         with os.fdopen(os.open(fname, flags=flags, mode=mode, dir_fd=dir_fd)) as filep:
             os.utime(
@@ -37,14 +41,29 @@ def touch(fname: str, mode=0o666, dir_fd=None, **kwargs) -> None:
                 dir_fd=None if os.supports_fd else dir_fd,
                 **kwargs,
             )
+        secho(f"File created: {fname}", fg="green")
 
 
 def makedirs(path, warn_exists=True):
-    if os.path.exists(path) and warn_exists:
-        if not confirm("directory {} already exists, go ahead?".format(path)):
+    if os.path.exists(path):
+        if warn_exists:
+            if confirm("directory {} already exists, go ahead?".format(path)):
+                secho(f"Directory exists: {path}", fg="yellow")
+                return
+            raise RuntimeError("aborting")
+        secho(f"Directory exists: {path}", fg="yellow")
+    else:
+        os.makedirs(path, exist_ok=True)
+        secho(f"Directory created: {path}", fg="green")
+
+
+def replace(source: str, dest: str):
+    if os.path.exists(dest):
+        if not confirm(f"file {dest} already exists, overwrite?"):
             raise RuntimeError("aborting")
 
-    os.makedirs(path, exist_ok=True)
+    shutil.copyfile(source, dest)
+    secho(f"Template created: {dest}", fg="green")
 
 
 MERGE_METHODS = ["ltr", "rtl", "ask", "crash"]

@@ -11,7 +11,6 @@ import os
 from typing import List
 
 from k8t.project import find_files
-from k8t.util import makedirs, touch
 
 
 def list_all(path: str) -> List[str]:
@@ -24,12 +23,3 @@ def list_all(path: str) -> List[str]:
             break
 
     return result
-
-
-def new(root: str, name: str):
-    directory = os.path.join(root, "clusters", name)
-
-    makedirs(directory)
-
-    touch(os.path.join(directory, "values.yaml"))
-    touch(os.path.join(directory, "config.yaml"))
