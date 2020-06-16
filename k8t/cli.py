@@ -12,9 +12,9 @@ import os
 import sys
 
 from functools import update_wrapper
+from jinja2 import UndefinedError, TemplateSyntaxError
 import click
 import coloredlogs
-from jinja2.exceptions import UndefinedError
 
 import k8t
 from k8t import cluster, config, environment, project, scaffolding, values
@@ -111,9 +111,10 @@ def cli_validate(method, value_files, cli_values, cname, ename, directory):
 @click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="<KEY VALUE>", help="Additional value(s) to include.")
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--dry-run", is_flag=True, default=False, show_default=True, help="Doesn't produce output. Used for validation.")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 @requires_project_directory
-def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
+def cli_gen(method, value_files, cli_values, cname, ename, dry_run, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -123,30 +124,21 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
     )
     config.CONFIG = config.load_all(directory, cname, ename, method)
 
-    eng = build(directory, cname, ename)
+    eng = build(directory, cname, ename, dry_run)
 
-    templates = eng.list_templates()  # pylint: disable=redefined-outer-name
-    validated = True
-
-    for template_path in templates:
-        if not validate(template_path, vals, eng):
-            click.echo("Failed to validate template {}".format(template_path))
-
-            validated = False
-
-    if not validated:
-        sys.exit(1)
-
+    templates = eng.list_templates()
     try:
         for template_path in templates:
             click.echo("---")
             click.echo("# Source: {}".format(template_path))
 
             template_output = render(template_path, vals, eng)
-            click.echo(template_output)
-    except (UndefinedError, YamlValidationError) as err:
+            if not dry_run:
+                click.echo(template_output)
+    except (UndefinedError, YamlValidationError, TemplateSyntaxError) as err:
         click.secho("✗ -> {}".format(err), fg="red")
-        sys.exit(1)
+        if not dry_run:
+            sys.exit(1)
 
 
 @root.group(help="Code scaffolding commands.")
