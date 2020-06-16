@@ -112,7 +112,7 @@ def render(template_path: str, values: dict, engine: Environment) -> str:
     output = engine.get_template(template_path).render(values)
 
     try:
-        yaml.safe_load(output)
+        yaml.safe_load_all(output)
     except (yaml.scanner.ScannerError, yaml.parser.ParserError) as err:
         raise YamlValidationError(err)
 
