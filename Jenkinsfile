@@ -64,26 +64,14 @@ pipeline {
     }
 
     stage('docker') {
-      agent { label 'docker' }
-
       steps {
-        script {
-          dockerImage = docker.build("${image}:${env.GIT_COMMIT}")
-
-          docker.withRegistry(credentialsId: 'dockerhub') {
-            dockerImage.push(env.TAG_NAME)
-            dockerImage.push("latest")
-          }
-        }
-      }
-
-      post {
-        always{
+        container('docker') {
           script {
-            try {
-              sh "docker rmi ${image}:${env.GIT_COMMIT}"
-            } finally {
-              deleteDir()
+            dockerImage = docker.build("${image}:${env.GIT_COMMIT}")
+
+            docker.withRegistry(credentialsId: 'dockerhub') {
+              dockerImage.push(env.TAG_NAME)
+              dockerImage.push("latest")
             }
           }
         }

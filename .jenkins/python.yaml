@@ -16,3 +16,15 @@ spec:
         limits:
           memory: '512Mi'
           cpu: '1'
+    - name: docker
+      image: gcr.io/kaniko-project/executor:debug
+      tty: true
+      command:
+        - /busybox/cat
+      resources:
+        requests:
+          memory: '256Mi'
+          cpu: '100m'
+        limits:
+          memory: '256Mi'
+          cpu: '100m'
