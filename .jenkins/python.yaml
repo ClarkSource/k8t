@@ -2,6 +2,9 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: node
+  annotations:
+    container.apparmor.security.beta.kubernetes.io/img: "unconfined"
+    container.seccomp.security.alpha.kubernetes.io/img: "unconfined"
 spec:
   containers:
     - name: python
@@ -16,11 +19,11 @@ spec:
         limits:
           memory: '512Mi'
           cpu: '1'
-    - name: docker
-      image: gcr.io/kaniko-project/executor:debug
+    - name: img
+      image: r.j3ss.co/img
       tty: true
       command:
-        - /busybox/cat
+        - cat
       resources:
         requests:
           memory: '256Mi'

@@ -65,14 +65,16 @@ pipeline {
 
     stage('docker') {
       steps {
-        container('docker') {
+        container('img') {
           script {
-            dockerImage = docker.build("${image}:${env.GIT_COMMIT}")
+            sh "img build -t ${image}:${env.GIT_COMMIT} ."
 
-            docker.withRegistry(credentialsId: 'dockerhub') {
-              dockerImage.push(env.TAG_NAME)
-              dockerImage.push("latest")
-            }
+            // dockerImage = docker.build("${image}:${env.GIT_COMMIT}")
+
+            /* docker.withRegistry(credentialsId: 'dockerhub') { */
+            /*   dockerImage.push(env.TAG_NAME) */
+            /*   dockerImage.push("latest") */
+            /* } */
           }
         }
       }
