@@ -6,6 +6,11 @@ metadata:
     container.apparmor.security.beta.kubernetes.io/img: "unconfined"
     container.seccomp.security.alpha.kubernetes.io/img: "unconfined"
 spec:
+  volumes:
+    - name: docker-socket-volume
+      hostPath:
+        path: /var/run/docker.sock
+        type: File
   containers:
     - name: python
       image: python:3-alpine
@@ -19,6 +24,11 @@ spec:
         limits:
           memory: '512Mi'
           cpu: '1'
+      volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-socket-volume
+#      securityContext:
+#        privileged: true
     - name: img
       image: r.j3ss.co/img
       tty: true
