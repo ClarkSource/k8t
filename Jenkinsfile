@@ -68,13 +68,11 @@ pipeline {
         container('img') {
           script {
             sh "img build -t ${image}:${env.GIT_COMMIT} ."
+            sh "img tag ${image}:${env.GIT_COMMIT} ${image}:latest"
 
-            // dockerImage = docker.build("${image}:${env.GIT_COMMIT}")
-
-            /* docker.withRegistry(credentialsId: 'dockerhub') { */
-            /*   dockerImage.push(env.TAG_NAME) */
-            /*   dockerImage.push("latest") */
-            /* } */
+            docker.withRegistry(credentialsId: 'dockerhub') {
+              sh "img push ${image}:latest"
+            }
           }
         }
       }
