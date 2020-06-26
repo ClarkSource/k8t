@@ -2,7 +2,7 @@ FROM python:3-alpine
 
 LABEL maintainer="CloudOps <cloudops@clark.de>"
 
-ARG KUBECTL_VERSION="1.8.0"
+ARG KUBECTL_VERSION="1.18.0"
 
 # Install kubectl
 RUN \
