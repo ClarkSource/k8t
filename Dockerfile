@@ -2,10 +2,12 @@ FROM python:3-alpine
 
 LABEL maintainer="CloudOps <cloudops@clark.de>"
 
+ARG KUBECTL_VERSION="1.8.0"
+
 # Install kubectl
 RUN \
   apk add --no-cache openssl curl tar gzip bash ca-certificates && \
-  curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl && \
+  curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
   chmod +x /usr/bin/kubectl && \
   kubectl version --client
 
