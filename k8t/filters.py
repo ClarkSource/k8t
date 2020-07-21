@@ -83,6 +83,7 @@ def hashf(value, method="sha256"):
 
 def get_secret(key: str, length: int = None) -> str:
     provider_name = config.CONFIG.get("secrets", {}).get("provider")
+
     if not provider_name:
         raise RuntimeError("Secrets provider not configured.")
 

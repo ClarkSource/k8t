@@ -111,9 +111,10 @@ def cli_validate(method, value_files, cli_values, cname, ename, directory):
 @click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="<KEY VALUE>", help="Additional value(s) to include.")
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--secret-provider", help="Secret provider override.")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 @requires_project_directory
-def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
+def cli_gen(method, value_files, cli_values, cname, ename, secret_provider, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -121,7 +122,11 @@ def cli_gen(method, value_files, cli_values, cname, ename, directory):  # pylint
         envvalues(),
         method=method,
     )
+
     config.CONFIG = config.load_all(directory, cname, ename, method)
+
+    if secret_provider is not None:
+        config.CONFIG['secrets']['provider'] = secret_provider
 
     eng = build(directory, cname, ename)
 
