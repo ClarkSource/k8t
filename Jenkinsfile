@@ -26,7 +26,9 @@ pipeline {
 
     stage('test') {
       steps {
-        sh 'tox'
+        withStatus(context: 'ci/test') {
+          sh 'tox'
+        }
       }
     }
 
@@ -39,8 +41,10 @@ pipeline {
       }
 
       steps {
-        sh 'pip install --upgrade setuptools wheel'
-        sh 'python3 setup.py sdist bdist_wheel'
+        withStatus(context: 'ci/build') {
+          sh 'pip install --upgrade setuptools wheel'
+          sh 'python3 setup.py sdist bdist_wheel'
+        }
       }
     }
 
@@ -50,9 +54,11 @@ pipeline {
       }
 
       steps {
-        sh 'pip install --upgrade twine'
-        withCredentials([usernamePassword(credentialsId: 'pypi', usernameVariable: 'TWINE_USERNAME', passwordVariable: 'TWINE_PASSWORD')]) {
-          sh 'twine upload dist/*'
+        withStatus(context: 'ci/release') {
+          sh 'pip install --upgrade twine'
+          withCredentials([usernamePassword(credentialsId: 'pypi', usernameVariable: 'TWINE_USERNAME', passwordVariable: 'TWINE_PASSWORD')]) {
+            sh 'twine upload dist/*'
+          }
         }
       }
     }
