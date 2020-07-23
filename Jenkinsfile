@@ -1,4 +1,4 @@
-library("base@CLOUD-1616")
+library("base")
 
 pipeline {
   agent {

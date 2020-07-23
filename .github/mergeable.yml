@@ -1,0 +1,13 @@
+# https://github.com/mergeability/mergeable
+version: 2
+mergeable:
+  - when: pull_request.*
+    validate:
+      # validate title
+      - do: title
+        no_empty:
+          enabled: true
+      # disallow merging when WIP
+      - do: label
+        must_exclude:
+          regex: 'wip'
