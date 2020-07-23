@@ -1,3 +1,5 @@
+library("base@CLOUD-1616")
+
 pipeline {
   agent {
     kubernetes {
