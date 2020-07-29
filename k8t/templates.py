@@ -74,37 +74,65 @@ def validate(template_path: str, values: dict, engine: Environment) -> bool:
 
 
 def get_variables(template_path: str, engine: Environment) -> Set[str]:
-    template_source = engine.loader.get_source(engine, template_path)[
-        0
-    ]
+    template_source = engine.loader.get_source(engine, template_path)[0]
     abstract_syntax_tree = engine.parse(template_source)
 
+    undeclared = meta.find_undeclared_variables(abstract_syntax_tree)
+
     defaults = {
-        hasattr(filter.node, "name") and filter.node.name
+        filter.node.name
 
         for filter in abstract_syntax_tree.find_all(nodes.Filter)
 
-        if filter.name == "default"
+        if filter.name == "default" and hasattr(filter.node, "name")
+    }
+
+    guarded = {
+        test.node.name
+
+        for test in abstract_syntax_tree.find_all(nodes.Test)
+
+        if test.name == 'defined' and hasattr(test.node, "name")
+    }
+
+    local = {
+        assign.target.name
+
+        for assign in abstract_syntax_tree.find_all(nodes.Assign)
     }
 
     return (
-        meta.find_undeclared_variables(
-            abstract_syntax_tree) - (set(engine.globals.keys()) - PROHIBITED_VARIABLE_NAMES) - defaults
+        undeclared - (set(engine.globals.keys()) - PROHIBITED_VARIABLE_NAMES) - defaults - guarded - local
     )
 
 
 def get_secrets(template_path: str, engine: Environment) -> Set[str]:
-    template_source = engine.loader.get_source(engine, template_path)[
-        0
-    ]
+    template_source = engine.loader.get_source(engine, template_path)[0]
     abstract_syntax_tree = engine.parse(template_source)
 
+    def parse_call_arg(node: nodes.Node, parent: nodes.Node) -> str:
+        if type(node) is nodes.Const:
+            return node.value
+        elif type(node) is nodes.Name:
+            return node.name
+        elif type(node) is nodes.Mod:
+            if type(node.left) is nodes.Const and type(node.right) is nodes.Name:
+                return node.left.value.format(f"${node.right.name}")
+            else:
+                LOGGER.error("can't parse node %s due to unhandled Mod node %s (please open a ticket and include this message and the template that fails)", parent, node)
+
+                return NotImplementedError(f"trying to parse a Mod node with unknown values")
+        else:
+            LOGGER.error("can't parse node %s due to unknown arg type %s (please open a ticket and include this message and the template that fails)", parent, node)
+
+            return NotImplementedError(f"trying to parse a node of type {type(node)}")
+
     return {
-        call.args[0].value
+        parse_call_arg(call.args[0], call.node)
 
         for call in abstract_syntax_tree.find_all(nodes.Call)
 
-        if call.node.name == "get_secret"
+        if call.node.name == "get_secret" and call.args
     }
 
 
