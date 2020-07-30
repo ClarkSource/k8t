@@ -58,7 +58,7 @@ def analyze(template_path: str, values: dict, engine: Environment) -> Tuple[Set[
 
 def validate(template_path: str, values: dict, engine: Environment) -> bool:
     config_ok = True
-    undefined, _, invalid, secrets = analyze(template_path, values, engine)
+    undefined, _, invalid, has_secrets = analyze(template_path, values, engine)
 
     if undefined:
         LOGGER.error(
@@ -68,7 +68,7 @@ def validate(template_path: str, values: dict, engine: Environment) -> bool:
         LOGGER.error(
             "Invalid variable names found: %s", sorted(invalid))
 
-    if secrets:
+    if has_secrets:
         if "secrets" not in config.CONFIG:
             LOGGER.error(
                 "No configuration for secrets found: %s", config.CONFIG)

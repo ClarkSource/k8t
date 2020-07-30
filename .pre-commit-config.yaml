@@ -4,11 +4,11 @@ repos:
       - id: check-hooks-apply
       - id: check-useless-excludes
   - repo: git://github.com/pre-commit/pre-commit-hooks
-    rev: v2.2.3
+    rev: v3.1.0
     hooks:
       - id: check-merge-conflict
   - repo: git://github.com/Lucas-C/pre-commit-hooks.git
-    rev: v1.1.7
+    rev: v1.1.9
     hooks:
       - id: insert-license
         files: \.py$
@@ -16,4 +16,3 @@ repos:
     rev: v1.4.0
     hooks:
       - id: doctoc
-        language: system
