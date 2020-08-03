@@ -33,9 +33,13 @@ class YamlValidationError(Exception):
     """
 
 
-def analyze(template_path: str, values: dict, engine: Environment) -> Tuple[Set[str], Set[str], Set[str], Set[str]]:
-    secrets = get_secrets(template_path, engine)
-    required_variables = get_variables(template_path, engine)
+def analyze(template_path: str, values: dict, engine: Environment) -> Tuple[Set[str], Set[str], Set[str], bool]:
+    template_source = engine.loader.get_source(engine, template_path)[0]
+    abstract_syntax_tree = engine.parse(template_source)
+
+    has_secrets = any(call.node.name == "get_secret" for call in abstract_syntax_tree.find_all(nodes.Call))
+    required_variables = get_variables(abstract_syntax_tree, engine)
+
     defined_variables = set(values.keys())
 
     LOGGER.debug(
@@ -49,12 +53,12 @@ def analyze(template_path: str, values: dict, engine: Environment) -> Tuple[Set[
         var for var in required_variables if var in PROHIBITED_VARIABLE_NAMES
     }
 
-    return (undefined_variables - invalid_variables), unused_variables, invalid_variables, secrets
+    return (undefined_variables - invalid_variables), unused_variables, invalid_variables, has_secrets
 
 
 def validate(template_path: str, values: dict, engine: Environment) -> bool:
     config_ok = True
-    undefined, _, invalid, secrets = analyze(template_path, values, engine)
+    undefined, _, invalid, has_secrets = analyze(template_path, values, engine)
 
     if undefined:
         LOGGER.error(
@@ -64,7 +68,7 @@ def validate(template_path: str, values: dict, engine: Environment) -> bool:
         LOGGER.error(
             "Invalid variable names found: %s", sorted(invalid))
 
-    if secrets:
+    if has_secrets:
         if "secrets" not in config.CONFIG:
             LOGGER.error(
                 "No configuration for secrets found: %s", config.CONFIG)
@@ -73,39 +77,34 @@ def validate(template_path: str, values: dict, engine: Environment) -> bool:
     return config_ok and not (invalid or undefined)
 
 
-def get_variables(template_path: str, engine: Environment) -> Set[str]:
-    template_source = engine.loader.get_source(engine, template_path)[
-        0
-    ]
-    abstract_syntax_tree = engine.parse(template_source)
+def get_variables(ast, engine: Environment) -> Set[str]:
+    undeclared = meta.find_undeclared_variables(ast)
 
     defaults = {
-        hasattr(filter.node, "name") and filter.node.name
+        filter.node.name
 
-        for filter in abstract_syntax_tree.find_all(nodes.Filter)
+        for filter in ast.find_all(nodes.Filter)
 
-        if filter.name == "default"
+        if filter.name == "default" and hasattr(filter.node, "name")
+    }
+
+    guarded = {
+        test.node.name
+
+        for test in ast.find_all(nodes.Test)
+
+        if test.name == 'defined' and hasattr(test.node, "name")
+    }
+
+    local = {
+        assign.target.name
+
+        for assign in ast.find_all(nodes.Assign)
     }
 
     return (
-        meta.find_undeclared_variables(
-            abstract_syntax_tree) - (set(engine.globals.keys()) - PROHIBITED_VARIABLE_NAMES) - defaults
+        undeclared - (set(engine.globals.keys()) - PROHIBITED_VARIABLE_NAMES) - defaults - guarded - local
     )
-
-
-def get_secrets(template_path: str, engine: Environment) -> Set[str]:
-    template_source = engine.loader.get_source(engine, template_path)[
-        0
-    ]
-    abstract_syntax_tree = engine.parse(template_source)
-
-    return {
-        call.args[0].value
-
-        for call in abstract_syntax_tree.find_all(nodes.Call)
-
-        if call.node.name == "get_secret"
-    }
 
 
 def render(template_path: str, values: dict, engine: Environment) -> str:

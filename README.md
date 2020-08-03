@@ -23,6 +23,8 @@ Simple cluster and environment specific aware templating for kubernetes manifest
   - [Scaffolding](#scaffolding)
   - [Config management](#config-management)
   - [Validate templates](#validate-templates)
+    - [Shortcomings](#shortcomings)
+      - [is defined](#is-defined)
   - [Generate manifests](#generate-manifests)
   - [Overriding templates](#overriding-templates)
   - [Managing secrets](#managing-secrets)
@@ -146,6 +148,32 @@ To validate for clusters/environments the usual options can be used
 
 ```bash
 $ k8t validate -c MyCluster -e production
+```
+
+#### Shortcomings
+
+The validation is currently not a 100% correct and can miss certain edge cases.  If you notice any other issues please let us know.
+
+##### is defined
+
+The following will result in a false negative for `foobar` being defined
+
+```
+{{ foobar }}
+
+{% if foobar is defined %}
+{{ foobar }}
+{% endif %}
+```
+
+To avoid this make sure that the `is defined` test is applied to all instances of the variable.
+
+The following may result in a false positive for `bar` being undefined
+
+```
+{% if foobar is defined %}
+{{ bar }}
+{% endif %}
 ```
 
 ### Generate manifests
