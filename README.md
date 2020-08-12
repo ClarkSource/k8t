@@ -43,6 +43,12 @@ run this
 $ pip install --user --upgrade k8t
 ```
 
+run the following to install [ujson](https://pypi.org/project/ujson/) as a dependency
+
+```bash
+$ pip install --user --upgrade k8t[ujson]
+```
+
 **note**: k8t is not Python 2 compatible
 
 ### Completion
