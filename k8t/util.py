@@ -11,23 +11,19 @@ import copy
 import logging
 import os
 import shutil
-from functools import reduce
-from typing import Dict, List
-from click import secho
-
 import yaml
+
+from click import secho
+from functools import reduce
 from simple_tools.interaction import confirm
+from typing import Dict, List, Any, Tuple
+
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 LOGGER = logging.getLogger(__name__)
-
-
-# def include_file(name: str):
-#     fpath = find_file(name, path, cluster, environment)
-#
-#     with open(fpath, 'rb') as s:
-#         return s.read()
-
-
 
 
 def touch(fname: str, mode=0o666, dir_fd=None, **kwargs) -> None:
@@ -119,6 +115,14 @@ def load_yaml(path: str) -> dict:
     with open(path, "r") as stream:
         return yaml.safe_load(stream) or dict()
 
+
+def load_cli_value(key: str, value: str) -> Tuple[str, Any]:
+    LOGGER.debug("loading cli value (%s, %s)", key, value)
+
+    try:
+        return (key, json.loads(value))
+    except json.decoder.JSONDecodeError:
+        return (key, value)
 
 
 def envvalues() -> Dict:
