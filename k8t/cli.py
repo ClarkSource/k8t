@@ -20,7 +20,7 @@ import k8t
 from k8t import cluster, config, environment, project, scaffolding, values
 from k8t.engine import build
 from k8t.templates import analyze, validate, render, YamlValidationError
-from k8t.util import MERGE_METHODS, deep_merge, envvalues, load_yaml
+from k8t.util import MERGE_METHODS, deep_merge, envvalues, load_yaml, load_cli_value
 
 
 def requires_project_directory(func):
@@ -64,7 +64,7 @@ def cli_validate(method, value_files, cli_values, cname, ename, directory):
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
-        dict(cli_values),
+        dict(load_cli_value(k, v) for k, v in cli_values),
         envvalues(),
         method=method,
     )
@@ -118,7 +118,7 @@ def cli_gen(method, value_files, cli_values, cname, ename, secret_provider, dire
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
-        dict(cli_values),
+        dict(load_cli_value(k, v) for k, v in cli_values),
         envvalues(),
         method=method,
     )

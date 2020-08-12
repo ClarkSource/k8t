@@ -41,6 +41,7 @@ in
         pyyaml
         click
         simple_tools
+        ujson
         setuptools
       ];
 
