@@ -120,7 +120,7 @@ $ k8t new cluster MyCluster
 Create a new environment
 
 ```bash
-$ k8t new environment staging
+$ k8t new environment staging -c MyCluster
 ```
 
 Generate a new deployment template for cluster MyCluster (for a list of available templates see the `k8t new template --help`)
