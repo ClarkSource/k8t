@@ -101,6 +101,43 @@ quickly verify the written templates.
 * `get_secret(key: str)` - provides a secret value from a given provider (see [here](#managing-secrets))
 * `bool(value: Any)` - casts value to boolean ("true", "on", "yes", "1", 1 are considered as `True`)
 
+## Overriding flow
+
+Overriding flow is from low score (1) to high (4) means more-specific configuration will be on top.
+
+So variables and templates will be ovveriden by flow `project` -> `environments` -> `clusters` -> `cluster-specific-environments`
+
+```.                                        (1) # k8t new project .
+├── clusters
+│   ├── foo                                 (3) # k8t new cluster foo
+│   │   ├── config.yaml         
+│   │   ├── values.yaml
+│   │   ├── environments 
+│   │   │    ├── production                 (4) # k8t new environment production -c foo
+│   │   │    │   ├── config.yaml
+│   │   │    │   └── values.yaml
+│   │   │    └── staging                    (4) # k8t new environment staging -c foo
+│   │   │        ├── config.yaml
+│   │   │        ├── values.yaml
+│   │   │        └── templates                    
+│   │   │           └── deployment.yaml.j2  (4) # k8t new template deployment -c foo -e staging                     
+│   │   └── templates                    
+│   │      └── deployment.yaml.j2           (3) # k8t new template deployment -c foo
+│   └── bar                                 (3) # k8t new cluster bar
+│       ├── config.yaml  
+│       └── values.yaml
+├── environments              
+│   ├── production                          (2) # k8t new environment production 
+│   │   ├── config.yaml
+│   │   └── values.yaml
+│   └── staging                             (2) # k8t new environment staging
+│       ├── config.yaml
+│       └── values.yaml
+├── config.yaml                             (1)
+└── values.yaml                             (1)
+
+```
+
 ## Usage
 
 ### Scaffolding
