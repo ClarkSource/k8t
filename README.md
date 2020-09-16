@@ -107,7 +107,8 @@ Configuration, values and templates are used according to the scope they are in.
 
 So variables and templates will be overridden from `project` -> `environments` -> `clusters` -> `cluster-environments` resulting in more specific configuration overriding lower values.
 
-```.                                        (1) # k8t new project .
+```bash
+.                                           (1) # k8t new project .
 ├── clusters
 │   ├── foo                                 (3) # k8t new cluster foo
 │   │   ├── config.yaml         
@@ -164,6 +165,8 @@ And a new cluster environment
 
 ```bash
 k8t new environment staging -c MyCluster
+```
+
 Generate a new deployment template for cluster MyCluster (for a list of available templates see the `k8t new template --help`)
 
 ```bash
