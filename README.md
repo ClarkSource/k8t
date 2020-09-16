@@ -117,7 +117,7 @@ Create a new cluster
 $ k8t new cluster MyCluster
 ```
 
-Create a new environment
+Create a new global environment
 
 ```bash
 $ k8t new environment staging -c MyCluster
