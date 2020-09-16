@@ -101,11 +101,11 @@ quickly verify the written templates.
 * `get_secret(key: str)` - provides a secret value from a given provider (see [here](#managing-secrets))
 * `bool(value: Any)` - casts value to boolean ("true", "on", "yes", "1", 1 are considered as `True`)
 
-## Overriding flow
+## Configuration inheritance
 
-Overriding flow is from low score (1) to high (4) means more-specific configuration will be on top.
+Configuration, values and templates are used according to the scope they are in. The following snippet shows an example project with low scores (1) and high scores (4) for evaluation order.
 
-So variables and templates will be ovveriden by flow `project` -> `environments` -> `clusters` -> `cluster-specific-environments`
+So variables and templates will be overridden from `project` -> `environments` -> `clusters` -> `cluster-environments` resulting in more specific configuration overriding lower values.
 
 ```.                                        (1) # k8t new project .
 ├── clusters
