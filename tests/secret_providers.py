@@ -9,10 +9,9 @@
 
 import boto3
 import pytest
-from moto import mock_ssm
 from k8t import config
-from k8t.secret_providers import random
-from k8t.secret_providers import ssm
+from k8t.secret_providers import random, ssm
+from moto import mock_ssm
 
 
 def test_random():
@@ -21,7 +20,9 @@ def test_random():
     assert random("/foobar") != random("/foobaz")
 
     assert len(random("/foo", 12)) == 12
-    with pytest.raises(AssertionError, match=r"Secret '/foo' did not have expected length of 3"):
+    with pytest.raises(
+        AssertionError, match=r"Secret '/foo' did not have expected length of 3"
+    ):
         random("/foo", 3)
 
 
@@ -58,16 +59,27 @@ def test_ssm():
     assert ssm("/dev/test1"), "string_value"
     assert ssm("/app/dev/password"), "my_secret_value"
 
-    with pytest.raises(AssertionError, match=r"Secret '/app/dev/password' did not have expected length of 3"):
+    with pytest.raises(
+        AssertionError,
+        match=r"Secret '/app/dev/password' did not have expected length of 3",
+    ):
         ssm("/app/dev/password", 3)
-    with pytest.raises(RuntimeError, match=r"Could not find secret: /Application/non_existent"):
+    with pytest.raises(
+        RuntimeError, match=r"Failed to retrieve secret /Application/non_existent: ..."
+    ):
         ssm("/Application/non_existent")
+    with pytest.raises(
+        RuntimeError, match=r"Failed to retrieve secret /Application/password/: ..."
+    ):
+        ssm("/Application/password/")
 
-    config.CONFIG = {"secrets": {"provider": "ssm", "region": region, "prefix": "/app/dev"}}
+    config.CONFIG = {
+        "secrets": {"provider": "ssm", "region": region, "prefix": "/app/dev"}
+    }
     assert ssm("/password"), "my_secret_value"
 
     config.CONFIG = {"secrets": {"provider": "ssm", "region": "eu-central-1"}}
-    with pytest.raises(RuntimeError, match=r"Could not find secret: foo"):
+    with pytest.raises(RuntimeError, match=r"Failed to retrieve secret foo: ..."):
         ssm("foo")
 
 
@@ -86,5 +98,6 @@ def test_ssm_default_region():
 
     config.CONFIG = {"secrets": {"provider": "ssm"}}
     assert ssm("foo"), "global_secret_value"
+
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab

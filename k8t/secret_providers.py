@@ -46,10 +46,11 @@ def ssm(key: str, length: int = None) -> str:
                 )
 
         return result
-    except botocore.exceptions.ClientError as exc:
+    except (
+        client.exceptions.ParameterNotFound,
+        botocore.exceptions.ClientError,
+    ) as exc:
         raise RuntimeError(f"Failed to retrieve secret {key}: {exc}")
-    except client.exceptions.ParameterNotFound:
-        raise RuntimeError("Could not find secret: {}".format(key))
 
 
 def random(key: str, length: int = None) -> str:
