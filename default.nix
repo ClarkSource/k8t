@@ -55,6 +55,6 @@ in
       buildInputs = [
         k8t
         unstable.pre-commit
-        pkgs.python3.pkgs.tox
+        unstable.python3.pkgs.tox
       ];
     }
