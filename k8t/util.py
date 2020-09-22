@@ -8,20 +8,17 @@
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import copy
+import json
 import logging
 import os
 import shutil
-import yaml
-
-from click import secho
 from functools import reduce
-from simple_tools.interaction import confirm
-from typing import Dict, List, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
-try:
-    import ujson as json
-except ImportError:
-    import json
+import yaml
+from click import secho
+
+from simple_tools.interaction import confirm
 
 LOGGER = logging.getLogger(__name__)
 
@@ -45,6 +42,7 @@ def makedirs(path, warn_exists=True):
         if warn_exists:
             if confirm("directory {} already exists, go ahead?".format(path)):
                 secho(f"Directory exists: {path}", fg="yellow")
+
                 return
             raise RuntimeError("aborting")
         secho(f"Directory exists: {path}", fg="yellow")
@@ -74,9 +72,7 @@ def merge(d_1: dict, d_2: dict, path=None, method="ltr"):
     for key in d_2:
         if key in d_1:
             if isinstance(d_1[key], dict) and isinstance(d_2[key], dict):
-                d_1[key] = merge(d_1[key], d_2[key],
-                                 path + [str(key)],
-                                 method=method)
+                d_1[key] = merge(d_1[key], d_2[key], path + [str(key)], method=method)
             elif d_1[key] == d_2[key]:
                 pass  # same leaf value
             else:
@@ -87,8 +83,7 @@ def merge(d_1: dict, d_2: dict, path=None, method="ltr"):
                 elif method == "ask":
                     raise NotImplementedError('Merge method "ask"')
                 elif method == "crash":
-                    raise Exception("Conflict at %s" %
-                                    ".".join(path + [str(key)]))
+                    raise Exception("Conflict at %s" % ".".join(path + [str(key)]))
                 else:
                     raise Exception("Invalid merge method: %s" % method)
         else:
@@ -98,8 +93,7 @@ def merge(d_1: dict, d_2: dict, path=None, method="ltr"):
 
 
 def deep_merge(*dicts, method="ltr"):
-    LOGGER.debug(
-        '"%s" merging %s dicts', method, len(dicts))
+    LOGGER.debug('"%s" merging %s dicts', method, len(dicts))
 
     if not dicts:
         return {}
@@ -126,17 +120,19 @@ def load_cli_value(key: str, value: str) -> Tuple[str, Any]:
 
 
 def envvalues() -> Dict:
-    prefix: str = 'K8T_VALUE_'
+    prefix: str = "K8T_VALUE_"
     values: dict = dict()
 
     for key, value in os.environ.items():
         if key.startswith(prefix):
-            values[key.replace(prefix, '', 1).lower()] = value
+            values[key.replace(prefix, "", 1).lower()] = value
 
     return values
 
 
-def list_files(directory: str, include_files=False, include_directories=False) -> List[str]:
+def list_files(
+    directory: str, include_files=False, include_directories=False
+) -> List[str]:
     result = []
 
     for _, dirs, files in os.walk(directory):
