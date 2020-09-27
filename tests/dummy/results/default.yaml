@@ -1,0 +1,7 @@
+---
+# Source: common-template.yaml.j2
+env: "none"
+cluster: "none"
+foo: "1"
+bar: "test"
+buz: "buz_default"
