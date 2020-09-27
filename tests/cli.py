@@ -8,6 +8,8 @@
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import os
+import boto3
+from moto import mock_ssm
 from click.testing import CliRunner
 from k8t import __version__, __license__
 from k8t.cli import root
@@ -295,6 +297,54 @@ def test_validate_failure():
     assert 'secret-template.yaml.j2: ✗' in result.output # TODO: Crushes, check file
     assert 'several-template.yaml.j2: ✗' in result.output
     assert 'value-template.yaml.j2: ✗' in result.output
+
+@mock_ssm
+def test_gen():
+    client = boto3.client('ssm', region_name='eu-central-1')
+
+    client.put_parameter(
+        Name="/cluster-1/test",
+        Description="Environment specific simple parameter",
+        Value="string_value",
+        Type="String",
+    )
+
+    runner = CliRunner()
+
+    with open('tests/dummy/results/default.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', 'tests/dummy/k8t'])
+        assert result.exit_code == 0
+        assert result.output == file.read()
+
+    with open('tests/dummy/results/some-env.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-e', 'some-env', 'tests/dummy/k8t'])
+        assert result.exit_code == 0
+        assert result.output == file.read()
+
+    with open('tests/dummy/results/common-env.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-e', 'common-env', 'tests/dummy/k8t'])
+        assert result.exit_code == 0
+        assert result.output == file.read()
+
+    with open('tests/dummy/results/cluster-1.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-c', 'cluster-1', 'tests/dummy/k8t'])
+        assert result.exit_code == 0
+        assert result.output == file.read()
+
+    with open('tests/dummy/results/cluster-1-common-env.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-c', 'cluster-1', '-e', 'common-env', 'tests/dummy/k8t'])
+        assert result.exit_code == 0
+        assert result.output == file.read()
+
+    with open('tests/dummy/results/cluster-1-cluster-specific-env.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-c', 'cluster-1', '-e', 'cluster-specific-env', 'tests/dummy/k8t'])
+        assert result.exit_code == 0
+        assert result.output == file.read()
+
+    with open('tests/dummy/results/cluster-2.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-c', 'cluster-2', 'tests/dummy/k8t'])
+        assert result.exit_code == 0
+        assert result.output == file.read()
 
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab
