@@ -132,5 +132,86 @@ def test_new_template():
             assert f'Template created: ./templates/{template_type}.yaml.j2' in result.output
             assert os.path.exists(f'./templates/{template_type}.yaml.j2')
 
+def test_get_clusters():
+    runner = CliRunner()
+
+    result = runner.invoke(root, ['get', 'clusters', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    # TODO: Fix that, should return clusters, not environments
+    assert 'some-env' in result.output
+    assert 'common-env' in result.output
+    assert 'cluster-specific-env' not in result.output
+
+def test_get_environments():
+    runner = CliRunner()
+
+    result = runner.invoke(root, ['get', 'environments', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'some-env' in result.output
+    assert 'common-env' in result.output
+    assert 'cluster-specific-env' in result.output
+
+    result = runner.invoke(root, ['get', 'environments', '-c', 'cluster-1', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'some-env' not in result.output
+    assert 'common-env' in result.output
+    assert 'cluster-specific-env' in result.output
+
+    result = runner.invoke(root, ['get', 'environments', '-c', 'cluster-2', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert not result.output
+
+def test_get_templates():
+    runner = CliRunner()
+
+    result = runner.invoke(root, ['get', 'templates', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2' in result.output
+    assert 'common-env-template.yaml.j2' not in result.output
+    assert 'cluster-1-template.yaml.j2' not in result.output
+    assert 'cluster-1-env-template.yaml.j2' not in result.output
+
+    result = runner.invoke(root, ['get', 'templates', '-e', 'common-env', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2' in result.output
+    assert 'common-env-template.yaml.j2' in result.output
+    assert 'cluster-1-template.yaml.j2' not in result.output
+    assert 'cluster-1-env-template.yaml.j2' not in result.output
+
+    result = runner.invoke(root, ['get', 'templates', '-e', 'some-env', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2' in result.output
+    assert 'common-env-template.yaml.j2' not in result.output
+    assert 'cluster-1-template.yaml.j2' not in result.output
+    assert 'cluster-1-env-template.yaml.j2' not in result.output
+
+    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2' in result.output
+    assert 'common-env-template.yaml.j2' not in result.output
+    assert 'cluster-1-template.yaml.j2' in result.output
+    assert 'cluster-1-env-template.yaml.j2' not in result.output
+
+    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', '-e', 'cluster-specific-env', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2' in result.output
+    assert 'common-env-template.yaml.j2' not in result.output
+    assert 'cluster-1-template.yaml.j2' in result.output
+    assert 'cluster-1-env-template.yaml.j2' in result.output
+
+    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', '-e', 'common-env', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2' in result.output
+    assert 'common-env-template.yaml.j2' in result.output
+    assert 'cluster-1-template.yaml.j2' in result.output
+    assert 'cluster-1-env-template.yaml.j2' not in result.output
+
+    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-2', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2' in result.output
+    assert 'common-env-template.yaml.j2' not in result.output
+    assert 'cluster-1-template.yaml.j2' not in result.output
+    assert 'cluster-1-env-template.yaml.j2' not in result.output
+
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab
