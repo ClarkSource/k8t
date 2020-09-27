@@ -213,5 +213,88 @@ def test_get_templates():
     assert 'cluster-1-template.yaml.j2' not in result.output
     assert 'cluster-1-env-template.yaml.j2' not in result.output
 
+def test_validate_successful():
+    runner = CliRunner()
+
+    result = runner.invoke(root, ['validate', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2: ✔' in result.output
+    assert 'common-env-template.yaml.j2: ✔' not in result.output
+    assert 'cluster-1-template.yaml.j2: ✔' not in result.output
+    assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
+
+    result = runner.invoke(root, ['validate', '-e', 'common-env', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2: ✔' in result.output
+    assert 'common-env-template.yaml.j2: ✔' in result.output
+    assert 'cluster-1-template.yaml.j2: ✔' not in result.output
+    assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
+
+    result = runner.invoke(root, ['validate', '-e', 'some-env', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2: ✔' in result.output
+    assert 'common-env-template.yaml.j2: ✔' not in result.output
+    assert 'cluster-1-template.yaml.j2: ✔' not in result.output
+    assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
+
+    result = runner.invoke(root, ['validate', '-c', 'cluster-1', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2: ✔' in result.output
+    assert 'common-env-template.yaml.j2: ✔' not in result.output
+    assert 'cluster-1-template.yaml.j2: ✔' in result.output
+    assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
+
+    result = runner.invoke(root, ['validate', '-c', 'cluster-1', '-e', 'cluster-specific-env', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2: ✔' in result.output
+    assert 'common-env-template.yaml.j2: ✔' not in result.output
+    assert 'cluster-1-template.yaml.j2: ✔' in result.output
+    assert 'cluster-1-env-template.yaml.j2: ✔' in result.output
+
+    result = runner.invoke(root, ['validate', '-c', 'cluster-1', '-e', 'common-env', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2: ✔' in result.output
+    assert 'common-env-template.yaml.j2: ✔' in result.output
+    assert 'cluster-1-template.yaml.j2: ✔' in result.output
+    assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
+
+    result = runner.invoke(root, ['validate', '-c', 'cluster-2', 'tests/dummy/k8t'])
+    assert result.exit_code == 0
+    assert 'common-template.yaml.j2: ✔' in result.output
+    assert 'common-env-template.yaml.j2: ✔' not in result.output
+    assert 'cluster-1-template.yaml.j2: ✔' not in result.output
+    assert 'cluster-1-env-template.yaml.j2: ✔: ✔' not in result.output
+
+def test_validate_with_values():
+    runner = CliRunner()
+
+    result = runner.invoke(root, ['validate', 'tests/dummy/missing_values'])
+    assert result.exit_code # TODO: Should be 1
+    assert 'template.yaml.j2: ✗' in result.output
+    assert '- undefined variable: test' in result.output
+
+    result = runner.invoke(root, ['validate', '--value', 'test', 'something', 'tests/dummy/missing_values'])
+    assert result.exit_code == 0
+    assert 'template.yaml.j2: ✔' in result.output
+
+    result = runner.invoke(
+        root,
+        ['validate', '--value-file', 'tests/dummy/missing_values/value-file.yaml', 'tests/dummy/missing_values']
+    )
+    assert result.exit_code == 0
+    assert 'template.yaml.j2: ✔' in result.output
+
+def test_validate_failure():
+    runner = CliRunner()
+
+    result = runner.invoke(root, ['validate', 'tests/dummy/bad'])
+    # TODO: Fix and uncomment
+    # assert 'filter-template.yaml.j2: ✗' in result.output
+    # assert 'nested-value-adding-template.yaml.j2: ✗' in result.output
+    # assert 'nested-value-template.yaml.j2: ✗' in result.output
+    assert 'secret-template.yaml.j2: ✗' in result.output # TODO: Crushes, check file
+    assert 'several-template.yaml.j2: ✗' in result.output
+    assert 'value-template.yaml.j2: ✗' in result.output
+
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab
