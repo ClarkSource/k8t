@@ -139,10 +139,8 @@ def test_get_clusters():
 
     result = runner.invoke(root, ['get', 'clusters', 'tests/dummy/k8t'])
     assert result.exit_code == 0
-    # TODO: Fix that, should return clusters, not environments
-    assert 'some-env' in result.output
-    assert 'common-env' in result.output
-    assert 'cluster-specific-env' not in result.output
+    assert 'cluster-1' in result.output
+    assert 'cluster-2' in result.output
 
 def test_get_environments():
     runner = CliRunner()
