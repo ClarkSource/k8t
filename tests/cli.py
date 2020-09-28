@@ -172,6 +172,7 @@ def test_get_templates():
     assert 'common-env-template.yaml.j2' not in result.output
     assert 'cluster-1-template.yaml.j2' not in result.output
     assert 'cluster-1-env-template.yaml.j2' not in result.output
+    assert 'composite-template.yaml.j2' not in result.output
 
     result = runner.invoke(root, ['get', 'templates', '-e', 'common-env', 'tests/dummy/k8t'])
     assert result.exit_code == 0
@@ -179,6 +180,7 @@ def test_get_templates():
     assert 'common-env-template.yaml.j2' in result.output
     assert 'cluster-1-template.yaml.j2' not in result.output
     assert 'cluster-1-env-template.yaml.j2' not in result.output
+    assert 'composite-template.yaml.j2' not in result.output
 
     result = runner.invoke(root, ['get', 'templates', '-e', 'some-env', 'tests/dummy/k8t'])
     assert result.exit_code == 0
@@ -186,6 +188,7 @@ def test_get_templates():
     assert 'common-env-template.yaml.j2' not in result.output
     assert 'cluster-1-template.yaml.j2' not in result.output
     assert 'cluster-1-env-template.yaml.j2' not in result.output
+    assert 'composite-template.yaml.j2' not in result.output
 
     result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', 'tests/dummy/k8t'])
     assert result.exit_code == 0
@@ -193,6 +196,7 @@ def test_get_templates():
     assert 'common-env-template.yaml.j2' not in result.output
     assert 'cluster-1-template.yaml.j2' in result.output
     assert 'cluster-1-env-template.yaml.j2' not in result.output
+    assert 'composite-template.yaml.j2' not in result.output
 
     result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', '-e', 'cluster-specific-env', 'tests/dummy/k8t'])
     assert result.exit_code == 0
@@ -200,6 +204,7 @@ def test_get_templates():
     assert 'common-env-template.yaml.j2' not in result.output
     assert 'cluster-1-template.yaml.j2' in result.output
     assert 'cluster-1-env-template.yaml.j2' in result.output
+    assert 'composite-template.yaml.j2' not in result.output
 
     result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', '-e', 'common-env', 'tests/dummy/k8t'])
     assert result.exit_code == 0
@@ -207,6 +212,7 @@ def test_get_templates():
     assert 'common-env-template.yaml.j2' in result.output
     assert 'cluster-1-template.yaml.j2' in result.output
     assert 'cluster-1-env-template.yaml.j2' not in result.output
+    assert 'composite-template.yaml.j2' not in result.output
 
     result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-2', 'tests/dummy/k8t'])
     assert result.exit_code == 0
@@ -214,6 +220,7 @@ def test_get_templates():
     assert 'common-env-template.yaml.j2' not in result.output
     assert 'cluster-1-template.yaml.j2' not in result.output
     assert 'cluster-1-env-template.yaml.j2' not in result.output
+    assert 'composite-template.yaml.j2' in result.output
 
 def test_validate_successful():
     runner = CliRunner()
@@ -224,6 +231,7 @@ def test_validate_successful():
     assert 'common-env-template.yaml.j2: ✔' not in result.output
     assert 'cluster-1-template.yaml.j2: ✔' not in result.output
     assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
+    assert 'composite-template.yaml.j2: ✔' not in result.output
 
     result = runner.invoke(root, ['validate', '-e', 'common-env', 'tests/dummy/k8t'])
     assert result.exit_code == 0
@@ -231,6 +239,7 @@ def test_validate_successful():
     assert 'common-env-template.yaml.j2: ✔' in result.output
     assert 'cluster-1-template.yaml.j2: ✔' not in result.output
     assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
+    assert 'composite-template.yaml.j2: ✔' not in result.output
 
     result = runner.invoke(root, ['validate', '-e', 'some-env', 'tests/dummy/k8t'])
     assert result.exit_code == 0
@@ -238,6 +247,7 @@ def test_validate_successful():
     assert 'common-env-template.yaml.j2: ✔' not in result.output
     assert 'cluster-1-template.yaml.j2: ✔' not in result.output
     assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
+    assert 'composite-template.yaml.j2: ✔' not in result.output
 
     result = runner.invoke(root, ['validate', '-c', 'cluster-1', 'tests/dummy/k8t'])
     assert result.exit_code == 0
@@ -245,6 +255,7 @@ def test_validate_successful():
     assert 'common-env-template.yaml.j2: ✔' not in result.output
     assert 'cluster-1-template.yaml.j2: ✔' in result.output
     assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
+    assert 'composite-template.yaml.j2: ✔' not in result.output
 
     result = runner.invoke(root, ['validate', '-c', 'cluster-1', '-e', 'cluster-specific-env', 'tests/dummy/k8t'])
     assert result.exit_code == 0
@@ -252,6 +263,7 @@ def test_validate_successful():
     assert 'common-env-template.yaml.j2: ✔' not in result.output
     assert 'cluster-1-template.yaml.j2: ✔' in result.output
     assert 'cluster-1-env-template.yaml.j2: ✔' in result.output
+    assert 'composite-template.yaml.j2: ✔' not in result.output
 
     result = runner.invoke(root, ['validate', '-c', 'cluster-1', '-e', 'common-env', 'tests/dummy/k8t'])
     assert result.exit_code == 0
@@ -259,13 +271,15 @@ def test_validate_successful():
     assert 'common-env-template.yaml.j2: ✔' in result.output
     assert 'cluster-1-template.yaml.j2: ✔' in result.output
     assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
+    assert 'composite-template.yaml.j2: ✔' not in result.output
 
     result = runner.invoke(root, ['validate', '-c', 'cluster-2', 'tests/dummy/k8t'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2: ✔' in result.output
     assert 'common-env-template.yaml.j2: ✔' not in result.output
     assert 'cluster-1-template.yaml.j2: ✔' not in result.output
-    assert 'cluster-1-env-template.yaml.j2: ✔: ✔' not in result.output
+    assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
+    assert 'composite-template.yaml.j2: ✔' in result.output
 
 def test_validate_with_values():
     runner = CliRunner()
@@ -297,6 +311,9 @@ def test_validate_failure():
     assert 'secret-template.yaml.j2: ✗' in result.output # TODO: Crushes, check file
     assert 'several-template.yaml.j2: ✗' in result.output
     assert 'value-template.yaml.j2: ✗' in result.output
+    assert 'composite-template.yaml.j2: ✗' in result.output
+    # assert 'invalid-yaml-template.yaml.j2: ✗' in result.output
+    # assert 'composite-invalid-yaml-template.yaml.j2: ✗' in result.output
 
 @mock_ssm
 def test_gen():
