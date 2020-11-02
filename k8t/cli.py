@@ -10,17 +10,18 @@
 import logging
 import os
 import sys
-
 from functools import update_wrapper
+
 import click
-import coloredlogs
 from jinja2.exceptions import UndefinedError
 
+import coloredlogs
 import k8t
 from k8t import cluster, config, environment, project, scaffolding, values
 from k8t.engine import build
-from k8t.templates import analyze, validate, render, YamlValidationError
-from k8t.util import MERGE_METHODS, deep_merge, envvalues, load_yaml, load_cli_value
+from k8t.templates import YamlValidationError, analyze, render, validate
+from k8t.util import (MERGE_METHODS, deep_merge, envvalues, load_cli_value,
+                      load_yaml)
 
 
 def requires_project_directory(func):
@@ -30,6 +31,7 @@ def requires_project_directory(func):
             sys.exit("not a valid project: {}".format(kwargs["directory"]))
 
         return ctx.invoke(func, *args, **kwargs)
+
     return update_wrapper(new_func, func)
 
 
@@ -58,9 +60,10 @@ def print_license():
 @click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="<KEY VALUE>", help="Additional value(s) to include.")
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--extension", "-e", "extensions", default=[".yaml", ".j2", ".jinja2"], help="Filter template files by suffix. Can be used multiple times.", show_default=True)
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 @requires_project_directory
-def cli_validate(method, value_files, cli_values, cname, ename, directory):
+def cli_validate(method, value_files, cli_values, cname, ename, extensions, directory):
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -73,6 +76,9 @@ def cli_validate(method, value_files, cli_values, cname, ename, directory):
     eng = build(directory, cname, ename)
 
     templates = eng.list_templates()  # pylint: disable=redefined-outer-name
+
+    if extensions:
+        templates = [ name for name in templates if os.path.splitext(name)[1] in extensions ]
 
     all_validated = True
 
@@ -111,10 +117,11 @@ def cli_validate(method, value_files, cli_values, cname, ename, directory):
 @click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="<KEY VALUE>", help="Additional value(s) to include.")
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--extension", "-e", "extensions", default=[".yaml", ".j2", ".jinja2"], help="Filter template files by suffix. Can be used multiple times.", show_default=True)
 @click.option("--secret-provider", help="Secret provider override.")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 @requires_project_directory
-def cli_gen(method, value_files, cli_values, cname, ename, secret_provider, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
+def cli_gen(method, value_files, cli_values, cname, ename, extensions, secret_provider, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -131,6 +138,10 @@ def cli_gen(method, value_files, cli_values, cname, ename, secret_provider, dire
     eng = build(directory, cname, ename)
 
     templates = eng.list_templates()  # pylint: disable=redefined-outer-name
+
+    if extensions:
+        templates = [ name for name in templates if os.path.splitext(name)[1] in extensions ]
+
     validated = True
 
     for template_path in templates:

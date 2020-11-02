@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools", "wheel", "setuptools_scm[toml]"]
+
+[tool.setuptools_scm]
+
+[tool.black]
+line-length = 160
+
+[tool.pytest.ini_options]
+norecursedirs = [".tox", ".git", ".python3"]
+python_files = ["*.py"]
+testpaths = ["tests"]
