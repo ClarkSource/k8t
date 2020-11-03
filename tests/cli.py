@@ -8,12 +8,15 @@
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import os
-import boto3
-from moto import mock_ssm
+
 from click.testing import CliRunner
-from k8t import __version__, __license__
+
+import boto3
+from k8t import __license__, __version__
 from k8t.cli import root
 from k8t.scaffolding import list_available_templates
+from moto import mock_ssm
+
 
 def test_print_version():
     runner = CliRunner()
@@ -137,7 +140,7 @@ def test_new_template():
 def test_get_clusters():
     runner = CliRunner()
 
-    result = runner.invoke(root, ['get', 'clusters', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['get', 'clusters', 'tests/resources/good'])
     assert result.exit_code == 0
     # TODO: Fix that, should return clusters, not environments
     assert 'some-env' in result.output
@@ -147,26 +150,26 @@ def test_get_clusters():
 def test_get_environments():
     runner = CliRunner()
 
-    result = runner.invoke(root, ['get', 'environments', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['get', 'environments', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'some-env' in result.output
     assert 'common-env' in result.output
     assert 'cluster-specific-env' in result.output
 
-    result = runner.invoke(root, ['get', 'environments', '-c', 'cluster-1', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['get', 'environments', '-c', 'cluster-1', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'some-env' not in result.output
     assert 'common-env' in result.output
     assert 'cluster-specific-env' in result.output
 
-    result = runner.invoke(root, ['get', 'environments', '-c', 'cluster-2', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['get', 'environments', '-c', 'cluster-2', 'tests/resources/good'])
     assert result.exit_code == 0
     assert not result.output
 
 def test_get_templates():
     runner = CliRunner()
 
-    result = runner.invoke(root, ['get', 'templates', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['get', 'templates', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2' in result.output
     assert 'common-env-template.yaml.j2' not in result.output
@@ -174,7 +177,7 @@ def test_get_templates():
     assert 'cluster-1-env-template.yaml.j2' not in result.output
     assert 'composite-template.yaml.j2' not in result.output
 
-    result = runner.invoke(root, ['get', 'templates', '-e', 'common-env', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['get', 'templates', '-e', 'common-env', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2' in result.output
     assert 'common-env-template.yaml.j2' in result.output
@@ -182,7 +185,7 @@ def test_get_templates():
     assert 'cluster-1-env-template.yaml.j2' not in result.output
     assert 'composite-template.yaml.j2' not in result.output
 
-    result = runner.invoke(root, ['get', 'templates', '-e', 'some-env', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['get', 'templates', '-e', 'some-env', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2' in result.output
     assert 'common-env-template.yaml.j2' not in result.output
@@ -190,7 +193,7 @@ def test_get_templates():
     assert 'cluster-1-env-template.yaml.j2' not in result.output
     assert 'composite-template.yaml.j2' not in result.output
 
-    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2' in result.output
     assert 'common-env-template.yaml.j2' not in result.output
@@ -198,7 +201,7 @@ def test_get_templates():
     assert 'cluster-1-env-template.yaml.j2' not in result.output
     assert 'composite-template.yaml.j2' not in result.output
 
-    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', '-e', 'cluster-specific-env', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', '-e', 'cluster-specific-env', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2' in result.output
     assert 'common-env-template.yaml.j2' not in result.output
@@ -206,7 +209,7 @@ def test_get_templates():
     assert 'cluster-1-env-template.yaml.j2' in result.output
     assert 'composite-template.yaml.j2' not in result.output
 
-    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', '-e', 'common-env', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-1', '-e', 'common-env', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2' in result.output
     assert 'common-env-template.yaml.j2' in result.output
@@ -214,7 +217,7 @@ def test_get_templates():
     assert 'cluster-1-env-template.yaml.j2' not in result.output
     assert 'composite-template.yaml.j2' not in result.output
 
-    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-2', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['get', 'templates', '-c', 'cluster-2', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2' in result.output
     assert 'common-env-template.yaml.j2' not in result.output
@@ -225,7 +228,7 @@ def test_get_templates():
 def test_validate_successful():
     runner = CliRunner()
 
-    result = runner.invoke(root, ['validate', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['validate', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2: ✔' in result.output
     assert 'common-env-template.yaml.j2: ✔' not in result.output
@@ -233,7 +236,7 @@ def test_validate_successful():
     assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
     assert 'composite-template.yaml.j2: ✔' not in result.output
 
-    result = runner.invoke(root, ['validate', '-e', 'common-env', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['validate', '-e', 'common-env', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2: ✔' in result.output
     assert 'common-env-template.yaml.j2: ✔' in result.output
@@ -241,7 +244,7 @@ def test_validate_successful():
     assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
     assert 'composite-template.yaml.j2: ✔' not in result.output
 
-    result = runner.invoke(root, ['validate', '-e', 'some-env', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['validate', '-e', 'some-env', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2: ✔' in result.output
     assert 'common-env-template.yaml.j2: ✔' not in result.output
@@ -249,7 +252,7 @@ def test_validate_successful():
     assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
     assert 'composite-template.yaml.j2: ✔' not in result.output
 
-    result = runner.invoke(root, ['validate', '-c', 'cluster-1', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['validate', '-c', 'cluster-1', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2: ✔' in result.output
     assert 'common-env-template.yaml.j2: ✔' not in result.output
@@ -257,7 +260,7 @@ def test_validate_successful():
     assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
     assert 'composite-template.yaml.j2: ✔' not in result.output
 
-    result = runner.invoke(root, ['validate', '-c', 'cluster-1', '-e', 'cluster-specific-env', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['validate', '-c', 'cluster-1', '-e', 'cluster-specific-env', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2: ✔' in result.output
     assert 'common-env-template.yaml.j2: ✔' not in result.output
@@ -265,7 +268,7 @@ def test_validate_successful():
     assert 'cluster-1-env-template.yaml.j2: ✔' in result.output
     assert 'composite-template.yaml.j2: ✔' not in result.output
 
-    result = runner.invoke(root, ['validate', '-c', 'cluster-1', '-e', 'common-env', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['validate', '-c', 'cluster-1', '-e', 'common-env', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2: ✔' in result.output
     assert 'common-env-template.yaml.j2: ✔' in result.output
@@ -273,7 +276,7 @@ def test_validate_successful():
     assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
     assert 'composite-template.yaml.j2: ✔' not in result.output
 
-    result = runner.invoke(root, ['validate', '-c', 'cluster-2', 'tests/dummy/k8t'])
+    result = runner.invoke(root, ['validate', '-c', 'cluster-2', 'tests/resources/good'])
     assert result.exit_code == 0
     assert 'common-template.yaml.j2: ✔' in result.output
     assert 'common-env-template.yaml.j2: ✔' not in result.output
@@ -284,18 +287,18 @@ def test_validate_successful():
 def test_validate_with_values():
     runner = CliRunner()
 
-    result = runner.invoke(root, ['validate', 'tests/dummy/missing_values'])
+    result = runner.invoke(root, ['validate', 'tests/resources/missing_values'])
     assert result.exit_code # TODO: Should be 1
     assert 'template.yaml.j2: ✗' in result.output
     assert '- undefined variable: test' in result.output
 
-    result = runner.invoke(root, ['validate', '--value', 'test', 'something', 'tests/dummy/missing_values'])
+    result = runner.invoke(root, ['validate', '--value', 'test', 'something', 'tests/resources/missing_values'])
     assert result.exit_code == 0
     assert 'template.yaml.j2: ✔' in result.output
 
     result = runner.invoke(
         root,
-        ['validate', '--value-file', 'tests/dummy/missing_values/value-file.yaml', 'tests/dummy/missing_values']
+        ['validate', '--value-file', 'tests/resources/missing_values/value-file.yaml', 'tests/resources/missing_values']
     )
     assert result.exit_code == 0
     assert 'template.yaml.j2: ✔' in result.output
@@ -303,7 +306,7 @@ def test_validate_with_values():
 def test_validate_failure():
     runner = CliRunner()
 
-    result = runner.invoke(root, ['validate', 'tests/dummy/bad'])
+    result = runner.invoke(root, ['validate', 'tests/resources/bad'])
     # TODO: Fix and uncomment
     # assert 'filter-template.yaml.j2: ✗' in result.output
     # assert 'nested-value-adding-template.yaml.j2: ✗' in result.output
@@ -328,38 +331,38 @@ def test_gen():
 
     runner = CliRunner()
 
-    with open('tests/dummy/results/default.yaml', 'r') as file:
-        result = runner.invoke(root, ['gen', 'tests/dummy/k8t'])
+    with open('tests/resources/results/default.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', 'tests/resources/good'])
         assert result.exit_code == 0
         assert result.output == file.read()
 
-    with open('tests/dummy/results/some-env.yaml', 'r') as file:
-        result = runner.invoke(root, ['gen', '-e', 'some-env', 'tests/dummy/k8t'])
+    with open('tests/resources/results/some-env.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-e', 'some-env', 'tests/resources/good'])
         assert result.exit_code == 0
         assert result.output == file.read()
 
-    with open('tests/dummy/results/common-env.yaml', 'r') as file:
-        result = runner.invoke(root, ['gen', '-e', 'common-env', 'tests/dummy/k8t'])
+    with open('tests/resources/results/common-env.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-e', 'common-env', 'tests/resources/good'])
         assert result.exit_code == 0
         assert result.output == file.read()
 
-    with open('tests/dummy/results/cluster-1.yaml', 'r') as file:
-        result = runner.invoke(root, ['gen', '-c', 'cluster-1', 'tests/dummy/k8t'])
+    with open('tests/resources/results/cluster-1.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-c', 'cluster-1', 'tests/resources/good'])
         assert result.exit_code == 0
         assert result.output == file.read()
 
-    with open('tests/dummy/results/cluster-1-common-env.yaml', 'r') as file:
-        result = runner.invoke(root, ['gen', '-c', 'cluster-1', '-e', 'common-env', 'tests/dummy/k8t'])
+    with open('tests/resources/results/cluster-1-common-env.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-c', 'cluster-1', '-e', 'common-env', 'tests/resources/good'])
         assert result.exit_code == 0
         assert result.output == file.read()
 
-    with open('tests/dummy/results/cluster-1-cluster-specific-env.yaml', 'r') as file:
-        result = runner.invoke(root, ['gen', '-c', 'cluster-1', '-e', 'cluster-specific-env', 'tests/dummy/k8t'])
+    with open('tests/resources/results/cluster-1-cluster-specific-env.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-c', 'cluster-1', '-e', 'cluster-specific-env', 'tests/resources/good'])
         assert result.exit_code == 0
         assert result.output == file.read()
 
-    with open('tests/dummy/results/cluster-2.yaml', 'r') as file:
-        result = runner.invoke(root, ['gen', '-c', 'cluster-2', 'tests/dummy/k8t'])
+    with open('tests/resources/results/cluster-2.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-c', 'cluster-2', 'tests/resources/good'])
         assert result.exit_code == 0
         assert result.output == file.read()
 
