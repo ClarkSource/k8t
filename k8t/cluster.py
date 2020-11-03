@@ -16,7 +16,7 @@ from k8t.project import find_files
 def list_all(path: str) -> List[str]:
     result: List[str] = []
 
-    for directory in find_files(path, None, None, 'environments', file_ok=False, dir_ok=True):
+    for directory in find_files(path, None, None, 'clusters', file_ok=False, dir_ok=True):
         for _, dirs, _ in os.walk(directory):
             result.extend(dirs)
 
