@@ -4,11 +4,11 @@ in
 { pkgs ? import <nixpkgs> {} }:
 
   let
-    simple_tools = pkgs.python3.pkgs.buildPythonPackage rec {
+    simple_tools = with unstable.python3.pkgs; buildPythonPackage rec {
       pname = "simple_tools";
       version = "0.2.0.post2";
 
-      src = pkgs.python3.pkgs.fetchPypi {
+      src = fetchPypi {
         inherit pname version;
         sha256 = "16xxpsngv76fzsxji1714m7b6b74wk459sjs8p15nj8h4xy0b7b9";
       };
@@ -21,7 +21,7 @@ in
       };
     };
 
-    k8t = pkgs.python3.pkgs.buildPythonApplication rec {
+    k8t = with unstable.python3.pkgs; buildPythonApplication rec {
       pname = "k8t";
       version = "dev";
 
@@ -34,7 +34,7 @@ in
         git
       ];
 
-      propagatedBuildInputs = with pkgs.python3.pkgs; [
+      propagatedBuildInputs = [
         jinja2
         coloredlogs
         boto3
