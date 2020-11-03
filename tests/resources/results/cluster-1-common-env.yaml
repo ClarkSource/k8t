@@ -1,0 +1,22 @@
+---
+# Source: cluster-1-template.yaml.j2
+env: "cluster-1-common-env"
+cluster: "cluster-1"
+foo: "1"
+bar: "test"
+buz: "buz_default"
+overwritten-in-env: true
+---
+# Source: common-env-template.yaml.j2
+env: "cluster-1-common-env"
+cluster: "cluster-1"
+foo: "1"
+bar: "test"
+buz: "buz_default"
+---
+# Source: common-template.yaml.j2
+env: "cluster-1-common-env"
+cluster: "cluster-1"
+foo: "1"
+bar: "test"
+buz: "buz_default"

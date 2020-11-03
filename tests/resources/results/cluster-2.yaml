@@ -1,0 +1,17 @@
+---
+# Source: common-template.yaml.j2
+env: "none"
+cluster: "cluster-2"
+foo: "1"
+bar: "test"
+buz: "buz"
+---
+# Source: composite-template.yaml.j2
+---
+template: 1
+env: "none"
+cluster: "cluster-2"
+---
+template: 2
+env: "none"
+cluster: "cluster-2"

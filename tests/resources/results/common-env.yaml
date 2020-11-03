@@ -1,0 +1,14 @@
+---
+# Source: common-env-template.yaml.j2
+env: "common-env"
+cluster: "none"
+foo: "1"
+bar: "test"
+buz: "buz_default"
+---
+# Source: common-template.yaml.j2
+env: "common-env"
+cluster: "none"
+foo: "1"
+bar: "test"
+buz: "buz_default"

@@ -1,0 +1,6 @@
+env: "{{env}}"
+cluster: "{{cls}}"
+foo: "{{foo}}"
+bar: "{{bar}}"
+buz: "{{buz | default('buz_default')}}"
+secret: "{{get_secret('/test', 12) | b64encode}}"
