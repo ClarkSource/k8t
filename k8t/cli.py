@@ -60,10 +60,10 @@ def print_license():
 @click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="<KEY VALUE>", help="Additional value(s) to include.")
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
-@click.option("--extension", "-e", "extensions", default=[".yaml", ".j2", ".jinja2"], help="Filter template files by suffix. Can be used multiple times.", show_default=True)
+@click.option("--suffix", "-s", "suffixes", default=[".yaml", ".j2", ".jinja2"], help="Filter template files by suffix. Can be used multiple times.", show_default=True)
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 @requires_project_directory
-def cli_validate(method, value_files, cli_values, cname, ename, extensions, directory):
+def cli_validate(method, value_files, cli_values, cname, ename, suffixes, directory):
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -77,8 +77,8 @@ def cli_validate(method, value_files, cli_values, cname, ename, extensions, dire
 
     templates = eng.list_templates()  # pylint: disable=redefined-outer-name
 
-    if extensions:
-        templates = [ name for name in templates if os.path.splitext(name)[1] in extensions ]
+    if suffixes:
+        templates = [ name for name in templates if os.path.splitext(name)[1] in suffixes ]
 
     all_validated = True
 
@@ -117,11 +117,11 @@ def cli_validate(method, value_files, cli_values, cname, ename, extensions, dire
 @click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="<KEY VALUE>", help="Additional value(s) to include.")
 @click.option("--cluster", "-c", "cname", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", help="Deployment environment to use.")
-@click.option("--extension", "-e", "extensions", default=[".yaml", ".j2", ".jinja2"], help="Filter template files by suffix. Can be used multiple times.", show_default=True)
+@click.option("--suffix", "-s", "suffixes", default=[".yaml", ".j2", ".jinja2"], help="Filter template files by suffix. Can be used multiple times.", show_default=True)
 @click.option("--secret-provider", help="Secret provider override.")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 @requires_project_directory
-def cli_gen(method, value_files, cli_values, cname, ename, extensions, secret_provider, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
+def cli_gen(method, value_files, cli_values, cname, ename, suffixes, secret_provider, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -139,8 +139,8 @@ def cli_gen(method, value_files, cli_values, cname, ename, extensions, secret_pr
 
     templates = eng.list_templates()  # pylint: disable=redefined-outer-name
 
-    if extensions:
-        templates = [ name for name in templates if os.path.splitext(name)[1] in extensions ]
+    if suffixes:
+        templates = [ name for name in templates if os.path.splitext(name)[1] in suffixes ]
 
     validated = True
 
