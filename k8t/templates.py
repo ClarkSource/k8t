@@ -25,6 +25,7 @@ PROHIBITED_VARIABLE_NAMES = {
     'lipsum',
     'joiner'
 }
+YAML_DELIMETER = '---'
 
 
 class YamlValidationError(Exception):
@@ -110,9 +111,13 @@ def get_variables(ast, engine: Environment) -> Set[str]:
 def render(template_path: str, values: dict, engine: Environment) -> str:
     output = engine.get_template(template_path).render(values)
 
-    try:
-        yaml.safe_load_all(output)
-    except (yaml.scanner.ScannerError, yaml.parser.ParserError) as err:
-        raise YamlValidationError(err)
+    validate_yaml(output)
 
     return output
+
+def validate_yaml(stream: str):
+    try:
+        for document in stream.split(YAML_DELIMETER):
+            yaml.safe_load(document)
+    except (yaml.scanner.ScannerError, yaml.parser.ParserError) as err:
+        raise YamlValidationError(err)
