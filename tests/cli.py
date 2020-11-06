@@ -314,8 +314,8 @@ def test_validate_failure():
     assert 'several-template.yaml.j2: ✗' in result.output
     assert 'value-template.yaml.j2: ✗' in result.output
     assert 'composite-template.yaml.j2: ✗' in result.output
-    # assert 'invalid-yaml-template.yaml.j2: ✗' in result.output
-    # assert 'composite-invalid-yaml-template.yaml.j2: ✗' in result.output
+    assert 'invalid-yaml-template.yaml.j2: ✗' in result.output
+    assert 'composite-invalid-yaml-template.yaml.j2: ✗' in result.output
 
 @mock_ssm
 def test_gen():

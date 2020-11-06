@@ -85,6 +85,15 @@ def cli_validate(method, value_files, cli_values, cname, ename, suffixes, direct
     for template_path in templates:
         errors = set()
 
+        try:
+            render(template_path, vals, eng)
+        except YamlValidationError as err:
+            click.secho("{}: ✗".format(template_path), fg="red")
+            click.echo("- {}".format(err))
+            continue
+        except: # pylint: disable=bare-except
+            pass
+
         undefined, _, invalid, secrets = analyze(template_path, vals, eng)
 
         if undefined or invalid:
