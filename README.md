@@ -14,11 +14,13 @@ Simple cluster and environment specific aware templating for kubernetes manifest
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Installation](#installation)
+  - [Docker](#docker)
   - [Completion](#completion)
 - [Concepts](#concepts)
   - [*Clusters* and *Environments*](#clusters-and-environments)
   - [Templating](#templating)
     - [Template helper functions](#template-helper-functions)
+- [Configuration inheritance](#configuration-inheritance)
 - [Usage](#usage)
   - [Scaffolding](#scaffolding)
   - [Config management](#config-management)
@@ -50,6 +52,16 @@ $ pip install --user --upgrade k8t[ujson]
 ```
 
 **note**: k8t is not Python 2 compatible
+
+### Docker
+
+You can also run k8t via docker
+
+```bash
+$ docker run clarksource/k8t:latest
+```
+
+**hint**: the docker image comes with [aws-cli](https://aws.amazon.com/cli/), [kubectl](https://github.com/kubernetes/kubectl) and [kubeval](https://github.com/instrumenta/kubeval).
 
 ### Completion
 
@@ -111,24 +123,24 @@ So variables and templates will be overridden from `project` -> `environments` -
 .                                           (1) # k8t new project .
 ├── clusters
 │   ├── foo                                 (3) # k8t new cluster foo
-│   │   ├── config.yaml         
+│   │   ├── config.yaml
 │   │   ├── values.yaml
-│   │   ├── environments 
+│   │   ├── environments
 │   │   │    ├── production                 (4) # k8t new environment production -c foo
 │   │   │    │   ├── config.yaml
 │   │   │    │   └── values.yaml
 │   │   │    └── staging                    (4) # k8t new environment staging -c foo
 │   │   │        ├── config.yaml
 │   │   │        ├── values.yaml
-│   │   │        └── templates                    
-│   │   │           └── deployment.yaml.j2  (4) # k8t new template deployment -c foo -e staging                     
-│   │   └── templates                    
+│   │   │        └── templates
+│   │   │           └── deployment.yaml.j2  (4) # k8t new template deployment -c foo -e staging
+│   │   └── templates
 │   │      └── deployment.yaml.j2           (3) # k8t new template deployment -c foo
 │   └── bar                                 (3) # k8t new cluster bar
-│       ├── config.yaml  
+│       ├── config.yaml
 │       └── values.yaml
-├── environments              
-│   ├── production                          (2) # k8t new environment production 
+├── environments
+│   ├── production                          (2) # k8t new environment production
 │   │   ├── config.yaml
 │   │   └── values.yaml
 │   └── staging                             (2) # k8t new environment staging
