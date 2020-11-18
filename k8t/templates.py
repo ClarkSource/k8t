@@ -10,9 +10,9 @@
 import logging
 import os
 from typing import Set, Tuple
-import yaml
 
-from jinja2 import meta, nodes, Environment
+import yaml
+from jinja2 import Environment, meta, nodes
 
 from k8t import config
 
@@ -37,7 +37,7 @@ def analyze(template_path: str, values: dict, engine: Environment) -> Tuple[Set[
     template_source = engine.loader.get_source(engine, template_path)[0]
     abstract_syntax_tree = engine.parse(template_source)
 
-    has_secrets = any(call.node.name == "get_secret" for call in abstract_syntax_tree.find_all(nodes.Call))
+    has_secrets = any(getattr(call.node, "name", None) == "get_secret" for call in abstract_syntax_tree.find_all(nodes.Call))
     required_variables = get_variables(abstract_syntax_tree, engine)
 
     defined_variables = set(values.keys())
