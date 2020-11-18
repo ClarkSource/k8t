@@ -31,3 +31,10 @@ spec:
           requests:
             cpu: "{{ request_cpu }}"
             memory: "{{ request_memory }}"
+        {% if env_vars is defined -%}
+        {% for key, value in env_vars.items() -%}
+        env:
+        - name: "{{ key }}"
+          value: "{{ value }}"
+        {% endfor %}
+        {%- endif %}
