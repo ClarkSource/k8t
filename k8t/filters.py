@@ -14,8 +14,9 @@
 import base64
 import hashlib
 import os
+import re
 import string
-from typing import Any
+from typing import Any, Optional
 
 from k8t import config, secret_providers
 
@@ -96,11 +97,24 @@ def get_secret(key: str, length: int = None) -> str:
     return provider(key, length)
 
 
-def to_bool(value: Any):
+def to_bool(value: Any) -> Optional[bool]:
     if value is None or isinstance(value, bool):
         return value
+
     if isinstance(value, str):
         value = value.lower()
+
     if value in ('yes', 'on', '1', 'true', 1):
         return True
+
     return False
+
+
+def sanitize_label(value: str) -> str:
+    """
+    source: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set
+
+    TODO i'm sure there is a smarter way to do this.
+    """
+
+    return re.sub(r'(^[^a-z0-9A-Z]|[^a-z0-9A-Z]$|[^a-z0-9A-Z_.-])', 'X', value[:63])
