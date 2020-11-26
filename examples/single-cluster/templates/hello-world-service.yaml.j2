@@ -4,10 +4,10 @@ metadata:
   name: "{{ name }}"
   namespace: "{{ ns }}"
   labels:
-    app.kubernetes.io/name: "{{ name }}"
+    app.kubernetes.io/name: "{{ name | sanitize_label }}"
 spec:
   selector:
-    app.kubernetes.io/name: "{{ name }}"
+    app.kubernetes.io/name: "{{ name | sanitize_label }}"
   ports:
   - protocol: TCP
     port: "{{ service_port | default(80) }}"
