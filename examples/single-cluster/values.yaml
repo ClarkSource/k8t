@@ -13,3 +13,5 @@ traffic_port: 3000
 
 env_vars:
   FOO: BAR
+
+num_values: 10
