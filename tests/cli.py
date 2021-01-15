@@ -12,10 +12,11 @@ import os
 from click.testing import CliRunner
 
 import boto3
+from moto import mock_ssm  # pylint: disable=E0401
+
 from k8t import __license__, __version__
 from k8t.cli import root
 from k8t.scaffolding import list_available_templates
-from moto import mock_ssm
 
 
 def test_print_version():
@@ -25,12 +26,14 @@ def test_print_version():
     assert result.exit_code == 0
     assert __version__ in result.output
 
+
 def test_print_license():
     runner = CliRunner()
 
     result = runner.invoke(root, ['license'])
     assert result.exit_code == 0
     assert __license__ in result.output
+
 
 def test_new_project():
     runner = CliRunner()
@@ -46,6 +49,7 @@ def test_new_project():
         assert os.path.exists('test/values.yaml')
         assert os.path.exists('test/config.yaml')
 
+
 def test_new_cluster():
     runner = CliRunner()
 
@@ -59,6 +63,7 @@ def test_new_cluster():
         assert 'File created: ./clusters/cluster-1/config.yaml' in result.output
         assert os.path.exists('./clusters/cluster-1/values.yaml')
         assert os.path.exists('./clusters/cluster-1/config.yaml')
+
 
 def test_new_environment():
     runner = CliRunner()
@@ -83,6 +88,7 @@ def test_new_environment():
         assert 'File created: ./clusters/cluster-1/environments/production/config.yaml' in result.output
         assert os.path.exists('./clusters/cluster-1/environments/production/values.yaml')
         assert os.path.exists('./clusters/cluster-1/environments/production/config.yaml')
+
 
 def test_new_template():
     template_type = list(list_available_templates())[0]
@@ -137,14 +143,15 @@ def test_new_template():
             assert f'Template created: ./templates/{template_type}.yaml.j2' in result.output
             assert os.path.exists(f'./templates/{template_type}.yaml.j2')
 
+
 def test_get_clusters():
     runner = CliRunner()
 
     result = runner.invoke(root, ['get', 'clusters', 'tests/resources/good'])
     assert result.exit_code == 0
-    # TODO: Fix that, should return clusters, not environments
     assert 'cluster-1' in result.output
     assert 'cluster-2' in result.output
+
 
 def test_get_environments():
     runner = CliRunner()
@@ -165,7 +172,8 @@ def test_get_environments():
     assert result.exit_code == 0
     assert not result.output
 
-def test_get_templates():
+
+def test_get_templates():  # pylint: disable=R0915
     runner = CliRunner()
 
     result = runner.invoke(root, ['get', 'templates', 'tests/resources/good'])
@@ -224,7 +232,8 @@ def test_get_templates():
     assert 'cluster-1-env-template.yaml.j2' not in result.output
     assert 'composite-template.yaml.j2' in result.output
 
-def test_validate_successful():
+
+def test_validate_successful():  # pylint: disable=R0915
     runner = CliRunner()
 
     result = runner.invoke(root, ['validate', 'tests/resources/good'])
@@ -283,11 +292,12 @@ def test_validate_successful():
     assert 'cluster-1-env-template.yaml.j2: ✔' not in result.output
     assert 'composite-template.yaml.j2: ✔' in result.output
 
+
 def test_validate_with_values():
     runner = CliRunner()
 
     result = runner.invoke(root, ['validate', 'tests/resources/missing_values'])
-    assert result.exit_code # TODO: Should be 1
+    assert result.exit_code == 1
     assert 'template.yaml.j2: ✗' in result.output
     assert '- undefined variable: test' in result.output
 
@@ -302,6 +312,7 @@ def test_validate_with_values():
     assert result.exit_code == 0
     assert 'template.yaml.j2: ✔' in result.output
 
+
 def test_validate_failure():
     runner = CliRunner()
 
@@ -310,7 +321,7 @@ def test_validate_failure():
     # assert 'filter-template.yaml.j2: ✗' in result.output
     # assert 'nested-value-adding-template.yaml.j2: ✗' in result.output
     # assert 'nested-value-template.yaml.j2: ✗' in result.output
-    assert 'secret-template.yaml.j2: ✗' in result.output # TODO: Crushes, check file
+    assert 'secret-template.yaml.j2: ✗' in result.output
     assert 'several-template.yaml.j2: ✗' in result.output
     assert 'value-template.yaml.j2: ✗' in result.output
     assert 'composite-template.yaml.j2: ✗' in result.output

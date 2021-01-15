@@ -10,8 +10,8 @@
 import logging
 import string
 
-import boto3
-import botocore
+import boto3  # pylint: disable=E0401
+import botocore  # pylint: disable=E0401
 from k8t import config
 
 try:
@@ -50,7 +50,7 @@ def ssm(key: str, length: int = None) -> str:
         client.exceptions.ParameterNotFound,
         botocore.exceptions.ClientError,
     ) as exc:
-        raise RuntimeError(f"Failed to retrieve secret {key}: {exc}")
+        raise RuntimeError(f"Failed to retrieve secret {key}: {exc}") from exc
 
 
 def random(key: str, length: int = None) -> str:

@@ -16,3 +16,7 @@ repos:
     rev: v1.4.0
     hooks:
       - id: doctoc
+  - repo: git@github.com:PyCQa/pylint
+    rev: pylint-2.5.3
+    hooks:
+      - id: pylint

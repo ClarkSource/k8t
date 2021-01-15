@@ -11,6 +11,6 @@
 # Copyright © 2020 Clark Germany GmbH
 # Author: Aljosha Friemann <aljosha.friemann@clark.de>
 
-from k8t.templates import analyze
+from k8t.templates import analyze  # pylint: disable=W0611
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab
