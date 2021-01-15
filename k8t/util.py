@@ -114,9 +114,9 @@ def load_cli_value(key: str, value: str) -> Tuple[str, Any]:
     LOGGER.debug("loading cli value (%s, %s)", key, value)
 
     try:
-        return (key, json.loads(value))
+        return key, json.loads(value, parse_float=lambda x: str(x))
     except json.decoder.JSONDecodeError:
-        return (key, value)
+        return key, value
 
 
 def envvalues() -> Dict:

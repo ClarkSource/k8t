@@ -346,6 +346,13 @@ def test_gen():
         assert result.exit_code == 0
         assert result.output == file.read()
 
+    with open('tests/resources/results/default-with-cli-values.yaml', 'r') as file:
+        result = runner.invoke(
+            root, ['gen', '--value', 'foo', '77950e8', 'tests/resources/good']
+        )
+        assert result.exit_code == 0
+        assert result.output == file.read()
+
     with open('tests/resources/results/some-env.yaml', 'r') as file:
         result = runner.invoke(root, ['gen', '-e', 'some-env', 'tests/resources/good'])
         assert result.exit_code == 0
