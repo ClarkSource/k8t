@@ -15,10 +15,10 @@ import shutil
 from functools import reduce
 from typing import Any, Dict, List, Tuple
 
-import yaml
-from click import secho
+import yaml  # pylint: disable=E0401
+from click import secho  # pylint: disable=E0401
 
-from simple_tools.interaction import confirm
+from simple_tools.interaction import confirm  # pylint: disable=E0401
 
 LOGGER = logging.getLogger(__name__)
 
@@ -114,7 +114,7 @@ def load_cli_value(key: str, value: str) -> Tuple[str, Any]:
     LOGGER.debug("loading cli value (%s, %s)", key, value)
 
     try:
-        return key, json.loads(value, parse_float=lambda x: str(x))
+        return key, json.loads(value, parse_float=lambda x: str(x))  # lambda is necessary, pylint: disable=W0108
     except json.decoder.JSONDecodeError:
         return key, value
 
