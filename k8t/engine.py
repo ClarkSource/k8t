@@ -12,7 +12,7 @@ import logging
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from k8t.filters import (b64decode, b64encode, envvar, get_secret, hashf,
-                         random_password, to_bool)
+                         random_password, sanitize_label, to_bool)
 from k8t.project import find_files
 
 LOGGER = logging.getLogger(__name__)
@@ -26,18 +26,21 @@ def build(path: str, cluster: str, environment: str) -> Environment:
 
     env = Environment(undefined=StrictUndefined, loader=FileSystemLoader(template_paths))
 
-    ### Filter functions ###
+    # Filter functions
     env.filters["b64decode"] = b64decode
     env.filters["b64encode"] = b64encode
     env.filters["hash"] = hashf
     env.filters["bool"] = to_bool
+    env.filters["sanitize_label"] = sanitize_label
 
-    ### Global functions ###
-    # env.globals['include_raw'] = include_file
-    # env.globals['include_file'] = include_file
+    # Global functions
     env.globals["random_password"] = random_password
     env.globals["get_secret"] = get_secret
     env.globals["env"] = envvar
+
+    # Disabled
+    # env.globals['include_raw'] = include_file
+    # env.globals['include_file'] = include_file
 
     return env
 

@@ -112,6 +112,7 @@ quickly verify the written templates.
 * `hash(value: str, [method: str])` - hashes a given value (default using `sha256`)
 * `get_secret(key: str)` - provides a secret value from a given provider (see [here](#managing-secrets))
 * `bool(value: Any)` - casts value to boolean ("true", "on", "yes", "1", 1 are considered as `True`)
+* `sanitize_label(value: str)` - sanitizes label values according to kubernetes spec
 
 ## Configuration inheritance
 

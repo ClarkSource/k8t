@@ -12,11 +12,13 @@
 # Author: Aljosha Friemann <aljosha.friemann@clark.de>
 
 import random
+
 import pytest  # pylint: disable=E0401
 from mock import patch  # pylint: disable=E0401
 
 from k8t import config, secret_providers
-from k8t.filters import b64decode, b64encode, hashf, random_password, to_bool, get_secret
+from k8t.filters import (b64decode, b64encode, get_secret, hashf,
+                         random_password, sanitize_label, to_bool)
 
 
 def test_b64encode():
@@ -68,22 +70,40 @@ def test_get_secret():
 
 
 def test_to_bool():
-    assert to_bool(True)
-    assert to_bool("Yes")
-    assert to_bool("yes")
-    assert to_bool("True")
-    assert to_bool("true")
-    assert to_bool("On")
-    assert to_bool("on")
-    assert to_bool("1")
-    assert to_bool(1)
+    assert to_bool(None) is None
 
-    assert not to_bool(None)
-    assert not to_bool(False)
-    assert not to_bool("False")
-    assert not to_bool("false")
-    assert not to_bool("anything")
-    assert not to_bool("0")
-    assert not to_bool(0)
+    assert to_bool(True) is True
+    assert to_bool("Yes") is True
+    assert to_bool("yes") is True
+    assert to_bool("True") is True
+    assert to_bool("true") is True
+    assert to_bool("On") is True
+    assert to_bool("on") is True
+    assert to_bool("1") is True
+    assert to_bool(1) is True
 
-# vim: fenc=utf-8:ts=4:sw=4:expandtab
+    assert to_bool(False) is False
+    assert to_bool("False") is False
+    assert to_bool("false") is False
+    assert to_bool("0") is False
+    assert to_bool(0) is False
+
+    # TODO this is a bad one, probably need to raise an error instead
+    assert to_bool("anything") is False
+
+
+def test_sanitize_label():
+    # sanity check
+    assert sanitize_label("foobar") == "foobar"
+
+    # check replacement for first and last characters
+    assert sanitize_label(",foobar-") == "XfoobarX"
+
+    # check valid characters
+    assert sanitize_label(",foobar-baz.com") == "Xfoobar-baz.com"
+
+    # check invalid character replacements
+    assert sanitize_label(",foobar-baz$.com") == "Xfoobar-bazX.com"
+
+    # check length
+    assert len(sanitize_label("x" * 65)) == 63
