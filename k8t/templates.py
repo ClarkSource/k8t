@@ -8,11 +8,10 @@
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import logging
-import os
 from typing import Set, Tuple
 
-import yaml
-from jinja2 import Environment, meta, nodes
+import yaml  # pylint: disable=E0401
+from jinja2 import Environment, meta, nodes  # pylint: disable=E0401
 
 from k8t import config
 
@@ -113,6 +112,6 @@ def render(template_path: str, values: dict, engine: Environment) -> str:
     try:
         yaml.safe_load_all(output)
     except (yaml.scanner.ScannerError, yaml.parser.ParserError) as err:
-        raise YamlValidationError(err)
+        raise YamlValidationError(err) from err
 
     return output

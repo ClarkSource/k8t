@@ -68,8 +68,8 @@ def b64decode(value: Any) -> str:
 def hashf(value, method="sha256"):
     try:
         hash_method = getattr(hashlib, method)()
-    except AttributeError:
-        raise RuntimeError("No such hash method: {}".format(method))
+    except AttributeError as no_hash_method:
+        raise RuntimeError("No such hash method: {}".format(method)) from no_hash_method
 
     if isinstance(value, str):
         hash_method.update(value.encode())
@@ -90,8 +90,8 @@ def get_secret(key: str, length: int = None) -> str:
     provider_name = str(provider_name).lower()
     try:
         provider = getattr(secret_providers, provider_name)
-    except AttributeError:
-        raise NotImplementedError("secret provider {} does not exist.".format(provider_name))
+    except AttributeError as no_secret_provider:
+        raise NotImplementedError("secret provider {} does not exist.".format(provider_name)) from no_secret_provider
 
     return provider(key, length)
 

@@ -12,8 +12,8 @@
 # Author: Aljosha Friemann <aljosha.friemann@clark.de>
 
 import random
-import pytest
-from mock import patch
+import pytest  # pylint: disable=E0401
+from mock import patch  # pylint: disable=E0401
 
 from k8t import config, secret_providers
 from k8t.filters import b64decode, b64encode, hashf, random_password, to_bool, get_secret
