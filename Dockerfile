@@ -2,10 +2,10 @@ FROM python:3-alpine
 
 LABEL maintainer="CloudOps <cloudops@clark.de>"
 
-ARG KUBECTL_VERSION="1.18.0"
-ARG KUBEVAL_VERSION="0.15.0"
-ARG KUBECTL_SHA="bb16739fcad964c197752200ff89d89aad7b118cb1de5725dc53fe924c40e3f7"
-ARG KUBEVAL_SHA="70bff2642a2886c0d9ebea452ffb81f333a956e26bbe0826fd7c6797e343e5aa"
+ARG KUBECTL_VERSION="1.20.5"
+ARG KUBEVAL_VERSION="0.16.1"
+ARG KUBECTL_SHA="7f9dbb80190945a5077dc5f4230202c22f68f9bd7f20c213c3cf5a74abf55e56"
+ARG KUBEVAL_SHA="2d6f9bda1423b93787fa05d9e8dfce2fc1190fefbcd9d0936b9635f3f78ba790"
 
 # Install aws-cli & dependencies
 RUN apk add --no-cache openssl curl tar gzip bash ca-certificates aws-cli
@@ -14,7 +14,7 @@ RUN apk add --no-cache openssl curl tar gzip bash ca-certificates aws-cli
 RUN \
   echo -e "${KUBECTL_SHA}  /tmp/kubectl\n${KUBEVAL_SHA}  /tmp/kubeval.tar.gz" >> /tmp/CHECKSUMS && \
   curl -L -o /tmp/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
-  curl -L -o /tmp/kubeval.tar.gz "https://github.com/instrumenta/kubeval/releases/download/${KUBEVAL_VERSION}/kubeval-linux-amd64.tar.gz" && \
+  curl -L -o /tmp/kubeval.tar.gz "https://github.com/instrumenta/kubeval/releases/download/v${KUBEVAL_VERSION}/kubeval-linux-amd64.tar.gz" && \
   sha256sum /tmp/kub* && \
   sha256sum -c /tmp/CHECKSUMS && \
   # install kubectl
