@@ -6,8 +6,8 @@ metadata:
   labels:
     app.kubernetes.io/name: "{{ name }}"
 spec:
-  replicas: "{{ replicas }}"
-  revisionHistoryLimit: "{{ revision_history_limit | default(3) }}"
+  replicas: {{ replicas }}
+  revisionHistoryLimit: {{ revision_history_limit | default(3) }}
   selector:
     matchLabels:
       app.kubernetes.io/name: "{{ name }}"
@@ -19,7 +19,7 @@ spec:
     spec:
       restartPolicy: "{{ restart_policy | default('Always') }}"
       securityContext:
-        runAsUser: "{{ user_id | default(1000) }}"
+        runAsUser: {{ user_id | default(1000) }}
       containers:
       - name: "{{ name }}"
         image: "{{ image_repository }}:{{ image_tag }}"

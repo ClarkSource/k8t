@@ -10,5 +10,5 @@ spec:
     app.kubernetes.io/name: "{{ name }}"
   ports:
   - protocol: TCP
-    port: "{{ service_port | default(80) }}"
-    targetPort: "{{ traffic_port }}"
+    port: {{ service_port | default(80) }}
+    targetPort: {{ traffic_port }}
