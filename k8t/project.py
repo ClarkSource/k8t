@@ -48,11 +48,14 @@ def find_files(root: str, cluster: str, environment: str, name: str, file_ok=Tru
     env_found = environment is None
 
     if environment is not None:
-        file_path = os.path.join(root, "environments", environment, name)
+        environment_path = os.path.join(root, "environments", environment)
 
-        if check(file_path):
-            files.append(file_path)
+        if os.path.isdir(environment_path):
             env_found = True
+            file_path = os.path.join(environment_path, name)
+
+            if check(file_path):
+                files.append(file_path)
 
     if cluster is not None:
         cluster_path = os.path.join(root, "clusters", cluster)
@@ -66,12 +69,16 @@ def find_files(root: str, cluster: str, environment: str, name: str, file_ok=Tru
             files.append(file_path)
 
         if environment is not None:
-            file_path = os.path.join(
-                cluster_path, "environments", environment, name)
+            environment_path = os.path.join(
+                cluster_path, "environments", environment)
 
-            if check(file_path):
-                files.append(file_path)
+            if os.path.isdir(environment_path):
                 env_found = True
+                file_path = os.path.join(environment_path, name)
+
+                if check(file_path):
+                    files.append(file_path)
+
 
     if not env_found:
         raise RuntimeError("no such environment: {}".format(environment))
