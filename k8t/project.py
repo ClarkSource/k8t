@@ -36,7 +36,7 @@ def get_base_dir(root: str, cluster: str, environment: str) -> str:
 # pylint: disable=too-many-arguments
 def find_files(root: str, cluster: str, environment: str, name: str, file_ok=True, dir_ok=True) -> List[str]:
     def check(path):
-        return (file_ok and os.path.isfile(path)) or (dir_ok and os.path.isdir(root_path))
+        return (file_ok and os.path.isfile(path)) or (dir_ok and os.path.isdir(path))
 
     files: List[str] = []
 
