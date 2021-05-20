@@ -35,52 +35,37 @@ def get_base_dir(root: str, cluster: str, environment: str) -> str:
 
 # pylint: disable=too-many-arguments
 def find_files(root: str, cluster: str, environment: str, name: str, file_ok=True, dir_ok=True) -> List[str]:
-    def check(path):
-        return (file_ok and os.path.isfile(path)) or (dir_ok and os.path.isdir(path))
+    def append_path(dir_path: str):
+        path = os.path.join(dir_path, name)
+        if (file_ok and os.path.isfile(path)) or (dir_ok and os.path.isdir(path)):
+            paths.append(path)
 
-    files: List[str] = []
 
-    root_path = os.path.join(root, name)
-
-    if check(root_path):
-        files.append(root_path)
+    paths: List[str] = []
 
     env_found = environment is None
+    cluster_found = cluster is None
 
-    if environment is not None:
+    append_path(root)
+
+    if environment:
         environment_path = os.path.join(root, "environments", environment)
+        env_found = os.path.isdir(environment_path)
+        append_path(environment_path)
 
-        if os.path.isdir(environment_path):
-            env_found = True
-            file_path = os.path.join(environment_path, name)
-
-            if check(file_path):
-                files.append(file_path)
-
-    if cluster is not None:
+    if cluster:
         cluster_path = os.path.join(root, "clusters", cluster)
+        cluster_found = os.path.isdir(cluster_path)
+        append_path(cluster_path)
 
-        if not os.path.isdir(cluster_path):
-            raise RuntimeError("no such cluster: {}".format(cluster))
+    if cluster and environment:
+        cluster_environment_path = os.path.join(root, "clusters", cluster, "environments", environment)
+        env_found = env_found or os.path.isdir(cluster_environment_path)
+        append_path(cluster_environment_path)
 
-        file_path = os.path.join(cluster_path, name)
-
-        if check(file_path):
-            files.append(file_path)
-
-        if environment is not None:
-            environment_path = os.path.join(
-                cluster_path, "environments", environment)
-
-            if os.path.isdir(environment_path):
-                env_found = True
-                file_path = os.path.join(environment_path, name)
-
-                if check(file_path):
-                    files.append(file_path)
-
-
+    if not cluster_found:
+        raise RuntimeError("no such cluster: {}".format(cluster))
     if not env_found:
         raise RuntimeError("no such environment: {}".format(environment))
 
-    return files
+    return paths
