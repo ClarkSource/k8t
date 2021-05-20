@@ -383,5 +383,24 @@ def test_gen():
         assert result.exit_code == 0
         assert result.output == file.read()
 
+    with open('tests/resources/results/no-config-env.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-e', 'no-config-env', 'tests/resources/good'])
+        assert result.exit_code == 0
+        assert result.output == file.read()
+
+    with open('tests/resources/results/no-values-env.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-e', 'no-values-env', 'tests/resources/good'])
+        assert result.exit_code == 0
+        assert result.output == file.read()
+
+    with open('tests/resources/results/no-yaml-env.yaml', 'r') as file:
+        result = runner.invoke(root, ['gen', '-e', 'no-yaml-env', 'tests/resources/good'])
+        assert result.exit_code == 0
+        assert result.output == file.read()
+
+    result = runner.invoke(root, ['gen', '-e', 'not-existing-env', 'tests/resources/good'])
+    assert result.exit_code == 1
+    assert str(result.exception) == 'no such environment: not-existing-env'
+
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab
