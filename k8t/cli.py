@@ -133,7 +133,10 @@ def cli_gen(method, value_files, cli_values, cname, ename, suffixes, secret_prov
     config.CONFIG = config.load_all(directory, cname, ename, method)
 
     if secret_provider is not None:
-        config.CONFIG['secrets']['provider'] = secret_provider
+        config.CONFIG = deep_merge(
+            config.CONFIG,
+            {'secrets': {'provider': secret_provider}}
+        )
 
     eng = build(directory, cname, ename)
 

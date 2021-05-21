@@ -383,5 +383,11 @@ def test_gen():
         assert result.exit_code == 0
         assert result.output == file.read()
 
+    result = runner.invoke(root, ['gen', 'tests/resources/no_secrets_provider'])
+    assert result.exit_code == 1
+
+    result = runner.invoke(root, ['gen', '--secret-provider', 'random', 'tests/resources/no_secrets_provider'])
+    assert result.exit_code == 0
+
 
 # vim: fenc=utf-8:ts=4:sw=4:expandtab
