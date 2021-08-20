@@ -1,12 +1,22 @@
 [build-system]
-requires = ["setuptools", "wheel", "setuptools_scm[toml]"]
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools>=45",
+  "wheel",
+  "setuptools_scm[toml]>=6.0"
+]
 
 [tool.setuptools_scm]
 
 [tool.black]
 line-length = 160
 
+[tool.isort]
+profile = "hug"
+src_paths = ["k8t", "tests"]
+known_first_party = ["k8t"]
+
 [tool.pytest.ini_options]
-norecursedirs = [".tox", ".git", ".python3"]
+norecursedirs = [".tox", ".direnv", ".git", ".python3"]
 python_files = ["*.py"]
 testpaths = ["tests"]

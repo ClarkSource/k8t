@@ -1,0 +1,133 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: circleci/python:3.9
+    steps:
+      - checkout
+      - run: pip install tox
+      - run: tox
+
+  build_dist:
+    docker:
+      - image: circleci/python:3.9
+    steps:
+      - checkout
+      - run: sudo pip install build twine setuptools-scm
+      - run:
+          # https://github.com/pypa/setuptools_scm/issues/455
+          command: |
+            export SETUPTOOLS_SCM_PRETEND_VERSION=$(python -c 'from setuptools_scm import get_version; print(get_version(local_scheme="no-local-version"))')
+            python -m build
+      - run: twine check dist/*
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist/*
+
+  test_pypi_publish:
+    docker:
+      - image: circleci/python:3.9
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: sudo pip install twine
+      - run: twine upload --repository testpypi /tmp/workspace/dist/*
+
+  pypi_publish:
+    docker:
+      - image: circleci/python:3.9
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: sudo pip install twine
+      - run: twine upload /tmp/workspace/dist/*
+
+  docker_build:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: docker build -t "$IMAGE_NAME:latest" .
+      - run: 
+          command: |
+            mkdir docker
+            docker save -o docker/image.tar "$IMAGE_NAME:latest"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - docker/image.tar
+
+  docker_push:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - run: test -n "$CIRCLE_TAG"
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: docker load -i /tmp/workspace/docker/image.tar
+      - run: echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
+      - run:
+          name: push versioned image
+          command: |
+            docker tag "$IMAGE_NAME:latest" "$IMAGE_NAME:$CIRCLE_TAG"
+            docker push "$IMAGE_NAME:$CIRCLE_TAG"
+      - run:
+          name: push latest image
+          command: docker push "$IMAGE_NAME:latest"
+
+build_everywhere: &build_everywhere
+  filters:
+    tags:
+      only: /.*/
+
+build_only_on_main_branch: &build_only_on_main_branch
+  filters:
+    branches:
+      only:
+        - master
+
+build_only_on_tags: &build_only_on_tags
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /.*/
+
+workflows:
+  version: 2
+  test_and_publish:
+    jobs:
+      - test:
+          <<: *build_everywhere
+      - build_dist:
+          <<: *build_everywhere
+      - docker_build:
+          <<: *build_everywhere
+          requires:
+            - test
+      - test_pypi_publish:
+          <<: *build_only_on_main_branch
+          requires:
+            - test
+            - build_dist
+          context:
+            - test.pypi.org
+      - pypi_publish:
+          <<: *build_only_on_tags
+          requires:
+            - test
+            - build_dist
+          context:
+            - pypi.org
+      - docker_push:
+          <<: *build_only_on_tags
+          requires:
+            - pypi_publish
+            - docker_build
+          context:
+            - hub.docker.com
