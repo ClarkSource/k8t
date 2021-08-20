@@ -299,6 +299,15 @@ secrets:
   provider: random
 ```
 
+##### Hash
+
+In case consistent (fake) secrets are needed, the `hash` provider can be used that hashes the secret key for the value.
+
+```yaml
+secrets:
+  provider: hash
+```
+
 ## TODO
 
 * testing needs to be expanded
