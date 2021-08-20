@@ -133,6 +133,9 @@ def cli_gen(method, value_files, cli_values, cname, ename, suffixes, secret_prov
     config.CONFIG = config.load_all(directory, cname, ename, method)
 
     if secret_provider is not None:
+        if 'secrets' not in config.CONFIG:
+            config.CONFIG['secrets'] = dict()
+
         config.CONFIG['secrets']['provider'] = secret_provider
 
     eng = build(directory, cname, ename)

@@ -8,6 +8,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import logging
+import hashlib
 import string
 
 import boto3  # pylint: disable=E0401
@@ -68,5 +69,15 @@ def random(key: str, length: int = None) -> str:
             raise AssertionError(
                 "Secret '{}' did not have expected length of {}".format(key, length)
             )
+
+    return RANDOM_STORE[key]
+
+
+def hash(key: str, length: int = None) -> str:
+    LOGGER.debug("Requesting secret from %s", key)
+
+    if key not in RANDOM_STORE:
+        hashed_key = hashlib.sha1(key.encode()).hexdigest()
+        RANDOM_STORE[key] = hashed_key[:length] if length is not None else hashed_key
 
     return RANDOM_STORE[key]
