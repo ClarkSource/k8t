@@ -8,7 +8,8 @@ ARG KUBECTL_SHA="7f9dbb80190945a5077dc5f4230202c22f68f9bd7f20c213c3cf5a74abf55e5
 ARG KUBEVAL_SHA="2d6f9bda1423b93787fa05d9e8dfce2fc1190fefbcd9d0936b9635f3f78ba790"
 
 # Install aws-cli & dependencies
-RUN apk add --no-cache openssl curl tar gzip bash ca-certificates aws-cli
+RUN apk update && apk upgrade && \
+    apk add --no-cache openssl curl tar gzip bash ca-certificates aws-cli
 
 # Download and install tools
 RUN \
@@ -27,12 +28,13 @@ RUN \
 
 # Install app
 COPY . /app
-WORKDIR /app
 
 RUN \
   apk add --no-cache --upgrade git && \
-  python3 /app/setup.py install && \
+  pip install /app && \
   apk del git && \
   rm -rf /app /var/cache/apk
+
+USER 65534
 
 ENTRYPOINT ["k8t"]
