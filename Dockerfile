@@ -7,11 +7,10 @@ ARG KUBEVAL_VERSION="0.16.1"
 ARG KUBECTL_SHA="7f9dbb80190945a5077dc5f4230202c22f68f9bd7f20c213c3cf5a74abf55e56"
 ARG KUBEVAL_SHA="2d6f9bda1423b93787fa05d9e8dfce2fc1190fefbcd9d0936b9635f3f78ba790"
 
-# Install aws-cli & dependencies
-RUN apk update && apk upgrade && \
-    apk add --no-cache openssl curl tar gzip bash ca-certificates aws-cli
-
 # Download and install tools
+RUN apk update && apk upgrade && \
+    apk add --no-cache openssl curl tar gzip bash ca-certificates py3-wheel
+
 RUN \
   echo -e "${KUBECTL_SHA}  /tmp/kubectl\n${KUBEVAL_SHA}  /tmp/kubeval.tar.gz" >> /tmp/CHECKSUMS && \
   curl -L -o /tmp/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
@@ -24,14 +23,22 @@ RUN \
   # install kubeval
   mkdir /opt/kubeval && \
   tar -xzf /tmp/kubeval.tar.gz -C /opt/kubeval && \
-  ln -s /opt/kubeval/kubeval /usr/bin/kubeval
+  ln -s /opt/kubeval/kubeval /usr/bin/kubeval && \
+  pip install --upgrade awscli
 
 # Install app
 COPY . /app
 
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 RUN \
   apk add --no-cache --upgrade git && \
-  pip install /app && \
+  which pip && \
+  which python && \
+  pip install --use-feature=in-tree-build /app && \
+  which k8t && \
   apk del git && \
   rm -rf /app /var/cache/apk
 
