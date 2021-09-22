@@ -101,7 +101,7 @@ def cli_validate(method, value_files, cli_values, cname, ename, suffixes, direct
         if errors:
             all_validated = False
 
-            click.secho("{}: ✗".format(template_path), fg="red")
+            click.secho("{}: ✗".format(template_path), fg="red", err=True)
 
             for error in errors:
                 click.echo("- {}".format(error))
@@ -164,7 +164,7 @@ def cli_gen(method, value_files, cli_values, cname, ename, suffixes, secret_prov
             template_output = render(template_path, vals, eng)
             click.echo(template_output)
     except (UndefinedError, YamlValidationError) as err:
-        click.secho("✗ -> {}".format(err), fg="red")
+        click.secho("✗ -> {}".format(err), fg="red", err=True)
         sys.exit(1)
 
 
