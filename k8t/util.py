@@ -15,7 +15,7 @@ import shutil
 from functools import reduce
 from typing import Any, Dict, List, Tuple
 
-import ruamel.yaml as yaml # pylint: disable=E0401
+from ruamel.yaml import YAML # pylint: disable=E0401
 from click import secho  # pylint: disable=E0401
 
 from simple_tools.interaction import confirm  # pylint: disable=E0401
@@ -107,7 +107,8 @@ def load_yaml(path: str) -> dict:
     LOGGER.debug("loading values file: %s", path)
 
     with open(path, "r") as stream:
-        return yaml.safe_load(stream) or dict()
+        yaml = YAML(typ='safe', pure=True)
+        return yaml.load(stream) or dict()
 
 
 def load_cli_value(key: str, value: str) -> Tuple[str, Any]:
@@ -124,6 +125,7 @@ def to_json(input: dict) -> str:
 
 
 def to_yaml(input: dict) -> str:
+    yaml = YAML()
     yaml.scalarstring.walk_tree(input)
     return yaml.round_trip_dump(input, default_flow_style = False, allow_unicode = True, explicit_start=True)
 

@@ -10,7 +10,7 @@
 import logging
 from typing import Set, Tuple
 
-import ruamel.yaml as yaml  # pylint: disable=E0401
+from ruamel.yaml import YAML  # pylint: disable=E0401
 from jinja2 import Environment, meta, nodes  # pylint: disable=E0401
 
 from k8t import config
@@ -109,8 +109,10 @@ def get_variables(ast, engine: Environment) -> Set[str]:
 def render(template_path: str, values: dict, engine: Environment) -> str:
     output = engine.get_template(template_path).render(values)
 
+    yaml = YAML(typ='safe', pure=True)
+
     try:
-        yaml.safe_load_all(output)
+        yaml.load_all(output)
     except (yaml.scanner.ScannerError, yaml.parser.ParserError) as err:
         raise YamlValidationError(err) from err
 
