@@ -7,24 +7,35 @@
 #
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+import os
 import logging
 
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from typing import List
+from jinja2 import Environment, DictLoader, FileSystemLoader, StrictUndefined
 
 from k8t.filters import (b64decode, b64encode, envvar, get_secret, hashf,
                          random_password, sanitize_label, to_bool)
 from k8t.project import find_files
+from k8t.util import read_file
 
 LOGGER = logging.getLogger(__name__)
 
 
-def build(path: str, cluster: str, environment: str) -> Environment:
-    template_paths = find_template_paths(path, cluster, environment)
+def build(path: str, cluster: str, environment: str, template_overrides: List[str] = None) -> Environment:
+    env = None
+    template_paths = []
 
     LOGGER.debug(
         "building template environment")
 
-    env = Environment(undefined=StrictUndefined, loader=FileSystemLoader(template_paths))
+    if template_overrides is not None and len(template_overrides) > 0:
+        template_paths = {key: read_file(os.path.abspath(path)) for key, path in template_overrides}
+
+        env = Environment(undefined=StrictUndefined, loader=DictLoader(template_paths))
+    else:
+        template_paths = find_template_paths(path, cluster, environment)
+
+        env = Environment(undefined=StrictUndefined, loader=FileSystemLoader(template_paths))
 
     # Filter functions
     env.filters["b64decode"] = b64decode

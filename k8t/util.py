@@ -145,3 +145,7 @@ def list_files(
         break
 
     return result
+
+def read_file(path: str) -> str:
+    with open(path, 'rb') as stream:
+        return stream.read().decode()
