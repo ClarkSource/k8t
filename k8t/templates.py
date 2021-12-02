@@ -10,7 +10,7 @@
 import logging
 from typing import Set, Tuple
 
-import yaml  # pylint: disable=E0401
+import ruamel.yaml as yaml  # pylint: disable=E0401
 from jinja2 import Environment, meta, nodes  # pylint: disable=E0401
 
 from k8t import config

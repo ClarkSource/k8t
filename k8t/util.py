@@ -15,7 +15,7 @@ import shutil
 from functools import reduce
 from typing import Any, Dict, List, Tuple
 
-import yaml  # pylint: disable=E0401
+import ruamel.yaml as yaml # pylint: disable=E0401
 from click import secho  # pylint: disable=E0401
 
 from simple_tools.interaction import confirm  # pylint: disable=E0401
@@ -117,6 +117,15 @@ def load_cli_value(key: str, value: str) -> Tuple[str, Any]:
         return key, json.loads(value, parse_float=lambda x: str(x))  # lambda is necessary, pylint: disable=W0108
     except json.decoder.JSONDecodeError:
         return key, value
+
+
+def to_json(input: dict) -> str:
+    return json.dumps(input)
+
+
+def to_yaml(input: dict) -> str:
+    yaml.scalarstring.walk_tree(input)
+    return yaml.round_trip_dump(input, default_flow_style = False, allow_unicode = True, explicit_start=True)
 
 
 def envvalues() -> Dict:

@@ -21,7 +21,7 @@ from k8t import cluster, config, environment, project, scaffolding, values
 from k8t.engine import build
 from k8t.templates import YamlValidationError, analyze, render, validate
 from k8t.util import (MERGE_METHODS, deep_merge, envvalues, load_cli_value,
-                      load_yaml)
+                      load_yaml, to_json, to_yaml)
 
 
 def requires_project_directory(func):
@@ -253,6 +253,30 @@ def get_environments(cname, directory):  # pylint: disable=redefined-outer-name
 def get_templates(directory, cname, ename):  # pylint: disable=redefined-outer-name
     for template_path in build(directory, cname, ename).list_templates():
         click.echo(template_path)
+
+
+@get.command(name="values", help="Get final value set.")
+@click.option("-m", "--method", type=click.Choice(MERGE_METHODS), default="ltr", show_default=True, help="Value file merge method.")
+@click.option("--value-file", "value_files", multiple=True, type=click.Path(dir_okay=False, exists=True), help="Additional value file to include.")
+@click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="KEY VALUE", help="Additional value(s) to include.")
+@click.option("--cluster", "-c", "cname", metavar="NAME", help="Cluster context to use.")
+@click.option("--environment", "-e", "ename", metavar="NAME", help="Deployment environment to use.")
+@click.option("--output-format", "-o", type=click.Choice(["json", "yaml"]), default="json", help="Specify output format for values.")
+@click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
+@requires_project_directory
+def get_values(directory, method, value_files, cli_values, cname, ename, output_format):  # pylint: disable=redefined-outer-name
+    vals = deep_merge(  # pylint: disable=redefined-outer-name
+        values.load_all(directory, cname, ename, method),
+        *(load_yaml(p) for p in value_files),
+        dict(load_cli_value(k, v) for k, v in cli_values),
+        envvalues(),
+        method=method,
+    )
+
+    if output_format == "json":
+        print(to_json(vals))
+    else:
+        print(to_yaml(vals))
 
 
 @root.group(help="Edit local project files.")
