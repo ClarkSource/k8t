@@ -57,13 +57,14 @@ def print_license():
 @root.command(name="validate", help="Validate template files for given context.")
 @click.option("-m", "--method", type=click.Choice(MERGE_METHODS), default="ltr", show_default=True, help="Value file merge method.")
 @click.option("--value-file", "value_files", multiple=True, type=click.Path(dir_okay=False, exists=True), help="Additional value file to include.")
-@click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="<KEY VALUE>", help="Additional value(s) to include.")
-@click.option("--cluster", "-c", "cname", help="Cluster context to use.")
-@click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="KEY VALUE", help="Additional value(s) to include.")
+@click.option("--cluster", "-c", "cname", metavar="NAME", help="Cluster context to use.")
+@click.option("--environment", "-e", "ename", metavar="NAME", help="Deployment environment to use.")
 @click.option("--suffix", "-s", "suffixes", default=[".yaml", ".j2", ".jinja2"], help="Filter template files by suffix. Can be used multiple times.", show_default=True)
+@click.option("--template-file", "-t", "template_overrides", metavar="KEY PATH", type=click.Tuple([str, str]), multiple=True, help="Restrict validation to single template file (the key is needed for references in templates).")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 @requires_project_directory
-def cli_validate(method, value_files, cli_values, cname, ename, suffixes, directory):
+def cli_validate(method, value_files, cli_values, cname, ename, suffixes, template_overrides, directory):
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -73,12 +74,12 @@ def cli_validate(method, value_files, cli_values, cname, ename, suffixes, direct
     )
     config.CONFIG = config.load_all(directory, cname, ename, method)
 
-    eng = build(directory, cname, ename)
+    eng = build(directory, cname, ename, template_overrides)
 
     templates = eng.list_templates()  # pylint: disable=redefined-outer-name
 
     if suffixes:
-        templates = [ name for name in templates if os.path.splitext(name)[1] in suffixes ]
+        templates = [name for name in templates if os.path.splitext(name)[1] in suffixes]
 
     all_validated = True
 
@@ -114,14 +115,15 @@ def cli_validate(method, value_files, cli_values, cname, ename, suffixes, direct
 @root.command(name="gen", help="Create manifest files using stored templates.")
 @click.option("-m", "--method", type=click.Choice(MERGE_METHODS), default="ltr", show_default=True, help="Value file merge method.")
 @click.option("--value-file", "value_files", multiple=True, type=click.Path(dir_okay=False, exists=True), help="Additional value file to include.")
-@click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="<KEY VALUE>", help="Additional value(s) to include.")
-@click.option("--cluster", "-c", "cname", help="Cluster context to use.")
-@click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--value", "cli_values", type=(str, str), multiple=True, metavar="KEY VALUE", help="Additional value(s) to include.")
+@click.option("--cluster", "-c", "cname", metavar="NAME", help="Cluster context to use.")
+@click.option("--environment", "-e", "ename", metavar="NAME", help="Deployment environment to use.")
 @click.option("--suffix", "-s", "suffixes", default=[".yaml", ".j2", ".jinja2"], help="Filter template files by suffix. Can be used multiple times.", show_default=True)
-@click.option("--secret-provider", help="Secret provider override.")
+@click.option("--secret-provider", help="Secret provider override.", type=click.Choice(['ssm', 'random', 'hash']))
+@click.option("--template-file", "-t", "template_overrides", metavar="KEY PATH", type=click.Tuple([str, str]), multiple=True, help="Restrict validation to single template file (the key is needed for references in templates).")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 @requires_project_directory
-def cli_gen(method, value_files, cli_values, cname, ename, suffixes, secret_provider, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
+def cli_gen(method, value_files, cli_values, cname, ename, suffixes, secret_provider, template_overrides, directory):  # pylint: disable=redefined-outer-name,too-many-arguments
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -138,12 +140,12 @@ def cli_gen(method, value_files, cli_values, cname, ename, suffixes, secret_prov
 
         config.CONFIG['secrets']['provider'] = secret_provider
 
-    eng = build(directory, cname, ename)
+    eng = build(directory, cname, ename, template_overrides)
 
     templates = eng.list_templates()  # pylint: disable=redefined-outer-name
 
     if suffixes:
-        templates = [ name for name in templates if os.path.splitext(name)[1] in suffixes ]
+        templates = [name for name in templates if os.path.splitext(name)[1] in suffixes]
 
     validated = True
 
@@ -188,7 +190,7 @@ def new_cluster(name, directory):
 
 
 @new.command(name="environment", help="Create a new environment context.")
-@click.option("--cluster", "-c", "cname")
+@click.option("--cluster", "-c", "cname", metavar="NAME")
 @click.argument("name")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 @requires_project_directory
@@ -199,8 +201,8 @@ def new_environment(cname, name, directory):
 
 
 @new.command(name="template", help="Create specified kubernetes manifest template.")
-@click.option("--cluster", "-c", "cname", help="Cluster context to use.")
-@click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--cluster", "-c", "cname", metavar="NAME", help="Cluster context to use.")
+@click.option("--environment", "-e", "ename", metavar="NAME", help="Deployment environment to use.")
 @click.option("--name", "-n", help="Template filename.")
 @click.option("--prefix", "-p", help="Prefix for filename.")
 @click.argument("kind", type=click.Choice(sorted(list(scaffolding.list_available_templates()))))
@@ -233,7 +235,7 @@ def get_clusters(directory):
 
 
 @get.command(name="environments", help="Get configured environments.")
-@click.option("--cluster", "-c", "cname", help="Cluster context to use.")
+@click.option("--cluster", "-c", "cname", metavar="NAME", help="Cluster context to use.")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 @requires_project_directory
 def get_environments(cname, directory):  # pylint: disable=redefined-outer-name
@@ -244,8 +246,8 @@ def get_environments(cname, directory):  # pylint: disable=redefined-outer-name
 
 
 @get.command(name="templates", help="Get stored templates.")
-@click.option("--cluster", "-c", "cname", help="Cluster context to use.")
-@click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--cluster", "-c", "cname", metavar="NAME", help="Cluster context to use.")
+@click.option("--environment", "-e", "ename", metavar="NAME", help="Deployment environment to use.")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 @requires_project_directory
 def get_templates(directory, cname, ename):  # pylint: disable=redefined-outer-name
@@ -259,8 +261,8 @@ def edit():
 
 
 @edit.command(name="config", help="Edit config files in chosen context.")
-@click.option("--cluster", "-c", "cname", help="Cluster context to use.")
-@click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--cluster", "-c", "cname", metavar="NAME", help="Cluster context to use.")
+@click.option("--environment", "-e", "ename", metavar="NAME", help="Deployment environment to use.")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 @requires_project_directory
 def edit_config(directory, cname, ename):  # pylint: disable=redefined-outer-name
@@ -281,8 +283,8 @@ def edit_config(directory, cname, ename):  # pylint: disable=redefined-outer-nam
 
 
 @edit.command(name="values", help="Edit value files in chosen context.")
-@click.option("--cluster", "-c", "cname", help="Cluster context to use.")
-@click.option("--environment", "-e", "ename", help="Deployment environment to use.")
+@click.option("--cluster", "-c", "cname", metavar="NAME", help="Cluster context to use.")
+@click.option("--environment", "-e", "ename", metavar="NAME", help="Deployment environment to use.")
 @click.argument("directory", type=click.Path(exists=True, file_okay=False), default=os.getcwd())
 @requires_project_directory
 def edit_values(directory, cname, ename):  # pylint: disable=redefined-outer-name
