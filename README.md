@@ -3,8 +3,8 @@
 *Pronounced katie [ˈkeɪti]*
 
 [![CircleCI](https://circleci.com/gh/ClarkSource/k8t/tree/master.svg?style=shield)](https://circleci.com/gh/ClarkSource/k8t/tree/master)
-[![PyPi version](https://pypip.in/v/k8t/badge.png)](https://pypi.org/project/k8t/)
-[![PyPi downloads](https://pypip.in/d/k8t/badge.png)](https://pypi.org/project/k8t/)
+[![PyPI](https://img.shields.io/pypi/v/k8t?color=blue)](https://pypi.org/project/k8t/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/k8t)](https://pypi.org/project/k8t/)
 [![CLARK Open Source](https://img.shields.io/badge/CLARK-Open%20Source-%232B6CDE.svg)](https://www.clark.de/de/jobs)
 
 Simple cluster and environment specific aware templating for kubernetes manifests.
