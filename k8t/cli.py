@@ -61,10 +61,11 @@ def print_license():
 @click.option("--cluster", "-c", "cname", metavar="NAME", help="Cluster context to use.")
 @click.option("--environment", "-e", "ename", metavar="NAME", help="Deployment environment to use.")
 @click.option("--suffix", "-s", "suffixes", default=[".yaml", ".j2", ".jinja2"], help="Filter template files by suffix. Can be used multiple times.", show_default=True)
+@click.option("--secret-provider", help="Secret provider override.", type=click.Choice(['ssm', 'random', 'hash']))
 @click.option("--template-file", "-t", "template_overrides", metavar="KEY PATH", type=click.Tuple([str, str]), multiple=True, help="Restrict validation to single template file (the key is needed for references in templates).")
 @click.argument("directory", type=click.Path(dir_okay=True, file_okay=False, exists=True), default=os.getcwd())
 @requires_project_directory
-def cli_validate(method, value_files, cli_values, cname, ename, suffixes, template_overrides, directory):
+def cli_validate(method, value_files, cli_values, cname, ename, suffixes, secret_provider, template_overrides, directory):
     vals = deep_merge(  # pylint: disable=redefined-outer-name
         values.load_all(directory, cname, ename, method),
         *(load_yaml(p) for p in value_files),
@@ -73,6 +74,12 @@ def cli_validate(method, value_files, cli_values, cname, ename, suffixes, templa
         method=method,
     )
     config.CONFIG = config.load_all(directory, cname, ename, method)
+
+    if secret_provider is not None:
+        if 'secrets' not in config.CONFIG:
+            config.CONFIG['secrets'] = dict()
+
+        config.CONFIG['secrets']['provider'] = secret_provider
 
     eng = build(directory, cname, ename, template_overrides)
 
