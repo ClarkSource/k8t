@@ -10,6 +10,19 @@ categories:
       - 'fix'
       - 'bugfix'
       - 'bug'
+  - title: 'Other changes'
+    labels:
+      - 'chore'
+      - 'docs'
+      - 'style'
+      - 'perf'
+      - 'test'
+  - title: 'Breaking Changes'
+    labels:
+      - 'chore!'
+      - 'fix!'
+      - 'bugfix!'
+      - 'bug!'
 template: |
   ## Changes
 
