@@ -2,8 +2,8 @@ FROM python:3-alpine
 
 LABEL maintainer="CloudOps <cloudops@clark.de>"
 
-ARG KUBECTL_VERSION="1.20.5"
-ARG KUBECTL_SHA="7f9dbb80190945a5077dc5f4230202c22f68f9bd7f20c213c3cf5a74abf55e56"
+ARG KUBECTL_VERSION="1.22.6"
+ARG KUBECTL_SHA="1ab07643807a45e2917072f7ba5f11140b40f19675981b199b810552d6af5c53"
 
 # Download and install tools
 RUN apk update && apk upgrade && \
