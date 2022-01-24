@@ -61,7 +61,7 @@ You can also run k8t via docker
 $ docker run clarksource/k8t:latest
 ```
 
-**hint**: the docker image comes with [aws-cli](https://aws.amazon.com/cli/), [kubectl](https://github.com/kubernetes/kubectl) and [kubeval](https://github.com/instrumenta/kubeval).
+**hint**: the docker image comes with [aws-cli](https://aws.amazon.com/cli/), and [kubectl](https://github.com/kubernetes/kubectl).
 
 ### Completion
 
