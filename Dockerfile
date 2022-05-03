@@ -7,7 +7,7 @@ ARG KUBECTL_SHA="1ab07643807a45e2917072f7ba5f11140b40f19675981b199b810552d6af5c5
 
 # Download and install tools
 RUN apk update && apk upgrade && \
-    apk add --no-cache openssl curl tar gzip bash ca-certificates py3-wheel
+  apk add --no-cache openssl curl tar gzip bash ca-certificates py3-wheel gcc
 
 RUN \
   echo -e "${KUBECTL_SHA}  /tmp/kubectl" >> /tmp/CHECKSUMS && \
@@ -32,7 +32,7 @@ RUN \
   which python && \
   pip install --use-feature=in-tree-build /app && \
   which k8t && \
-  apk del git && \
+  apk del git gcc && \
   rm -rf /app /var/cache/apk
 
 USER 65534
