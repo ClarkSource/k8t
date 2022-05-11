@@ -2,7 +2,7 @@ version: 2
 jobs:
   test:
     docker:
-      - image: circleci/python:3.9
+      - image: cimg/python:3.9
     steps:
       - checkout
       - run: pip install tox
@@ -10,10 +10,10 @@ jobs:
 
   build_dist:
     docker:
-      - image: circleci/python:3.9
+      - image: cimg/python:3.9
     steps:
       - checkout
-      - run: sudo pip install build twine setuptools-scm
+      - run: pip install build twine setuptools-scm
       - run:
           # https://github.com/pypa/setuptools_scm/issues/455
           command: |
@@ -27,25 +27,25 @@ jobs:
 
   test_pypi_publish:
     docker:
-      - image: circleci/python:3.9
+      - image: cimg/python:3.9
     steps:
       - attach_workspace:
           at: /tmp/workspace
-      - run: sudo pip install twine
+      - run: pip install twine
       - run: twine upload --repository testpypi /tmp/workspace/dist/*
 
   pypi_publish:
     docker:
-      - image: circleci/python:3.9
+      - image: cimg/python:3.9
     steps:
       - attach_workspace:
           at: /tmp/workspace
-      - run: sudo pip install twine
+      - run: pip install twine
       - run: twine upload /tmp/workspace/dist/*
 
   docker_build:
     docker:
-      - image: circleci/buildpack-deps:stretch
+      - image: cimg/base:current
     steps:
       - checkout
       - setup_remote_docker:
@@ -62,7 +62,7 @@ jobs:
 
   docker_push:
     docker:
-      - image: circleci/buildpack-deps:stretch
+      - image: cimg/base:current
     steps:
       - run: test -n "$CIRCLE_TAG"
       - attach_workspace:
