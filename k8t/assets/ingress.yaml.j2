@@ -16,4 +16,4 @@ spec:
           service:
             name: "{{ name }}"
             port:
-              number: "{{ service_port | default(80) }}"
+              number: {{ service_port | default(80) }}
