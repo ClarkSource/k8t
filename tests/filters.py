@@ -12,13 +12,23 @@
 # Author: Aljosha Friemann <aljosha.friemann@clark.de>
 
 import random
+import bitmath
 
 import pytest  # pylint: disable=E0401
 from mock import patch  # pylint: disable=E0401
 
 from k8t import config, secret_providers
-from k8t.filters import (b64decode, b64encode, get_secret, hashf,
-                         random_password, sanitize_label, to_bool)
+from k8t.filters import (
+    b64decode,
+    b64encode,
+    get_secret,
+    hashf,
+    random_password,
+    sanitize_cpu,
+    sanitize_label,
+    sanitize_memory,
+    to_bool,
+)
 
 
 def test_b64encode():
@@ -107,3 +117,56 @@ def test_sanitize_label():
 
     # check length
     assert len(sanitize_label("x" * 65)) == 63
+
+
+def test_sanitize_cpu():
+    assert sanitize_cpu("200m") == "200m"
+    assert sanitize_cpu("0.5") == "500m"
+    assert sanitize_cpu("1") == "1000m"
+    assert sanitize_cpu("92") == "92000m"
+    assert sanitize_cpu("1.8") == "1800m"
+    assert sanitize_cpu("3000m") == "3000m"
+
+    assert sanitize_cpu("0.1") == "100m"
+    assert sanitize_cpu("0.01") == "10m"
+    assert sanitize_cpu("0.001") == "1m"
+
+    with pytest.raises(ValueError):
+        assert sanitize_cpu("0.0001") == "0.1m"
+
+
+def test_sanitize_memory():
+    def compare(size: str, value: int, precision: float = 0.008) -> bool:
+        # precision of 0.008 results in (value +- 1.0e+00)
+        return int(bitmath.parse_string(f"{size}B")) == pytest.approx(value, precision)
+
+    assert sanitize_memory("200M") == "200M"
+
+    with pytest.raises(ValueError):
+        assert sanitize_memory("100000000m") == "0.1M"
+
+    assert sanitize_memory("1289748") == "1M"
+    with pytest.raises(ValueError):
+        assert sanitize_memory("128974") == "0M"
+
+    # precision can vary between systems, values should be approximately 129MB
+    assert compare(sanitize_memory("129e6"), 129)
+    assert compare(sanitize_memory("129M"), 129)
+    assert compare(sanitize_memory("128974848"), 129)
+    assert compare(sanitize_memory("128974848000m"), 129)
+    assert compare(sanitize_memory("123Mi"), 129)
+
+    assert sanitize_memory("300000000000m") == "300M"
+    assert sanitize_memory("20000000000m") == "20M"
+    assert sanitize_memory("20005000000m") == "20M"
+    assert sanitize_memory("1000000000m") == "1M"
+
+    assert sanitize_memory("2M") == "2M"
+    assert sanitize_memory("2G") == "2000M"
+    assert sanitize_memory("2T") == "2000000M"
+    assert sanitize_memory("2P") == "2000000000M"
+
+    assert sanitize_memory("2Mi") == "2M"
+    assert sanitize_memory("2Gi") == "2147M"
+    assert sanitize_memory("2Ti") == "2199023M"
+    assert sanitize_memory("2Pi") == "2251799813M"

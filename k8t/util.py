@@ -10,14 +10,15 @@
 import copy
 import json
 import logging
+import math
+import bitmath
 import os
 import shutil
 from functools import reduce
 from typing import Any, Dict, List, Tuple
 
-from ruamel.yaml import YAML # pylint: disable=E0401
 from click import secho  # pylint: disable=E0401
-
+from ruamel.yaml import YAML  # pylint: disable=E0401
 from simple_tools.interaction import confirm  # pylint: disable=E0401
 
 LOGGER = logging.getLogger(__name__)
@@ -98,16 +99,14 @@ def deep_merge(*dicts, method="ltr"):
     if not dicts:
         return {}
 
-    return reduce(
-        lambda a, b: merge(a, b, method=method) if b is not None else a, dicts
-    )
+    return reduce(lambda a, b: merge(a, b, method=method) if b is not None else a, dicts)
 
 
 def load_yaml(path: str) -> dict:
     LOGGER.debug("loading values file: %s", path)
 
     with open(path, "r") as stream:
-        yaml = YAML(typ='safe', pure=True)
+        yaml = YAML(typ="safe", pure=True)
         return yaml.load(stream) or dict()
 
 
@@ -127,7 +126,7 @@ def to_json(input: dict) -> str:
 def to_yaml(input: dict) -> str:
     yaml = YAML()
     yaml.scalarstring.walk_tree(input)
-    return yaml.round_trip_dump(input, default_flow_style = False, allow_unicode = True, explicit_start=True)
+    return yaml.round_trip_dump(input, default_flow_style=False, allow_unicode=True, explicit_start=True)
 
 
 def envvalues() -> Dict:
@@ -141,9 +140,7 @@ def envvalues() -> Dict:
     return values
 
 
-def list_files(
-    directory: str, include_files=False, include_directories=False
-) -> List[str]:
+def list_files(directory: str, include_files=False, include_directories=False) -> List[str]:
     result = []
 
     for _, dirs, files in os.walk(directory):
@@ -157,6 +154,13 @@ def list_files(
 
     return result
 
+
 def read_file(path: str) -> str:
-    with open(path, 'rb') as stream:
+    with open(path, "rb") as stream:
         return stream.read().decode()
+
+
+def memory_to_mb(value: str) -> int:
+    parsed = bitmath.parse_string(value)  # all memory values are in bytes
+
+    return int(parsed.to_MB())

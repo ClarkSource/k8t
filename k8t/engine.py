@@ -14,7 +14,7 @@ from typing import List
 from jinja2 import Environment, DictLoader, FileSystemLoader, StrictUndefined
 
 from k8t.filters import (b64decode, b64encode, envvar, get_secret, hashf,
-                         random_password, sanitize_label, to_bool)
+                         random_password, sanitize_label, sanitize_cpu, sanitize_memory, standardize_cpu, standardize_memory, to_bool)
 from k8t.project import find_files
 from k8t.util import read_file
 
@@ -43,6 +43,10 @@ def build(path: str, cluster: str, environment: str, template_overrides: List[st
     env.filters["hash"] = hashf
     env.filters["bool"] = to_bool
     env.filters["sanitize_label"] = sanitize_label
+    env.filters["sanitize_cpu"] = sanitize_cpu
+    env.filters["sanitize_memory"] = sanitize_memory
+    env.filters["standardize_cpu"] = standardize_cpu
+    env.filters["standardize_memory"] = standardize_memory
 
     # Global functions
     env.globals["random_password"] = random_password
