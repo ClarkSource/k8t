@@ -9,7 +9,7 @@
 
 import boto3
 import pytest  # pylint: disable=E0401
-from moto import mock_ssm  # pylint: disable=E0401
+from moto import mock_ssm, mock_sts  # pylint: disable=E0401
 
 from k8t import config
 from k8t.secret_providers import random, ssm
@@ -81,6 +81,28 @@ def test_ssm():
     config.CONFIG = {"secrets": {"provider": "ssm", "region": "eu-central-1"}}
     with pytest.raises(RuntimeError, match=r"Failed to retrieve secret foo: ..."):
         ssm("foo")
+
+    config.CONFIG = {"secrets": {"provider": "ssm", "role_arn": "arn:aws:iam::account:role/role-name-with-path"}}
+    with pytest.raises(RuntimeError, match=r"Failed to assume role arn:aws:iam::account:role/role-name-with-path"):
+        ssm("foo")
+
+
+@mock_ssm
+@mock_sts
+def test_ssm_assume_role():
+    region = "eu-west-1"
+    client = boto3.client("ssm", region_name=region)
+
+    client.put_parameter(
+        Name="foo",
+        Description="Global parameter",
+        Value="global_secret_value",
+        Type="SecureString",
+        KeyId="alias/aws/ssm",
+    )
+
+    config.CONFIG = {"secrets": {"provider": "ssm", "region": region, "role_arn": "arn:aws:iam::account:role/role-name-with-path"}}
+    assert ssm("foo"), "global_secret_value"
 
 
 @mock_ssm

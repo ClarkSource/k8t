@@ -38,15 +38,7 @@ def ssm(key: str, length: Optional[int] = None) -> str:
     client_config = dict(region_name=region)
 
     if role_arn != '':
-        sts_client = boto3.client('sts', region_name=region)
-
-        LOGGER.debug("assuming role %s", role_arn)
-
-        assumed_role = sts_client.assume_role(RoleArn=role_arn, RoleSessionName='k8t')
-        role_creds = assumed_role.get('Credentials')
-
-        if role_creds is None:
-            raise RuntimeError(f"failed to assume role {role_arn}")
+        role_creds = _assume_role(role_arn, region)
 
         client_config.update(dict(
             aws_access_key_id=role_creds['AccessKeyId'],
@@ -75,6 +67,26 @@ def ssm(key: str, length: Optional[int] = None) -> str:
         botocore.exceptions.ClientError,
     ) as exc:
         raise RuntimeError(f"Failed to retrieve secret {key}: {exc}") from exc
+
+
+def _assume_role(role_arn: str, region: str) -> dict:
+    sts_client = boto3.client('sts', region_name=region)
+
+    LOGGER.debug("assuming role %s", role_arn)
+
+    try:
+        assumed_role = sts_client.assume_role(RoleArn=role_arn, RoleSessionName='k8t')
+
+        role_creds = assumed_role.get('Credentials')
+
+        if role_creds is None:
+            raise RuntimeError(f"Failed to assume role {role_arn}")
+
+        return role_creds
+    except (
+        botocore.exceptions.ClientError,
+    ) as exc:
+        raise RuntimeError(f"Failed to assume role {role_arn}: {exc}") from exc
 
 
 def random(key: str, length: Optional[int] = None) -> str:
