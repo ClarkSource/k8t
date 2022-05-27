@@ -33,11 +33,11 @@ def ssm(key: str, length: Optional[int] = None) -> str:
 
     prefix = str(secrets_config.get("prefix", DEFAULT_SSM_PREFIX))
     region = str(secrets_config.get("region", DEFAULT_SSM_REGION))
-    role_arn = str(secrets_config.get("role_arn"))
+    role_arn = str(secrets_config.get("role_arn", ""))
 
     client_config = dict(region_name=region)
 
-    if (role_arn is not None):
+    if role_arn != '':
         sts_client = boto3.client('sts', region_name=region)
 
         LOGGER.debug("assuming role %s", role_arn)
@@ -67,9 +67,7 @@ def ssm(key: str, length: Optional[int] = None) -> str:
 
         if length is not None:
             if len(result) != length:
-                raise AssertionError(
-                    "Secret '{}' did not have expected length of {}".format(key, length)
-                )
+                raise AssertionError(f"Secret '{key}' did not have expected length of {length}")
 
         return result
     except (
@@ -91,9 +89,7 @@ def random(key: str, length: Optional[int] = None) -> str:
 
     if length is not None:
         if len(RANDOM_STORE[key]) != length:
-            raise AssertionError(
-                "Secret '{}' did not have expected length of {}".format(key, length)
-            )
+            raise AssertionError(f"Secret '{key}' did not have expected length of {length}")
 
     return RANDOM_STORE[key]
 
