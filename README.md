@@ -32,7 +32,9 @@ Simple cluster and environment specific aware templating for kubernetes manifest
   - [Managing secrets](#managing-secrets)
     - [Providers](#providers)
       - [SSM](#ssm)
+        - [role assumption](#role-assumption)
       - [Random](#random)
+      - [Hash](#hash)
 - [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -288,6 +290,17 @@ secrets:
 > Keep in mind that SSM parameter names can be formed as a path and  they can only consist of sub-paths divided by slash symbol; each sub-path can be formed as a mix of letters, numbers and the following 3 symbols: `.-_`
 >
 > Be careful to follow this format when setting up the provider `prefix` and `get_secret(key)`.
+
+###### role assumption
+
+You can optionally assume an IAM role to retrieve secrets by specyfing `role_arn` in the config:
+
+```
+secrets:
+  provider: ssm
+  region: "eu-central-1"
+  role_arn: "arn:aws:iam::account:role/role-name-with-path"
+```
 
 ##### Random
 

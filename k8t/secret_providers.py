@@ -14,6 +14,7 @@ import string
 import boto3  # pylint: disable=E0401
 import botocore  # pylint: disable=E0401
 from k8t import config
+from typing import Optional
 
 try:
     from secrets import SystemRandom
@@ -27,13 +28,29 @@ DEFAULT_SSM_PREFIX = ""
 DEFAULT_SSM_REGION = "eu-central-1"
 
 
-def ssm(key: str, length: int = None) -> str:
-    prefix = str(config.CONFIG.get("secrets", {}).get("prefix", DEFAULT_SSM_PREFIX))
-    key = prefix + key
-    LOGGER.debug("Requesting secret from %s", key)
+def ssm(key: str, length: Optional[int] = None) -> str:
+    secrets_config = config.CONFIG.get("secrets", {})
 
-    region = str(config.CONFIG.get("secrets", {}).get("region", DEFAULT_SSM_REGION))
-    client = boto3.client("ssm", region_name=region)
+    prefix = str(secrets_config.get("prefix", DEFAULT_SSM_PREFIX))
+    region = str(secrets_config.get("region", DEFAULT_SSM_REGION))
+    role_arn = str(secrets_config.get("role_arn", ""))
+
+    client_config = dict(region_name=region)
+
+    if role_arn != '':
+        role_creds = _assume_role(role_arn, region)
+
+        client_config.update(dict(
+            aws_access_key_id=role_creds['AccessKeyId'],
+            aws_secret_access_key=role_creds['SecretAccessKey'],
+            aws_session_token=role_creds['SessionToken'],
+        ))
+
+    client = boto3.client("ssm", **client_config)
+
+    key = prefix + key
+
+    LOGGER.debug("Requesting secret from %s", key)
 
     try:
         result = client.get_parameter(Name=key, WithDecryption=True)["Parameter"][
@@ -42,9 +59,7 @@ def ssm(key: str, length: int = None) -> str:
 
         if length is not None:
             if len(result) != length:
-                raise AssertionError(
-                    "Secret '{}' did not have expected length of {}".format(key, length)
-                )
+                raise AssertionError(f"Secret '{key}' did not have expected length of {length}")
 
         return result
     except (
@@ -54,7 +69,27 @@ def ssm(key: str, length: int = None) -> str:
         raise RuntimeError(f"Failed to retrieve secret {key}: {exc}") from exc
 
 
-def random(key: str, length: int = None) -> str:
+def _assume_role(role_arn: str, region: str) -> dict:
+    sts_client = boto3.client('sts', region_name=region)
+
+    LOGGER.debug("assuming role %s", role_arn)
+
+    try:
+        assumed_role = sts_client.assume_role(RoleArn=role_arn, RoleSessionName='k8t')
+
+        role_creds = assumed_role.get('Credentials')
+
+        if role_creds is None:
+            raise RuntimeError(f"Failed to assume role {role_arn}")
+
+        return role_creds
+    except (
+        botocore.exceptions.ClientError,
+    ) as exc:
+        raise RuntimeError(f"Failed to assume role {role_arn}: {exc}") from exc
+
+
+def random(key: str, length: Optional[int] = None) -> str:
     LOGGER.debug("Requesting secret from %s", key)
 
     if key not in RANDOM_STORE:
@@ -66,14 +101,12 @@ def random(key: str, length: int = None) -> str:
 
     if length is not None:
         if len(RANDOM_STORE[key]) != length:
-            raise AssertionError(
-                "Secret '{}' did not have expected length of {}".format(key, length)
-            )
+            raise AssertionError(f"Secret '{key}' did not have expected length of {length}")
 
     return RANDOM_STORE[key]
 
 
-def hash(key: str, length: int = None) -> str:
+def hash(key: str, length: Optional[int] = None) -> str:
     LOGGER.debug("Requesting secret from %s", key)
 
     if key not in RANDOM_STORE:
