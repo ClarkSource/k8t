@@ -1,0 +1,9 @@
+---
+- id: k8t-validate
+  name: k8t validate
+  description: This hook validates k8t manifests
+  entry: k8t
+  args: [ "validate" ]
+  language: python
+  pass_filenames: false
+  always_run: true
