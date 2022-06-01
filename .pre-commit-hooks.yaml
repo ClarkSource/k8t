@@ -1,0 +1,17 @@
+---
+- id: k8t-validate
+  name: k8t validate
+  description: This hook validates k8t manifests
+  entry: k8t
+  args: [ "validate" ]
+  language: python
+  pass_filenames: false
+  always_run: true
+- id: k8t-generate
+  name: k8t generate
+  description: This hook generates k8t manifests
+  entry: pre_commit_hooks/k8t-generate
+  language: script
+  pass_filenames: false
+  always_run: true
+  args: [ "-o", "k8t-generated.yaml" ]

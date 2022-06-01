@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -e
+
+declare -a K8T_ARGS
+OUTPUT=""
+
+usage() {
+  echo "usage: $0 -o <output> [-e env] [-c cluster]" >&2
+  exit 1
+}
+
+while getopts "o:c:e:" options; do
+  
+  case "${options}" in 
+    o)
+      OUTPUT=${OPTARG}
+      ;;
+    c)
+      CLUSTER=${OPTARG}
+      K8T_ARGS+=("-c" "$CLUSTER")
+      ;;
+    e)
+      ENVIRONMENT=${OPTARG}
+      K8T_ARGS+=("-e" "$ENVIRONMENT")
+      ;;
+    *) 
+      usage
+      ;;
+  esac
+  
+done
+
+if [[ -z "$OUTPUT" ]]; then
+  usage
+fi
+
+exec k8t gen "${K8T_ARGS[@]}" > "$OUTPUT"
