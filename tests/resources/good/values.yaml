@@ -2,3 +2,7 @@ cls: none
 env: none
 foo: 1
 bar: test
+
+# these should be overwritten
+cluster: foobar
+environment: foobaz

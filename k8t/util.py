@@ -10,12 +10,13 @@
 import copy
 import json
 import logging
-import math
-import bitmath
 import os
 import shutil
+
 from functools import reduce
 from typing import Any, Dict, List, Tuple
+
+import bitmath
 
 from click import secho  # pylint: disable=E0401
 from ruamel.yaml import YAML  # pylint: disable=E0401
@@ -41,7 +42,7 @@ def touch(fname: str, mode=0o666, dir_fd=None, **kwargs) -> None:
 def makedirs(path, warn_exists=True):
     if os.path.exists(path):
         if warn_exists:
-            if confirm("directory {} already exists, go ahead?".format(path)):
+            if confirm(f"directory {path} already exists, go ahead?"):
                 secho(f"Directory exists: {path}", fg="yellow")
 
                 return
@@ -84,9 +85,11 @@ def merge(d_1: dict, d_2: dict, path=None, method="ltr"):
                 elif method == "ask":
                     raise NotImplementedError('Merge method "ask"')
                 elif method == "crash":
-                    raise Exception("Conflict at %s" % ".".join(path + [str(key)]))
+                    value_path = ".".join(path + [str(key)])
+
+                    raise RuntimeError(f"Conflict at {value_path}")
                 else:
-                    raise Exception("Invalid merge method: %s" % method)
+                    raise RuntimeError(f"Invalid merge method: {method}")
         else:
             d_1[key] = d_2[key]
 
@@ -107,7 +110,8 @@ def load_yaml(path: str) -> dict:
 
     with open(path, "r") as stream:
         yaml = YAML(typ="safe", pure=True)
-        return yaml.load(stream) or dict()
+
+        return yaml.load(stream) or {}
 
 
 def load_cli_value(key: str, value: str) -> Tuple[str, Any]:
