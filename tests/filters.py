@@ -122,17 +122,25 @@ def test_sanitize_label():
 def test_sanitize_cpu():
     assert sanitize_cpu("200m") == "200m"
     assert sanitize_cpu("0.5") == "500m"
+    assert sanitize_cpu(0.5) == "500m"
     assert sanitize_cpu("1") == "1000m"
+    assert sanitize_cpu(1) == "1000m"
     assert sanitize_cpu("92") == "92000m"
+    assert sanitize_cpu(92) == "92000m"
     assert sanitize_cpu("1.8") == "1800m"
+    assert sanitize_cpu(1.8) == "1800m"
     assert sanitize_cpu("3000m") == "3000m"
 
     assert sanitize_cpu("0.1") == "100m"
+    assert sanitize_cpu(0.1) == "100m"
     assert sanitize_cpu("0.01") == "10m"
+    assert sanitize_cpu(0.01) == "10m"
     assert sanitize_cpu("0.001") == "1m"
+    assert sanitize_cpu(0.001) == "1m"
 
     with pytest.raises(ValueError):
         assert sanitize_cpu("0.0001") == "0.1m"
+        assert sanitize_cpu(0.0001) == "0.1m"
 
 
 def test_sanitize_memory():
@@ -146,6 +154,7 @@ def test_sanitize_memory():
         assert sanitize_memory("100000000m") == "0.1M"
 
     assert sanitize_memory("1289748") == "1M"
+    assert sanitize_memory(1289748) == "1M"
     with pytest.raises(ValueError):
         assert sanitize_memory("128974") == "0M"
 
@@ -153,8 +162,13 @@ def test_sanitize_memory():
     assert compare(sanitize_memory("129e6"), 129)
     assert compare(sanitize_memory("129M"), 129)
     assert compare(sanitize_memory("128974848"), 129)
+    assert compare(sanitize_memory(128974848), 129)
     assert compare(sanitize_memory("128974848000m"), 129)
     assert compare(sanitize_memory("123Mi"), 129)
+
+    with pytest.raises(ValueError):
+        # TODO: this is a known limitation
+        assert compare(sanitize_memory(129e6), 129)
 
     assert sanitize_memory("300000000000m") == "300M"
     assert sanitize_memory("20000000000m") == "20M"
