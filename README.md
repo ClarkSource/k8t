@@ -115,6 +115,10 @@ quickly verify the written templates.
 * `get_secret(key: str)` - provides a secret value from a given provider (see [here](#managing-secrets))
 * `bool(value: Any)` - casts value to boolean ("true", "on", "yes", "1", 1 are considered as `True`)
 * `sanitize_label(value: str)` - sanitizes label values according to kubernetes spec
+* `sanitize_cpu(value: str | int)` - sanitize cpu value to millicores
+* `sanitize_memory(value: str | int)` - sanitize memory value to megabyte (note: values in scientific notation need to be converted to strings)
+* `standardize_cpu(value: str | int)` - standardize cpu value to millicores (as int)
+* `standardize_memory(value: str | int)` - standardize memory value to megabyte (as int; note: values in scientific notation need to be converted to strings)
 
 ## Configuration inheritance
 

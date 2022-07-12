@@ -118,31 +118,33 @@ def sanitize_label(value: str) -> str:
     return re.sub(r"(^[^a-z0-9A-Z]|[^a-z0-9A-Z]$|[^a-z0-9A-Z_.-])", "X", value[:63])
 
 
-def sanitize_cpu(value: str) -> str:
+def sanitize_cpu(value: Any) -> str:
     """
     sanitize cpu resource values to millicores.
     """
     return f"{standardize_cpu(value)}m"
 
 
-def sanitize_memory(value: str) -> str:
+def sanitize_memory(value: Any) -> str:
     """
     sanitize memory resource values to megabyte.
     """
     return f"{standardize_memory(value)}M"
 
 
-def standardize_cpu(value: str) -> int:
+def standardize_cpu(value: Any) -> int:
     """
     standardize cpu values to millicores.
     """
 
     value_millis: int
 
-    if re.fullmatch(r"^[0-9]+(\.[0-9]+)?$", value):
+    str_value = str(value)
+
+    if re.fullmatch(r"^[0-9]+(\.[0-9]+)?$", str_value):
         value_millis = int(float(value) * 1000)
-    elif re.fullmatch(r"^[0-9]+m$", value):
-        value_millis = int(value[:-1])
+    elif re.fullmatch(r"^[0-9]+m$", str_value):
+        value_millis = int(str_value[:-1])
     else:
         raise ValueError(f"invalid cpu value: {value}")
 
@@ -152,7 +154,7 @@ def standardize_cpu(value: str) -> int:
     return value_millis
 
 
-def standardize_memory(value: str) -> int:
+def standardize_memory(value: Any) -> int:
     """
     standardize memory values to a common notation.
 
@@ -161,11 +163,13 @@ def standardize_memory(value: str) -> int:
 
     value_mb: int
 
-    if re.fullmatch(r"^[0-9]+([EPTGMk]i?)?$", value):
+    str_value = str(value)
+
+    if re.fullmatch(r"^[0-9]+([EPTGMk]i?)?$", str_value):
         value_mb = util.memory_to_mb(f"{value}B")
-    elif re.fullmatch(r"^[0-9]+m$", value):
-        value_mb = util.memory_to_mb(f"{int(value[:-1]) / 1000}B")
-    elif re.fullmatch(r"^[0-9]+e[0-9]+$", value):
+    elif re.fullmatch(r"^[0-9]+m$", str_value):
+        value_mb = util.memory_to_mb(f"{int(str_value[:-1]) / 1000}B")
+    elif re.fullmatch(r"^[0-9]+e[0-9]+$", str_value):
         value_mb = util.memory_to_mb(f"{float(value)}B")
     else:
         raise ValueError(f"invalid memory value: {value}")

@@ -20,3 +20,7 @@ known_first_party = ["k8t"]
 norecursedirs = [".tox", ".direnv", ".git", ".python3"]
 python_files = ["*.py"]
 testpaths = ["tests"]
+
+[tool.pyright]
+include = ["k8t"]
+pythonPlatform = "Linux"
