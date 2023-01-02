@@ -35,6 +35,7 @@ Simple cluster and environment specific aware templating for kubernetes manifest
         - [role assumption](#role-assumption)
       - [Random](#random)
       - [Hash](#hash)
+  - [Using as a pre-commit hook](#using-as-a-pre-commit-hook)
 - [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -323,6 +324,22 @@ In case consistent (fake) secrets are needed, the `hash` provider can be used th
 ```yaml
 secrets:
   provider: hash
+```
+### Using as a pre-commit hook
+
+You can also use this repo as a https://github.com/pre-commit/pre-commit hook
+
+Add this to your `.pre-commit-config.yaml`:
+
+```yaml
+-   repo: https://github.com/ClarkSource/k8t
+    rev: ''  # Use the sha / tag you want to point at
+    hooks:
+    -   id: k8t-validate
+        # args: [ -e dev -c us-west-2 ]
+    -   id: k8t-generate
+        name: k8t(dev)
+        args: [ -o dev.yaml -e dev ]
 ```
 
 ## TODO

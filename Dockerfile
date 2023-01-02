@@ -30,7 +30,7 @@ RUN \
   apk add --no-cache --upgrade git && \
   which pip && \
   which python && \
-  pip install --use-feature=in-tree-build /app && \
+  pip install /app && \
   which k8t && \
   apk del git gcc musl-dev && \
   rm -rf /app /var/cache/apk
