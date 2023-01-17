@@ -296,6 +296,12 @@ secrets:
 >
 > Be careful to follow this format when setting up the provider `prefix` and `get_secret(key)`.
 
+Secrets config can be overridden in `get_secret` helper call by specifying `config_override` argument.
+
+```yaml
+foobar: "{{ get_secret('/my-key', config_override={'prefix': '/dev'}) }}"
+```
+
 ###### role assumption
 
 You can optionally assume an IAM role to retrieve secrets by specyfing `role_arn` in the config:
