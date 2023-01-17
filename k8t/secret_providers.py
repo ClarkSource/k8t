@@ -28,8 +28,10 @@ DEFAULT_SSM_PREFIX = ""
 DEFAULT_SSM_REGION = "eu-central-1"
 
 
-def ssm(key: str, length: Optional[int] = None) -> str:
+def ssm(key: str, length: Optional[int] = None, config_override: Optional[dict] = {}) -> str:
+    # Merge the config given as an argument with default config.
     secrets_config = config.CONFIG.get("secrets", {})
+    secrets_config.update(config_override)
 
     prefix = str(secrets_config.get("prefix", DEFAULT_SSM_PREFIX))
     region = str(secrets_config.get("region", DEFAULT_SSM_REGION))
@@ -89,7 +91,7 @@ def _assume_role(role_arn: str, region: str) -> dict:
         raise RuntimeError(f"Failed to assume role {role_arn}: {exc}") from exc
 
 
-def random(key: str, length: Optional[int] = None) -> str:
+def random(key: str, length: Optional[int] = None, config_override: Optional[dict] = {}) -> str:
     LOGGER.debug("Requesting secret from %s", key)
 
     if key not in RANDOM_STORE:
@@ -106,7 +108,7 @@ def random(key: str, length: Optional[int] = None) -> str:
     return RANDOM_STORE[key]
 
 
-def hash(key: str, length: Optional[int] = None) -> str:
+def hash(key: str, length: Optional[int] = None, config_override: Optional[dict] = {}) -> str:
     LOGGER.debug("Requesting secret from %s", key)
 
     if key not in RANDOM_STORE:

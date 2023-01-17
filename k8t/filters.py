@@ -80,7 +80,7 @@ def hashf(value, method="sha256"):
     return hash_method.hexdigest()
 
 
-def get_secret(key: str, length: Optional[int] = None) -> str:
+def get_secret(key: str, length: Optional[int] = None, config_override: Optional[dict] = {}) -> str:
     provider_name = config.CONFIG.get("secrets", {}).get("provider")
 
     if not provider_name:
@@ -92,7 +92,7 @@ def get_secret(key: str, length: Optional[int] = None) -> str:
     except AttributeError as no_secret_provider:
         raise NotImplementedError(f"secret provider {provider_name} does not exist.") from no_secret_provider
 
-    return provider(key, length)
+    return provider(key, length, config_override)
 
 
 def to_bool(value: Any) -> Optional[bool]:

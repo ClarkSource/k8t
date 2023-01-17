@@ -78,6 +78,11 @@ def test_ssm():
     }
     assert ssm("/password"), "my_secret_value"
 
+    config.CONFIG = {
+        "secrets": {"provider": "ssm", "region": region, "prefix": "/app/dev"}
+    }
+    assert ssm("/test1", config_override={"prefix": "/dev"}), "string_value"
+
     config.CONFIG = {"secrets": {"provider": "ssm", "region": "eu-central-1"}}
     with pytest.raises(RuntimeError, match=r"Failed to retrieve secret foo: ..."):
         ssm("foo")

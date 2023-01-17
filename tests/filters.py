@@ -59,16 +59,20 @@ def test_get_secret():
     config.CONFIG = {"secrets": {"provider": "random"}}
     with patch.object(secret_providers, "random") as mock:
         get_secret("any")
-        mock.assert_called_with("any", None)
+        mock.assert_called_with("any", None, {})
         get_secret("any", 99)
-        mock.assert_called_with("any", 99)
+        mock.assert_called_with("any", 99, {})
+        get_secret("any", 99, {"foo": "bar"})
+        mock.assert_called_with("any", 99, {"foo": "bar"})
 
     config.CONFIG = {"secrets": {"provider": "ssm"}}
     with patch.object(secret_providers, "ssm") as mock:
         get_secret("any")
-        mock.assert_called_with("any", None)
+        mock.assert_called_with("any", None, {})
         get_secret("any", 99)
-        mock.assert_called_with("any", 99)
+        mock.assert_called_with("any", 99, {})
+        get_secret("any", 99, {"foo": "bar"})
+        mock.assert_called_with("any", 99, {"foo": "bar"})
 
     config.CONFIG = {"secrets": {"provider": "nothing"}}
     with pytest.raises(NotImplementedError, match=r"secret provider nothing does not exist."):
