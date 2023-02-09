@@ -80,7 +80,7 @@ def hashf(value, method="sha256"):
     return hash_method.hexdigest()
 
 
-def get_secret(key: str, length: Optional[int] = None, config_override: Optional[dict] = {}) -> str:
+def get_secret(key: str, length: Optional[int] = None, config_override: Optional[dict] = None) -> str:
     provider_name = config.CONFIG.get("secrets", {}).get("provider")
 
     if not provider_name:
