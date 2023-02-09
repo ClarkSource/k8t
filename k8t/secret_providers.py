@@ -28,10 +28,11 @@ DEFAULT_SSM_PREFIX = ""
 DEFAULT_SSM_REGION = "eu-central-1"
 
 
-def ssm(key: str, length: Optional[int] = None, config_override: Optional[dict] = {}) -> str:
+def ssm(key: str, length: Optional[int] = None, config_override: Optional[dict] = None) -> str:
     # Merge the config given as an argument with default config.
-    secrets_config = config.CONFIG.get("secrets", {})
-    secrets_config.update(config_override)
+    secrets_config = config.CONFIG.get("secrets", {}).copy()
+    if config_override is not None:
+        secrets_config.update(config_override)
 
     prefix = str(secrets_config.get("prefix", DEFAULT_SSM_PREFIX))
     region = str(secrets_config.get("region", DEFAULT_SSM_REGION))
