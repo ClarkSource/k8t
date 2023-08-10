@@ -1,0 +1,129 @@
+#! /bin/bash
+
+### What is this?
+# This lets you use encrypted "yaml.j2" files with the "k8t" tool.
+# Encrypted files stay encrypted while the data is at-rest.
+# This is helpful for pushing your k8t project on GitHub while including all your encrypted secrets.
+
+### How it works?
+
+# "./k8tsecure" is a wrapper for "k8t".
+# It takes the same arguments as k8t.
+# Before running the actual k8t command, it decrypts all encrypted YAML files using "ansible-vault".
+# Then, runs the k8t command with those temporarily decrypted files.
+# When the k8t command is completed, it discards the temporarily decrypted YAML files.
+
+# That keeps your git-working tree clean.
+# None of the decrypted files end up accidentally being committed to the git repository.
+
+### Requirements
+# This utilizes "ansible-vault" command for encryption and decryption:
+# https://docs.ansible.com/ansible/latest/vault_guide/index.html
+
+# It requires one of the following installations
+#  - Official: The entire ansible installation including "ansible-vault"
+#    Link: https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+#  - Unofficial: There is a github project containing only the "ansible-vault" command/slimmed-down version of Ansible
+#    Link: https://pypi.org/project/ansible-vault/
+
+### How-to-use this?
+
+# 1. Create an empty "ansible.cfg" file in the same directory as this script(root of the k8t project)
+
+# 2. Add the following two lines without the "#"s in that config file and update the password file's location based on your needs.
+#    [defaults]
+#    vault_password_file = ./some_directory/.vault_password.txt
+
+# 3. open that ./some_directory/.vault_password.txt file
+#    and add the desired password (e.g. 16 characters)
+
+# 4. rename any file that you want to encrypt by following the name convention below.
+#    some-secret.yaml.j2 --> some-secret.yaml.j2.enc
+#    another.yaml.j2 --> another.yaml.j2.enc
+
+# 4. run "./k8tsecure encrypt_all" once to encrypt all the .enc files for first-time setup.
+
+# 5. From that point, everytime you want to use "k8t" tool,
+#    use "./k8tsecure" instead. k8tsecure encapsulates k8t behind the scenes while handling the encrypted files.
+#    The arguments/flags are the same as "k8t" tool's original command-set due to the encapsulation
+
+#    "k8t gen --environment development > compiled_dev_environment.yaml"
+#    becomes
+#    "./k8tsecure gen --environment development > compiled_dev_environment.yaml"
+
+# 6. Anytime you need to edit those ".enc" files,
+#    run the standard "ansible-vault" commands from directory where you have "ansible.cfg" file.
+#    e.g. "ansible-vault edit some-secret.yaml.j2.enc"
+
+# 7. Available options for k8tsecure
+#    "./k8tsecure encrypt_all" -- Encrypts all files containing ".enc" in the filename
+#    "./k8tsecure decrypt_all" -- Decrypts all files containing ".enc" in the filename
+#    "./k8tsecure any k8t flag option etc." -- Passes through all the arguments to k8t after temporarily decrypting the ".enc" files.
+
+
+enc_files=()
+
+find_enc_files() {
+    local directory="$1"
+    local extension="$2"
+
+    for file in "$directory"/*; do
+        if [[ -f "$file" && "$file" == *"$extension"* ]]; then
+            # echo "$file"
+            enc_files+=("$file")
+        elif [[ -d "$file" ]]; then
+            find_enc_files "$file" "$extension"
+        fi
+    done
+}
+
+has_vault_identifier() {
+  local file="$1"
+  if head -n 1 "$file" | grep -q "\$ANSIBLE_VAULT"; then
+      return 0;
+  else
+      return 1;
+  fi
+}
+
+encrypt() {
+  for file in "${enc_files[@]}"; do
+    if ! has_vault_identifier "$file"; then
+      ansible-vault encrypt "$file"
+    fi
+  done
+}
+decrypt() {
+  local method="$1"
+
+  for file in "${enc_files[@]}"; do
+    if has_vault_identifier "$file"; then
+      if [ $method == "temporarily" ]; then
+        ansible-vault decrypt "$file" --output "$file.yaml.j2"
+      else
+        ansible-vault decrypt "$file"
+      fi
+    fi
+  done
+}
+
+cleanup() {
+  for file in "${enc_files[@]}"; do
+    if has_vault_identifier "$file"; then
+      rm -f "$file.yaml.j2"
+    fi
+  done
+}
+
+find_enc_files "." ".enc"
+
+if [ "$1" == "encrypt_all" ]; then
+  decrypt "permanently"
+  encrypt
+elif [ "$1" == "decrypt_all" ]; then
+  decrypt "permanently"
+else
+  decrypt "temporarily"
+  k8t "$@" || true
+  cleanup
+fi
