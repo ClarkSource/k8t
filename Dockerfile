@@ -1,9 +1,9 @@
 FROM python:3-alpine
 
-LABEL maintainer="CloudOps <cloudops@clark.de>"
+LABEL maintainer="Core-Platform <core-platform@clark.io>"
 
-ARG KUBECTL_VERSION="1.22.6"
-ARG KUBECTL_SHA="1ab07643807a45e2917072f7ba5f11140b40f19675981b199b810552d6af5c53"
+ARG KUBECTL_VERSION="1.32.9"
+ARG KUBECTL_SHA="509ae171bac7ad3b98cc49f5594d6bc84900cf6860f155968d1059fde3be5286"
 
 # Download and install tools
 RUN apk update && apk upgrade && \
@@ -11,7 +11,7 @@ RUN apk update && apk upgrade && \
 
 RUN \
   echo -e "${KUBECTL_SHA}  /tmp/kubectl" >> /tmp/CHECKSUMS && \
-  curl -L -o /tmp/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
+  curl -L -o /tmp/kubectl "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
   sha256sum /tmp/kub* && \
   sha256sum -c /tmp/CHECKSUMS && \
   # install kubectl

@@ -3,20 +3,20 @@ repos:
     hooks:
       - id: check-hooks-apply
       - id: check-useless-excludes
-  - repo: git@github.com:pre-commit/pre-commit-hooks
-    rev: v4.2.0
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.1.0
     hooks:
       - id: check-merge-conflict
-  - repo: git@github.com:Lucas-C/pre-commit-hooks.git
-    rev: v1.1.13
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
     hooks:
       - id: insert-license
         files: \.py$
-  - repo: git@github.com:thlorenz/doctoc
-    rev: v2.1.0
+  - repo: https://github.com/thlorenz/doctoc
+    rev: v2.2.0
     hooks:
       - id: doctoc
-  - repo: git@github.com:PyCQa/pylint
-    rev: v2.13.7
+  - repo: https://github.com/PyCQa/pylint
+    rev: v4.0.1
     hooks:
       - id: pylint
