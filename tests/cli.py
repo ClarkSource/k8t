@@ -12,7 +12,7 @@ import os
 from click.testing import CliRunner
 
 import boto3
-from moto import mock_ssm  # pylint: disable=E0401
+from moto import mock_aws  # pylint: disable=E0401
 
 from k8t import __license__, __version__
 from k8t.cli import root
@@ -328,7 +328,7 @@ def test_validate_failure():
     # assert 'invalid-yaml-template.yaml.j2: ✗' in result.output
     # assert 'composite-invalid-yaml-template.yaml.j2: ✗' in result.output
 
-@mock_ssm
+@mock_aws
 def test_gen():
     client = boto3.client('ssm', region_name='eu-central-1')
 
