@@ -9,6 +9,9 @@
 
 Simple cluster and environment specific aware templating for kubernetes manifests.
 
+> [!WARNING]
+> This project is no longer maintained. Please use a different tool like [`helm`](https://helm.sh/).
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
